@@ -2,6 +2,8 @@
 
 Monte seu site pessoal a partir do Currículo Lattes e publique no GitHub Pages.
 
+**Use aqui: [luizpf42.github.io/PageLab](https://luizpf42.github.io/PageLab/)**
+
 O construtor gera um único arquivo, `index.html`, com tudo dentro (textos, cores, fontes e foto). Para publicar, basta criar um repositório chamado `seu-usuario.github.io` e enviar esse arquivo.
 
 ## Como funciona
