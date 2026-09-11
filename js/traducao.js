@@ -134,14 +134,286 @@ self.onmessage = async e => {
   // ---------- nomes protegidos ----------
 
   const INSTITUICAO_PALAVRAS = 'Universidade|Faculdade|Fundação|Instituto|Escola|Centro|Laboratório|Núcleo|Grupo|Programa|Departamento|Conselho|Ministério|Tribunal|Secretaria|Associação|Sociedade|Academia|Rede|Observatório|Museu|Hospital|Agência|Banco|Companhia|Coordenadoria|Pontifícia|Colégio|Câmara|Assembleia|Prefeitura|Defensoria|Procuradoria|Ordem|Comissão|Editora|Revista|Cátedra|Clínica|Superintendência|Diretoria|Pró-Reitoria|Reitoria|Cartório|Ouvidoria|Câmara';
-  const CONECTIVO = 'de|da|do|dos|das|e|em|para|of|the|and|for|in';
+  const CONECTIVO = 'de|da|do|dos|das|em';
   const MAIUSCULA = '\\p{Lu}[\\p{L}\\p{N}&-]*';
   const SIGLA = '(?:\\p{Lu}{2,}[\\p{L}\\p{N}]*|\\p{Lu}\\p{Ll}+\\p{Lu}[\\p{L}\\p{N}]*)(?:[-/][\\p{L}\\p{N}]+)?';
   // "Fundação Getulio Vargas", "Laboratório de Dados e Pesquisa Empírica em Direito (LabDados)",
-  // "Escola de Direito de São Paulo da Fundação Getúlio Vargas"
-  const RE_INSTITUICAO = new RegExp(`(?<![\\p{L}\\p{N}])(?:${INSTITUICAO_PALAVRAS})(?:\\s+(?:(?:${CONECTIVO})\\s+)*${MAIUSCULA})+(?:\\s*\\(${SIGLA}\\))?`, 'gu');
+  // "Escola de Direito de São Paulo da Fundação Getúlio Vargas". Um "e" só continua o nome se vier
+  // direto uma palavra com maiúscula que não seja outra instituição ("Dados e Pesquisa" sim;
+  // "Vargas e da Universidade" e "FGV e Universidade de Y" não).
+  const RE_INSTITUICAO = new RegExp(`(?<![\\p{L}\\p{N}])(?:${INSTITUICAO_PALAVRAS})(?:\\s+(?:(?:${CONECTIVO})\\s+)*(?:e\\s+(?!(?:${INSTITUICAO_PALAVRAS})(?![\\p{L}])))?${MAIUSCULA})+(?:\\s*\\(${SIGLA}\\))?`, 'gu');
   // "FGV", "CNPq", "LabDados", "FGV-SP", "PUC/SP" (palavras com duas ou mais maiúsculas)
   const RE_SIGLA = new RegExp(`(?<![\\p{L}\\p{N}])${SIGLA}(?![\\p{L}\\p{N}])`, 'gu');
+
+  // ---------- nomes de instituição em inglês, por regras ----------
+  // "Universidade Federal de Minas Gerais" -> "Federal University of Minas Gerais";
+  // "Escola de Direito de São Paulo da Fundação Getúlio Vargas" -> "São Paulo Law School of the Getúlio Vargas Foundation".
+  // O modelo de tradução não vê esses nomes (viram marcadores); a regra é previsível e revisável.
+
+  // Nomes oficiais em inglês, quando existem. Chave sem acento e em minúsculas.
+  const OFICIAIS = {
+    'universidade de sao paulo': 'University of São Paulo',
+    'fundacao getulio vargas': 'Getulio Vargas Foundation',
+    'escola de direito de sao paulo da fundacao getulio vargas': 'FGV São Paulo Law School',
+    'escola de direito do rio de janeiro da fundacao getulio vargas': 'FGV Rio de Janeiro Law School',
+    'escola de administracao de empresas de sao paulo da fundacao getulio vargas': 'FGV São Paulo School of Business Administration',
+    'escola de economia de sao paulo da fundacao getulio vargas': 'FGV São Paulo School of Economics',
+    'faculdade de direito da universidade de sao paulo': 'University of São Paulo Law School',
+    'faculdade de direito de ribeirao preto da universidade de sao paulo': 'Ribeirão Preto Law School, University of São Paulo',
+    'universidade estadual de campinas': 'University of Campinas',
+    'universidade federal do rio de janeiro': 'Federal University of Rio de Janeiro',
+    'universidade federal de minas gerais': 'Federal University of Minas Gerais',
+    'universidade de brasilia': 'University of Brasília',
+    'universidade federal do rio grande do sul': 'Federal University of Rio Grande do Sul',
+    'universidade federal de santa catarina': 'Federal University of Santa Catarina',
+    'universidade federal de pernambuco': 'Federal University of Pernambuco',
+    'universidade federal da bahia': 'Federal University of Bahia',
+    'universidade federal do parana': 'Federal University of Paraná',
+    'universidade federal de sao carlos': 'Federal University of São Carlos',
+    'universidade federal fluminense': 'Fluminense Federal University',
+    'universidade estadual paulista': 'São Paulo State University',
+    'universidade estadual paulista julio de mesquita filho': 'São Paulo State University',
+    'universidade federal de sao paulo': 'Federal University of São Paulo',
+    'universidade presbiteriana mackenzie': 'Mackenzie Presbyterian University',
+    'pontificia universidade catolica de sao paulo': 'Pontifical Catholic University of São Paulo',
+    'pontificia universidade catolica do rio de janeiro': 'Pontifical Catholic University of Rio de Janeiro',
+    'centro brasileiro de analise e planejamento': 'Brazilian Center for Analysis and Planning',
+    'conselho nacional de desenvolvimento cientifico e tecnologico': 'National Council for Scientific and Technological Development',
+    'coordenacao de aperfeicoamento de pessoal de nivel superior': 'Coordination for the Improvement of Higher Education Personnel',
+    'fundacao de amparo a pesquisa do estado de sao paulo': 'São Paulo Research Foundation',
+    'instituto brasileiro de geografia e estatistica': 'Brazilian Institute of Geography and Statistics',
+    'instituto de pesquisa economica aplicada': 'Institute for Applied Economic Research',
+    'fundacao oswaldo cruz': 'Oswaldo Cruz Foundation',
+    'supremo tribunal federal': 'Federal Supreme Court',
+    'superior tribunal de justica': 'Superior Court of Justice',
+    'tribunal superior do trabalho': 'Superior Labor Court',
+    'tribunal superior eleitoral': 'Superior Electoral Court',
+    'conselho nacional de justica': 'National Council of Justice',
+    'ministerio publico': "Public Prosecutor's Office",
+    'ministerio publico federal': "Federal Public Prosecutor's Office",
+    'ordem dos advogados do brasil': 'Brazilian Bar Association',
+    'defensoria publica': "Public Defender's Office",
+    'defensoria publica do estado de sao paulo': "São Paulo State Public Defender's Office",
+    'advocacia-geral da uniao': "Office of the Attorney General of the Union",
+    'organizacao internacional do trabalho': 'International Labour Organization',
+    'organizacao das nacoes unidas': 'United Nations',
+    'banco central do brasil': 'Central Bank of Brazil',
+    'banco nacional de desenvolvimento economico e social': 'Brazilian Development Bank',
+  };
+
+  const CABECAS = {
+    Universidade: 'University', Faculdade: 'School', Fundação: 'Foundation', Instituto: 'Institute', Escola: 'School',
+    Centro: 'Center', Laboratório: 'Laboratory', Núcleo: 'Center', Grupo: 'Group', Programa: 'Program',
+    Departamento: 'Department', Conselho: 'Council', Ministério: 'Ministry', Tribunal: 'Court', Secretaria: 'Department',
+    Associação: 'Association', Sociedade: 'Society', Academia: 'Academy', Rede: 'Network', Observatório: 'Observatory',
+    Museu: 'Museum', Hospital: 'Hospital', Agência: 'Agency', Banco: 'Bank', Companhia: 'Company', Coordenadoria: 'Office',
+    Colégio: 'College', Câmara: 'Chamber', Assembleia: 'Assembly', Prefeitura: 'City Government', Defensoria: "Defender's Office",
+    Procuradoria: "Attorney's Office", Ordem: 'Order', Comissão: 'Commission', Editora: 'Publishing House', Revista: 'Journal',
+    Cátedra: 'Chair', Clínica: 'Clinic', Superintendência: 'Superintendence', Diretoria: 'Directorate', Reitoria: "Rector's Office",
+    'Pró-Reitoria': "Vice-Rector's Office", Cartório: 'Notary Office', Ouvidoria: 'Ombudsman Office',
+  };
+  // Adjetivos que ficam antes da cabeça em inglês ("Universidade Federal" -> "Federal University").
+  const ADJETIVOS = {
+    Federal: 'Federal', Estadual: 'State', Nacional: 'National', Municipal: 'Municipal', Regional: 'Regional',
+    Católica: 'Catholic', Pontifícia: 'Pontifical', Brasileira: 'Brazilian', Brasileiro: 'Brazilian', Internacional: 'International',
+    Superior: 'Superior', Pública: 'Public', Público: 'Public', Presbiteriana: 'Presbyterian', Metodista: 'Methodist',
+    Luterana: 'Lutheran', Comunitária: 'Community', Técnica: 'Technical', Técnico: 'Technical', Tecnológica: 'Technological',
+    Tecnológico: 'Technological', 'Latino-Americana': 'Latin American', 'Latino-Americano': 'Latin American', Europeia: 'European',
+    Europeu: 'European', Rural: 'Rural', Militar: 'Military', Politécnica: 'Polytechnic', Eleitoral: 'Electoral', Cível: 'Civil',
+    Criminal: 'Criminal', Trabalhista: 'Labor', Constitucional: 'Constitutional', Administrativa: 'Administrative',
+    Administrativo: 'Administrative', Científica: 'Scientific', Científico: 'Scientific', Legislativa: 'Legislative', Geral: 'General',
+  };
+  // Áreas e palavras dos complementos (as mais longas primeiro, para "Ciência Política" vencer "Ciência").
+  // Áreas e termos compostos (os mais longos primeiro, para "Ciência Política" vencer "Ciência").
+  const AREAS = [
+    ['Direito e Desenvolvimento', 'Law and Development'], ['Direito do Trabalho', 'Labor Law'], ['Direito da Seguridade Social', 'Social Security Law'],
+    ['Direitos Humanos', 'Human Rights'], ['Direito Processual Civil', 'Civil Procedure Law'], ['Direito Processual Penal', 'Criminal Procedure Law'],
+    ['Economia Política', 'Political Economy'], ['Ciência Política', 'Political Science'], ['Ciências Sociais', 'Social Sciences'],
+    ['Ciências Humanas', 'Humanities'], ['Ciências Jurídicas', 'Legal Sciences'], ['Ciências Econômicas', 'Economic Sciences'],
+    ['Ciência da Computação', 'Computer Science'], ['Ciências da Saúde', 'Health Sciences'], ['Saúde Pública', 'Public Health'],
+    ['Saúde Coletiva', 'Collective Health'], ['Relações Internacionais', 'International Relations'], ['Administração Pública', 'Public Administration'],
+    ['Administração de Empresas', 'Business Administration'], ['Gestão Pública', 'Public Management'], ['Políticas Públicas', 'Public Policy'],
+    ['Pesquisa Empírica', 'Empirical Research'], ['Serviço Social', 'Social Work'], ['Arquitetura e Urbanismo', 'Architecture and Urbanism'],
+    ['Engenharia de Produção', 'Production Engineering'], ['Meio Ambiente', 'Environment'], ['Pós-Graduação', 'Graduate'],
+    ['Nível Superior', 'Higher Education'], ['Ensino Superior', 'Higher Education'], ['Amparo à Pesquisa', 'Research Support'],
+    ['Letras', 'Language and Literature'], ['Dados', 'Data'], ['Direito', 'Law'], ['Direitos', 'Rights'], ['Economia', 'Economics'],
+    ['Sociologia', 'Sociology'], ['Antropologia', 'Anthropology'], ['História', 'History'], ['Filosofia', 'Philosophy'], ['Educação', 'Education'],
+    ['Administração', 'Management'], ['Comunicação', 'Communication'], ['Psicologia', 'Psychology'], ['Medicina', 'Medicine'],
+    ['Enfermagem', 'Nursing'], ['Odontologia', 'Dentistry'], ['Farmácia', 'Pharmacy'], ['Engenharia', 'Engineering'], ['Matemática', 'Mathematics'],
+    ['Estatística', 'Statistics'], ['Física', 'Physics'], ['Química', 'Chemistry'], ['Biologia', 'Biology'], ['Geografia', 'Geography'],
+    ['Justiça', 'Justice'], ['Trabalho', 'Labor'], ['Pesquisa', 'Research'], ['Pesquisas', 'Research'], ['Estudos', 'Studies'], ['Estudo', 'Study'],
+    ['Ensino', 'Teaching'], ['Extensão', 'Outreach'], ['Inovação', 'Innovation'], ['Tecnologia', 'Technology'], ['Desenvolvimento', 'Development'],
+    ['Planejamento', 'Planning'], ['Análise', 'Analysis'], ['Regulação', 'Regulation'], ['Concorrência', 'Competition'], ['Mestrado', "Master's"],
+    ['Doutorado', 'Doctoral'], ['Graduação', 'Undergraduate'], ['Ciência', 'Science'], ['Ciências', 'Sciences'], ['Cultura', 'Culture'],
+    ['Artes', 'Arts'], ['Arte', 'Art'], ['Cidadania', 'Citizenship'], ['Democracia', 'Democracy'], ['Empresas', 'Business'],
+    ['Contabilidade', 'Accounting'], ['Finanças', 'Finance'], ['Fazenda', 'Finance'], ['Segurança', 'Security'], ['Defesa', 'Defense'],
+    ['Advogados', 'Lawyers'], ['Advocacia', 'Law Practice'], ['Magistratura', 'Judiciary'], ['Magistrados', 'Judges'], ['Professores', 'Teachers'],
+    ['Estudantes', 'Students'], ['Aperfeiçoamento', 'Improvement'], ['Pessoal', 'Personnel'], ['Formação', 'Training'], ['Capacitação', 'Training'],
+    ['Reconstrução', 'Reconstruction'], ['Cooperação', 'Cooperation'], ['Integração', 'Integration'], ['Governança', 'Governance'],
+    ['Gestão', 'Management'], ['Políticas', 'Policies'], ['Política', 'Politics'], ['Sociedade', 'Society'], ['Instituições', 'Institutions'],
+    ['Tribunais', 'Courts'], ['Processo', 'Procedure'], ['Faculdades', 'Colleges'], ['Universidades', 'Universities'], ['Conflitos', 'Conflicts'], ['Acesso', 'Access'], ['Solução', 'Resolution'], ['Meios', 'Means'],
+  ];
+  // Adjetivos que, em português, vêm depois do substantivo ("Direito Tributário" -> "Tax Law").
+  const ADJ_DEPOIS = [
+    [/^tribut[áa]ri[oa]s?$/i, 'Tax'], [/^comparad[oa]s?$/i, 'Comparative'], [/^pena(l|is)$/i, 'Criminal'], [/^civ(il|is)$/i, 'Civil'],
+    [/^constituciona(l|is)$/i, 'Constitutional'], [/^administrativ[oa]s?$/i, 'Administrative'], [/^econ[ôo]mic[oa]s?$/i, 'Economic'],
+    [/^emp[íi]ric[oa]s?$/i, 'Empirical'], [/^aplicad[oa]s?$/i, 'Applied'], [/^socia(l|is)$/i, 'Social'], [/^ambienta(l|is)$/i, 'Environmental'],
+    [/^digita(l|is)$/i, 'Digital'], [/^p[úu]blic[oa]s?$/i, 'Public'], [/^internaciona(l|is)$/i, 'International'], [/^naciona(l|is)$/i, 'National'],
+    [/^brasileir[oa]s?$/i, 'Brazilian'], [/^cient[íi]fic[oa]s?$/i, 'Scientific'], [/^tecnol[óo]gic[oa]s?$/i, 'Technological'],
+    [/^pol[íi]tic[oa]s?$/i, 'Political'], [/^jur[íi]dic[oa]s?$/i, 'Legal'], [/^human[oa]s?$/i, 'Human'], [/^exat[oa]s?$/i, 'Exact'],
+    [/^contempor[âa]ne[oa]s?$/i, 'Contemporary'], [/^regulat[óo]ri[oa]s?$/i, 'Regulatory'], [/^processua(l|is)$/i, 'Procedural'],
+    [/^trabalhistas?$/i, 'Labor'], [/^eleitora(l|is)$/i, 'Electoral'], [/^urban[oa]s?$/i, 'Urban'], [/^rura(l|is)$/i, 'Rural'],
+    [/^agr[áa]ri[oa]s?$/i, 'Agrarian'], [/^financeir[oa]s?$/i, 'Financial'], [/^banc[áa]ri[oa]s?$/i, 'Banking'], [/^empresaria(l|is)$/i, 'Business'],
+    [/^comercia(l|is)$/i, 'Commercial'], [/^sanit[áa]ri[oa]s?$/i, 'Health'], [/^crimina(l|is)$/i, 'Criminal'], [/^latino-american[oa]s?$/i, 'Latin American'],
+    [/^europe[ui]a?s?$/i, 'European'], [/^comparativ[oa]s?$/i, 'Comparative'], [/^quantitativ[oa]s?$/i, 'Quantitative'], [/^qualitativ[oa]s?$/i, 'Qualitative'],
+    [/^estat[íi]stic[oa]s?$/i, 'Statistical'], [/^computaciona(l|is)$/i, 'Computational'], [/^cr[íi]tic[oa]s?$/i, 'Critical'], [/^te[óo]ric[oa]s?$/i, 'Theoretical'],
+    [/^hist[óo]ric[oa]s?$/i, 'Historical'], [/^superior(es)?$/i, 'Higher'], [/^coletiv[oa]s?$/i, 'Collective'], [/^gera(l|is)$/i, 'General'],
+    [/^metropolitan[oa]s?$/i, 'Metropolitan'], [/^unid[oa]s?$/i, 'United'], [/^universit[áa]ri[oa]s?$/i, 'University'], [/^acad[êe]mic[oa]s?$/i, 'Academic'],
+    [/^alternativ[oa]s?$/i, 'Alternative'], [/^avançad[oa]s?$/i, 'Advanced'], [/^interdisciplinar(es)?$/i, 'Interdisciplinary'],
+  ];
+  const CONECTIVOS_EN = { e: 'and', em: 'in', de: 'of', da: 'of', do: 'of', dos: 'of', das: 'of', para: 'for', sobre: 'on', com: 'with', no: 'in', na: 'in', à: 'to', a: 'to' };
+  const RE_CONECTIVO = /^(de|da|do|dos|das)$/i;
+  // Lugares com conectivo dentro, que não podem ser partidos em "de".
+  const LUGARES = ['Rio de Janeiro', 'Minas Gerais', 'Mato Grosso do Sul', 'Mato Grosso', 'Rio Grande do Sul', 'Rio Grande do Norte', 'Nossa Senhora de Sion', 'Nossa Senhora', 'Espírito Santo', 'Juiz de Fora', 'Feira de Santana', 'Mesquita Filho', 'São José dos Campos', 'São João del-Rei', 'Estados Unidos', 'Reino Unido', 'Distrito Federal', 'Campo Grande', 'Santa Catarina', 'Santa Maria', 'Ponta Grossa'];
+
+  const semAcento = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
+  const escapar = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const NBSP = ' ';
+
+  // Junta termos compostos com espaço rígido, para "de" interno não partir o nome.
+  function juntarCompostos(s) {
+    for (const t of LUGARES.concat(AREAS.map(([pt]) => pt)).filter(t => /\s/.test(t)).sort((a, b) => b.length - a.length)) {
+      s = s.replace(new RegExp(`(?<![\\p{L}])${escapar(t)}(?![\\p{L}])`, 'gu'), t.replace(/ /g, NBSP));
+    }
+    return s;
+  }
+
+  function adjetivoDepois(p) {
+    const a = ADJ_DEPOIS.find(([re]) => re.test(p));
+    return a ? a[1] : null;
+  }
+
+  // Traduz um complemento ("Estudos Econômicos Sociais e Políticos" -> "Economic, Social and Political Studies")
+  // termo a termo: compostos e áreas do dicionário, adjetivos pospostos passam para antes do substantivo,
+  // o resto (nomes próprios) fica como está.
+  function traduzirTermosArea(s) {
+    const tokens = juntarCompostos(s).split(/ +/).filter(Boolean).map(t => {
+      // A pontuação colada ("Economia,") fica de fora da busca e volta no fim.
+      const fim = (t.match(/[,;:]+$/) || [''])[0];
+      const pt = t.slice(0, t.length - fim.length).replace(new RegExp(NBSP, 'g'), ' ');
+      const area = AREAS.find(([p]) => p === pt) || AREAS.find(([p]) => p.toLowerCase() === pt.toLowerCase());
+      if (area) return { en: area[1] + fim };
+      if (LUGARES.includes(pt)) return { en: pt + fim, proprio: true };
+      const adj = adjetivoDepois(pt);
+      if (adj) return { en: adj + fim, adj: true };
+      if (CONECTIVOS_EN[pt.toLowerCase()]) return { en: CONECTIVOS_EN[pt.toLowerCase()] + fim, conectivo: true };
+      return { en: pt + fim, proprio: true };
+    });
+    const saida = [];
+    for (let i = 0; i < tokens.length; i++) {
+      const t = tokens[i];
+      if (t.conectivo || t.adj) { saida.push(t.en); continue; }
+      // Substantivo seguido de adjetivos ("Direito Tributário", "Estudos Econômicos e Sociais")
+      const adjs = [];
+      let j = i + 1;
+      while (j < tokens.length && (tokens[j].adj || (tokens[j].en === 'and' && tokens[j + 1] && tokens[j + 1].adj))) {
+        if (tokens[j].adj) adjs.push(tokens[j].en);
+        j++;
+      }
+      if (adjs.length) {
+        const lista = adjs.length > 1 ? adjs.slice(0, -1).join(', ') + ' and ' + adjs[adjs.length - 1] : adjs[0];
+        saida.push(lista + ' ' + t.en);
+        i = j - 1;
+      } else saida.push(t.en);
+    }
+    return saida.join(' ').replace(/\s{2,}/g, ' ').trim();
+  }
+
+  const ehArea = c => c.split(/ +/).some(p => AREAS.some(([pt]) => pt.toLowerCase() === p.replace(new RegExp(NBSP, 'g'), ' ').toLowerCase()) || adjetivoDepois(p));
+
+  // Um nome de instituição inteiro. Sem regra aplicável, devolve o original.
+  function instituicaoEmIngles(nome) {
+    if (/ [-–] /.test(nome)) return nome.split(/ [-–] /).map(instituicaoEmIngles).join(' - ');
+    const m = nome.match(/^(.*?)(\s*\([^)]*\))?$/);
+    const corpo = m[1].trim();
+    const sigla = m[2] || '';
+    const oficial = OFICIAIS[semAcento(corpo)];
+    if (oficial) return oficial + sigla;
+
+    const palavras = juntarCompostos(corpo).split(/ +/); // só espaço comum: o rígido junta os compostos
+    const solto = p => p.replace(new RegExp(NBSP, 'g'), ' ');
+    // Cabeça: a primeira palavra-chave; adjetivos antes dela ("Pontifícia") e logo depois ("Federal").
+    const iCabeca = palavras.findIndex(p => CABECAS[p]);
+    if (iCabeca < 0 || palavras.slice(0, iCabeca).some(p => !ADJETIVOS[p])) return nome;
+    const adjetivos = palavras.slice(0, iCabeca).map(p => ADJETIVOS[p]);
+    let i = iCabeca + 1;
+    while (i < palavras.length && (ADJETIVOS[palavras[i]] || adjetivoDepois(palavras[i]))) {
+      adjetivos.push(ADJETIVOS[palavras[i]] || adjetivoDepois(palavras[i]));
+      i++;
+    }
+    // Nome próprio colado à cabeça ("Fundação Getulio Vargas", "Universidade Presbiteriana Mackenzie").
+    const proprio = [];
+    while (i < palavras.length && !RE_CONECTIVO.test(palavras[i])) proprio.push(solto(palavras[i++]));
+    // Complementos: cada "de X" até o próximo "de".
+    const complementos = [];
+    while (i < palavras.length) {
+      i++; // pula o conectivo
+      const inicio = i;
+      while (i < palavras.length && !RE_CONECTIVO.test(palavras[i])) i++;
+      complementos.push(palavras.slice(inicio, i).join(' '));
+    }
+    // Um complemento que começa com cabeça de instituição engole os seguintes ("da Fundação Getúlio Vargas").
+    const partes = [];
+    for (let k = 0; k < complementos.length; k++) {
+      const c = complementos[k];
+      const pal = c.split(/ +/);
+      if (CABECAS[pal[0]] || (ADJETIVOS[pal[0]] && CABECAS[pal[1]])) {
+        partes.push({ tipo: 'instituicao', texto: instituicaoEmIngles(solto(complementos.slice(k).join(' de '))) });
+        break;
+      }
+      // "do Estado de São Paulo": "Estado" fica sozinho entre dois "de"; junta com o próximo.
+      const unidade = { Estado: 'the State', Município: 'the Municipality', Cidade: 'the City', Governo: 'the Government', Prefeitura: 'the City Government' }[c];
+      if (unidade && complementos[k + 1]) {
+        partes.push({ tipo: 'lugar', texto: unidade + ' of ' + solto(complementos[++k]) });
+        continue;
+      }
+      if (ehArea(c)) partes.push({ tipo: 'area', texto: traduzirTermosArea(solto(c)) });
+      else {
+        const lugar = solto(c).replace(/^Estado (de|do|da) /, 'State of ').replace(/^Município (de|do|da) /, 'Municipality of ').replace(/^Cidade (de|do|da) /, 'City of ');
+        partes.push({ tipo: 'lugar', texto: lugar });
+      }
+    }
+
+    const cabecaPt = palavras[iCabeca];
+    let cabeca = CABECAS[cabecaPt];
+    const areas = partes.filter(p => p.tipo === 'area');
+    const lugares = partes.filter(p => p.tipo === 'lugar');
+    const inst = partes.find(p => p.tipo === 'instituicao');
+    const escola = /^(Faculdade|Escola)$/.test(cabecaPt);
+    let prefixo = '';
+    // "Faculdade de Direito" -> "Law School"; "Escola de Medicina" -> "Medical School"; "Programa de Mestrado" -> "Master's Program"
+    if (escola && areas.length && /^(Law|Medicine|Business Administration|Economics|Engineering|Education|Nursing|Dentistry|Pharmacy|Management)$/.test(areas[0].texto)) {
+      prefixo = ({ Medicine: 'Medical', 'Business Administration': 'Business' }[areas[0].texto] || areas[0].texto) + ' ';
+      areas.shift();
+    } else if (cabecaPt === 'Programa' && areas.length) {
+      // "Programa de Mestrado em Direito" -> "Master's Program in Law"
+      const mm = areas[0].texto.match(/^(Master's|Doctoral|Graduate)(?: in (.*))?$/);
+      if (mm) {
+        prefixo = mm[1] + ' ';
+        if (mm[2]) areas[0] = { tipo: 'area', texto: mm[2] };
+        else areas.shift();
+      }
+    }
+    // "Escola de Direito de São Paulo" -> "São Paulo Law School": o lugar vem antes quando a escola tem prefixo.
+    if (escola && prefixo && lugares.length && !proprio.length) prefixo = lugares.shift().texto + ' ' + prefixo;
+    const base = [proprio.join(' '), adjetivos.join(' '), prefixo + cabeca].filter(Boolean).join(' ');
+    const saida = [base];
+    const liga = cabecaPt === 'Programa' ? 'in ' : 'of ';
+    areas.forEach(a => saida.push(liga + a.texto));
+    lugares.forEach(l => saida.push('of ' + l.texto));
+    if (inst) saida.push('of the ' + inst.texto);
+    return saida.join(' ') + sigla;
+  }
 
   // Marcadores que o modelo copia sem mexer (escolhidos por teste): números de cinco dígitos.
   const marcador = i => String(70001 + i);
@@ -151,23 +423,30 @@ self.onmessage = async e => {
   function proteger(texto) {
     const nomes = [];
     // A pontuação colada ao fim ("Vargas.") fica fora do nome, no texto.
-    const guardar = m => {
+    const guardar = (m, traduzir) => {
       const fim = (m.match(/[.,;:]+$/) || [''])[0];
-      nomes.push(m.slice(0, m.length - fim.length));
+      const nome = m.slice(0, m.length - fim.length);
+      nomes.push(traduzir ? instituicaoEmIngles(nome) : nome);
       return ' ' + marcador(nomes.length - 1) + fim + ' ';
     };
-    let s = texto.replace(RE_INSTITUICAO, guardar);
-    s = s.replace(RE_SIGLA, m => (RE_MARCADOR.test(m) ? m : guardar(m)));
+    let s = texto.replace(RE_INSTITUICAO, m => guardar(m, true));
+    s = s.replace(RE_SIGLA, m => (RE_MARCADOR.test(m) ? m : guardar(m, false)));
     return { texto: s.replace(/\s+([,.;:)!?])/g, '$1').replace(/\s{2,}/g, ' ').trim(), nomes };
   }
 
   // Devolve os nomes no lugar dos marcadores; null se o modelo perdeu algum (aí traduz sem proteção).
+  // Nomes traduzidos que pedem artigo em inglês ("at the Federal University of...", "the Getulio Vargas Foundation").
+  const RE_PEDE_ARTIGO = /^(?:University of|Institute of|Center of|Laboratory of|Court of|Ministry of|Council of|School of|Department of|Superior|Federal|State|Pontifical|National|Brazilian|International|Central|Fluminense|[\p{Lu}][\p{L}'-]+(?: [\p{Lu}][\p{L}'-]+)* (?:Foundation|Institute|University|Center|Association|Society|Council|Court|Bank|Organization|Academy|Network|Observatory))\b/u;
+  const RE_PREPOSICAO_ANTES = /(?:^|\s)(?:at|of|from|for|in|by|with|to|into|within)\s+$/i;
+
   function devolver(texto, nomes) {
     let faltou = false;
-    let s = texto.replace(RE_MARCADOR, m => {
+    let s = texto.replace(RE_MARCADOR, (m, pos) => {
       const n = Number(m) - 70001;
       if (n < 0 || n >= nomes.length) return m;
-      return nomes[n];
+      const nome = nomes[n];
+      const antes = texto.slice(0, pos);
+      return RE_PEDE_ARTIGO.test(nome) && RE_PREPOSICAO_ANTES.test(antes) ? 'the ' + nome : nome;
     });
     nomes.forEach(n => { if (!s.includes(n)) faltou = true; });
     if (faltou) return null;
@@ -277,5 +556,5 @@ self.onmessage = async e => {
     return Array.isArray(entrada) ? traduzirTermos(entrada) : traduzirTexto(entrada);
   }
 
-  return { traduzir, carregar, pronto, jaBaixado, TAMANHO_MB, MODELO, frases, recolocarLinks, proteger, devolver };
+  return { traduzir, carregar, pronto, jaBaixado, TAMANHO_MB, MODELO, frases, recolocarLinks, proteger, devolver, instituicaoEmIngles };
 });
