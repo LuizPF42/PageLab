@@ -194,6 +194,11 @@ input:focus, textarea:focus, button:focus-visible, label:focus-within {
 .fonte-amostra { font-size: 1.3rem; line-height: 1.25; overflow-wrap: anywhere; }
 .fonte-nome { font-size: .84rem; color: var(--suave); }
 
+.foto-aparencia { display: flex; align-items: center; gap: 1rem; margin-bottom: .75rem; }
+.foto-aparencia .foto { width: 80px; height: 80px; }
+.foto-texto { font-size: .88rem; color: var(--suave); }
+.foto-texto p { margin: 0 0 .2rem; }
+
 .opcoes-estrutura { display: grid; grid-template-columns: repeat(3, 1fr); gap: .5rem; }
 .opcao-estrutura {
   position: relative;

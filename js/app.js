@@ -267,6 +267,13 @@
 
           <fieldset class="grupo">
             <legend>Foto</legend>
+            <div class="foto-aparencia">
+              ${htmlFoto()}
+              <div class="foto-texto">
+                <p>${estado.perfil.foto ? 'Sua foto aparece na prévia ao lado.' : 'Uma foto sua, de preferência quadrada ou em retrato.'}</p>
+                ${estado.perfil.foto ? '<button type="button" class="link" data-acao="remover-foto">Tirar a foto</button>' : ''}
+              </div>
+            </div>
             <div class="opcoes-estrutura">
               ${Tema.FOTOS.map(f => `
               <label class="opcao-estrutura">
@@ -274,7 +281,7 @@
                 ${formatoFoto(f.id)}<span>${f.nome}</span>
               </label>`).join('')}
             </div>
-            <p class="dica">${estado.perfil.foto ? 'Na revisão, dá para arrastar o canto da foto para mudar o tamanho.' : 'A foto entra na etapa de conteúdo.'}</p>
+            <p class="dica">Na revisão, dá para arrastar o canto da foto para mudar o tamanho.</p>
           </fieldset>
 
           <fieldset class="grupo">
@@ -335,6 +342,17 @@
         <span class="dica">Tudo fica salvo neste navegador.</span>
         <span class="barra-acoes"><button type="button" class="botao" data-acao="continuar">Continuar</button></span>
       </div>`;
+  }
+
+  // Botão redondo de foto: mostra a atual e abre o seletor de arquivo (aparência e conteúdo).
+  function htmlFoto() {
+    const foto = estado.perfil.foto;
+    return `
+        <label class="foto" title="${foto ? 'Trocar foto' : 'Adicionar foto'}">
+          <input type="file" accept="image/*" class="invisivel" data-arquivo="foto">
+          ${foto ? `<img src="${esc(foto)}" alt="">` : ''}
+          <span>${foto ? 'Trocar foto' : 'Adicionar foto'}</span>
+        </label>`;
   }
 
   function selectFamilias(campo, valor, familias) {
@@ -866,11 +884,7 @@
       ${estado.avisos.length ? `<div class="aviso">${estado.avisos.map(a => `<p>${esc(a)}</p>`).join('')}</div>` : ''}
 
       <section class="cartao perfil">
-        <label class="foto" title="${p.foto ? 'Trocar foto' : 'Adicionar foto'}">
-          <input type="file" accept="image/*" class="invisivel" data-arquivo="foto">
-          ${p.foto ? `<img src="${esc(p.foto)}" alt="">` : ''}
-          <span>${p.foto ? 'Trocar foto' : 'Adicionar foto'}</span>
-        </label>
+        ${htmlFoto()}
         <div class="campo-nome">
           <label for="nome">Nome</label>
           <input id="nome" data-perfil="nome" value="${esc(p.nome)}" autocomplete="name">
@@ -1195,6 +1209,12 @@
         ui.temaPrevia = ui.temaPrevia === 'escuro' ? 'claro' : 'escuro';
         atualizarCores();
         atualizarBotaoTema();
+        break;
+
+      case 'remover-foto':
+        estado.perfil.foto = '';
+        salvar();
+        render();
         break;
 
       case 'foto-padrao':
