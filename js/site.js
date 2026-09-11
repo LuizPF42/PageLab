@@ -66,9 +66,11 @@
 
   function dados(estado) {
     const p = estado.perfil;
+    const interesses = (p.interesses || []).map(i => String(i).trim()).filter(Boolean);
     const secoes = [];
     const destaques = [];
     for (const s of estado.secoes) {
+      if (s.id === 'AreasAtuacao' && interesses.length) continue; // já aparecem como interesses, no início
       const itens = s.itens.filter(i => i.manter);
       if (!itens.length) continue;
       itens.forEach(i => { if (i.destaque) destaques.push(Object.assign({}, i, { categoria: tipoDe(s.titulo) })); });
@@ -81,6 +83,8 @@
       subtitulo: p.subtitulo || subtituloPadrao(estado),
       foto: p.foto,
       bio: p.bio,
+      interesses,
+      formacao: resumoFormacao(estado.secoes),
       links: LINKS.filter(([id]) => p.links && p.links[id]).map(([id, rotulo]) => ({
         rotulo,
         url: id === 'email' ? 'mailto:' + p.links[id].trim() : urlSegura(p.links[id]),
@@ -89,6 +93,38 @@
       secoes,
       atualizadoEm: estado.fonte ? estado.fonte.atualizadoEm : '',
     };
+  }
+
+  // Os títulos acadêmicos que a pessoa manteve, resumidos para o início do site:
+  // "Doutorado em Direito" / "Universidade X, 2019–2023". Até três, sem ensino médio ou cursos curtos.
+  function resumoFormacao(secoes) {
+    const s = (secoes || []).find(x => x.id === 'FormacaoAcademicaTitulacao');
+    if (!s) return [];
+    return s.itens
+      .filter(i => i.manter && i.titulo && !/^Ensino (M[ée]dio|Fundamental)|^Curso t[ée]cnico|^Aperfei/i.test(i.titulo))
+      .slice(0, 3)
+      .map(i => ({
+        titulo: capsParaTitulo(i.titulo.replace(/\s*\(.*?\)\s*$/, '')),
+        // "Fundação Getúlio Vargas, FGV" -> "Fundação Getúlio Vargas"; períodos "2019 - 2021" -> "2019–2021"
+        onde: [(i.detalhe || '').replace(/,\s*[A-ZÀ-Ú][A-ZÀ-Ú0-9\/.-]*\s*$/, '').trim(), (i.periodo || '').replace(/\s*-\s*/, '–')].filter(Boolean).join(', '),
+      }));
+  }
+
+  // Sugestão de interesses: as áreas de atuação do Lattes, já reduzidas ao termo mais específico.
+  function interessesPadrao(secoes) {
+    const s = (secoes || []).find(x => x.id === 'AreasAtuacao');
+    if (!s) return [];
+    const vistos = new Set();
+    const lista = [];
+    for (const it of s.itens) {
+      const t = capsParaTitulo((it.titulo || '').trim());
+      const chave = t.toLowerCase();
+      if (!t || vistos.has(chave)) continue;
+      vistos.add(chave);
+      lista.push(t);
+      if (lista.length === 6) break;
+    }
+    return lista;
   }
 
   // Sugestão para a linha abaixo do nome: o vínculo atual mais "principal".
@@ -109,6 +145,11 @@
       foto: perfil.foto,
       bio: perfil.bio || 'Aqui entra um texto curto sobre você: o que pesquisa, onde trabalha, o que te interessa. Na etapa de conteúdo, ele vem do resumo do seu Lattes, e você reescreve como quiser.',
       links: [{ rotulo: 'E-mail', url: '#' }, { rotulo: 'Lattes', url: '#' }, { rotulo: 'ORCID', url: '#' }],
+      interesses: perfil.interesses && perfil.interesses.length ? perfil.interesses : ['Um tema de pesquisa', 'Outro tema', 'Mais um'],
+      formacao: [
+        { titulo: 'Doutorado em Área do Conhecimento', onde: 'Universidade Federal, 2019–2023' },
+        { titulo: 'Mestrado em Área do Conhecimento', onde: 'Universidade Estadual, 2016–2018' },
+      ],
       destaques: [
         {
           periodo: '2025', categoria: 'Artigo', negrito: autoria, autores: autoria, link: 'https://doi.org/',
@@ -254,9 +295,22 @@ ${cada(id => `.aba-${id}`)}{display:block}
 ${cada(id => `.abas a[href="#${id}"]`)}{color:var(--texto);border-color:var(--acento)}`;
   }
 
+  // Logo abaixo da apresentação: interesses e formação lado a lado, como um cartão de visitas.
+  function resumoPerfil(d) {
+    const interesses = d.interesses && d.interesses.length;
+    const formacao = d.formacao && d.formacao.length;
+    if (!interesses && !formacao) return '';
+    return `
+  <div class="resumo-perfil">
+    ${interesses ? `<section class="interesses"><h2>Interesses</h2><ul>${d.interesses.map(i => `<li>${esc(i)}</li>`).join('')}</ul></section>` : ''}
+    ${formacao ? `<section class="formacao"><h2>Formação</h2><ul>${d.formacao.map(f => `<li><strong>${esc(f.titulo)}</strong>${f.onde ? `<span>${esc(f.onde)}</span>` : ''}</li>`).join('')}</ul></section>` : ''}
+  </div>`;
+  }
+
   function inicio(d) {
     return `
   ${d.bio ? `<section class="sobre">${paragrafos(d.bio)}</section>` : ''}
+  ${resumoPerfil(d)}
   ${d.destaques.length ? `
   <section>
     <h2>Destaques</h2>
@@ -455,6 +509,16 @@ h2::before{content:"";flex:none;width:1rem;height:.22rem;border-radius:2px;backg
 .sobre p{margin:0 0 1em}
 .sobre p,.destaque-texto{text-align:var(--alinhamento,start);-webkit-hyphens:var(--hifens,manual);hyphens:var(--hifens,manual)}
 section{margin-top:3.25rem}
+.resumo-perfil{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,15rem),1fr));gap:1.5rem 3rem;max-width:46em;margin-top:2.25rem}
+.resumo-perfil section{margin-top:0}
+.resumo-perfil h2{font-size:1.1rem;margin-bottom:.6rem}
+.resumo-perfil ul{margin:0;padding:0;list-style:none}
+.interesses li{position:relative;padding:.2rem 0 .2rem 1.1rem}
+.interesses li::before{content:"";position:absolute;left:0;top:.72em;width:.45rem;height:.45rem;border-radius:50%;background:var(--acento)}
+.formacao li{display:flex;flex-direction:column;padding:.3rem 0}
+.formacao li strong{font-weight:600}
+.formacao li span{color:var(--suave);font-size:.92rem}
+.resumo-perfil+section{margin-top:2.5rem}
 .principal>section:first-child,.aba>section:first-child,.apresentacao-texto>section:first-child{margin-top:0}
 .destaques{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,19rem),1fr));gap:1rem;margin:0;padding:0;list-style:none}
 .destaque{display:flex;flex-direction:column;gap:.45rem;padding:1.2rem 1.35rem;border-left:4px solid var(--acento);border-radius:4px 12px 12px 4px;background:var(--acento-fundo)}
@@ -543,5 +607,5 @@ details[open]>summary{display:none}
   .lista li{grid-template-columns:1fr;gap:.1rem}
 }`;
 
-  return { dados, exemplo, html, subtituloPadrao, textoComLinks, textoPuro, camposDestaque, tipoDe };
+  return { dados, exemplo, html, subtituloPadrao, interessesPadrao, textoComLinks, textoPuro, camposDestaque, tipoDe };
 });

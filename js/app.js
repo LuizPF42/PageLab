@@ -53,7 +53,7 @@
       aparencia: Tema.normalizar({}),
       fonte: null,
       semLattes: false,
-      perfil: { nome: '', subtitulo: '', bio: '', bioOriginal: '', foto: '', links: {} },
+      perfil: { nome: '', subtitulo: '', bio: '', bioOriginal: '', foto: '', links: {}, interesses: [], interessesEditados: false },
       secoes: [],
       avisos: [],
       publicacao: { usuario: '' },
@@ -70,6 +70,8 @@
       e.perfil = Object.assign(novoEstado().perfil, e.perfil);
       e.publicacao = Object.assign(novoEstado().publicacao, e.publicacao);
       completarProducoes(e.secoes);
+      // Progresso salvo antes de existirem os interesses: sugere as áreas de atuação, como numa importação.
+      if (!e.perfil.interessesEditados && !e.perfil.interesses.length) e.perfil.interesses = Site.interessesPadrao(e.secoes);
       return e;
     } catch (e) {
       return null;
@@ -139,6 +141,8 @@
         bio: bioEditada ? p.bio : dados.perfil.bio,
         bioOriginal: dados.perfil.bio,
         links,
+        // Interesses: as áreas de atuação do Lattes, a menos que a pessoa já tenha mexido na lista.
+        interesses: p.interessesEditados ? p.interesses : Site.interessesPadrao(secoes),
       }),
       secoes,
       ocultos: [], // já aplicados: agora todas as produções estão no estado
@@ -734,7 +738,7 @@
       versao: 1,
       aparencia: estado.aparencia,
       fonte: estado.fonte,
-      perfil: { nome: p.nome, subtitulo: p.subtitulo, bio: p.bio, links: p.links },
+      perfil: { nome: p.nome, subtitulo: p.subtitulo, bio: p.bio, links: p.links, interesses: p.interesses, interessesEditados: p.interessesEditados },
       publicacao: { usuario: usuarioAtual() },
       secoes: estado.secoes
         .map(s => ({ id: s.id, titulo: s.titulo, tipo: s.tipo, itens: s.itens.filter(i => i.manter) }))
@@ -885,6 +889,13 @@
             <button type="button" class="link" data-acao="restaurar-bio" id="restaurar-bio"${podeRestaurarBio() ? '' : ' hidden'}>Voltar ao texto do Lattes</button>
           </span>
         </div>
+      </section>
+
+      <section class="cartao">
+        <h2 id="rotulo-interesses">Interesses</h2>
+        <p class="dica">Três a seis temas, separados por vírgula. Aparecem no início do site, ao lado da sua formação.${f ? ' Vieram das áreas de atuação do seu Lattes.' : ''}</p>
+        <input data-perfil="interesses" aria-labelledby="rotulo-interesses" value="${esc((p.interesses || []).join(', '))}"
+          placeholder="Ex.: Direito e Desenvolvimento, Regulação, Métodos empíricos">
       </section>
 
       <section class="cartao">
@@ -1404,6 +1415,12 @@
       estado.secoes[si].itens[ii][campo] = campo === 'link' ? t.value.trim() : t.value;
       salvar();
       if (campo === 'link') trocarItem(si, ii); // o link também aparece na lista
+      return;
+    }
+    if (t.dataset.perfil === 'interesses') {
+      estado.perfil.interesses = t.value.split(/\s*,\s*/).map(s => s.trim()).filter(Boolean);
+      estado.perfil.interessesEditados = true;
+      salvar();
       return;
     }
     if (t.dataset.perfil) {
