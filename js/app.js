@@ -10,6 +10,15 @@
     // etapas e cabeçalho
     'Monte seu site pessoal': 'Build your personal site',
     'Atualizar': 'Update',
+    'Atualizar o site publicado': 'Update the published site',
+    'Seu site já está no ar. Basta trocar o <code>index.html</code> de lá pelo novo: o GitHub substitui o arquivo de mesmo nome.': 'Your site is already online. Just replace its <code>index.html</code> with the new one: GitHub overwrites the file with the same name.',
+    'Baixe o index.html novo': 'Download the new index.html',
+    'Envie no lugar do antigo': 'Upload it in place of the old one',
+    'Arraste o <code>index.html</code> novo para a página. Como o nome é o mesmo, ele entra no lugar do antigo: desça até o fim e clique em <strong>Commit changes</strong>.': 'Drag the new <code>index.html</code> onto the page. Since the name is the same, it replaces the old one: scroll to the bottom and click <strong>Commit changes</strong>.',
+    'Não precisa criar nada de novo nem apagar o arquivo antigo. Em um ou dois minutos, {link} mostra a versão nova (se não mudar, recarregue com Ctrl + F5).': 'No need to create anything new or delete the old file. In a minute or two, {link} shows the new version (if it does not change, reload with Ctrl + F5).',
+    'Primeira publicação (se o site ainda não está no ar)': 'First publication (if the site is not online yet)',
+    'Neste navegador, tudo fica salvo: volte aqui, ajuste e baixe o <code>index.html</code> de novo. Depois envie o arquivo novo pela mesma página de envio (passo 4): como o nome é o mesmo, o GitHub substitui o antigo. É só clicar em <strong>Commit changes</strong>.': 'In this browser everything is saved: come back, adjust and download <code>index.html</code> again. Then upload the new file through the same upload page (step 4): since the name is the same, GitHub replaces the old one. Just click <strong>Commit changes</strong>.',
+    'Em outro computador, comece pela etapa <strong>0 Atualizar</strong> e traga o <code>index.html</code> publicado: ele guarda as suas escolhas para você continuar de onde parou.': 'On another computer, start at step <strong>0 Update</strong> and bring the published <code>index.html</code>: it keeps your choices so you can carry on from where you left off.',
     'Já tem um site feito aqui? Atualize-o': 'Already have a site made here? Update it',
     'Traga o <code>index.html</code> que está publicado no seu GitHub. O construtor recupera as suas escolhas, os textos e a foto, e você continua de onde parou.': 'Bring the <code>index.html</code> published on your GitHub. The builder recovers your choices, texts and photo, and you carry on from where you left off.',
     'No GitHub, abra o repositório <code>seu-usuario.github.io</code>, clique em <code>index.html</code> e depois no botão de baixar (<em>Download raw file</em>).': 'On GitHub, open the <code>your-username.github.io</code> repository, click <code>index.html</code> and then the download button (<em>Download raw file</em>).',
@@ -334,6 +343,7 @@
       secoes: [],
       avisos: [],
       publicacao: { usuario: '' },
+      reaberto: false, // veio de um index.html já publicado: na hora de publicar, é substituir o arquivo
     };
   }
 
@@ -1057,8 +1067,34 @@
       `<a class="${classe}" data-href="${modelo}" href="${esc(comUsuario(modelo))}" target="_blank" rel="noopener">${conteudo}</a>`;
     const trecho = modelo => `<span data-texto="${modelo}">${esc(comUsuario(modelo))}</span>`;
     // Os modelos de endereço usam {u} (usuário do GitHub); ficam fora do _() para não se confundirem com os marcadores.
+    const atualizando = estado.reaberto;
     return `
-      <section class="cartao">
+      ${atualizando ? `
+      <section class="cartao atualizando">
+        <h1>${_('Atualizar o site publicado')}</h1>
+        <p class="sub">${_('Seu site já está no ar. Basta trocar o <code>index.html</code> de lá pelo novo: o GitHub substitui o arquivo de mesmo nome.')}</p>
+        <ol class="passos-publicar">
+          <li class="passo">
+            <span class="passo-num">1</span>
+            <h2>${_('Baixe o index.html novo')}</h2>
+            <p><button type="button" class="botao" data-acao="baixar">${_('Baixar index.html')}</button>
+              <span id="estado-download" class="dica" role="status"></span></p>
+          </li>
+          <li class="passo">
+            <span class="passo-num">2</span>
+            <h2>${_('Envie no lugar do antigo')}</h2>
+            <label class="campo-usuario">${_('Nome de usuário')}
+              <input data-publicar="usuario" value="${esc(estado.publicacao.usuario)}" placeholder="${esc(_('seu-usuario'))}" autocomplete="off" spellcheck="false">
+            </label>
+            <p>${link('https://github.com/{u}/{u}.github.io/upload/main', _('Abrir a página de envio ↗'), 'botao-secundario')}</p>
+            <p>${_('Arraste o <code>index.html</code> novo para a página. Como o nome é o mesmo, ele entra no lugar do antigo: desça até o fim e clique em <strong>Commit changes</strong>.')}</p>
+            <p class="dica">${_('Não precisa criar nada de novo nem apagar o arquivo antigo. Em um ou dois minutos, {link} mostra a versão nova (se não mudar, recarregue com Ctrl + F5).', { link: link('https://{u}.github.io', trecho('https://{u}.github.io'), 'link-site') })}</p>
+          </li>
+        </ol>
+      </section>
+      <details class="cartao">
+        <summary>${_('Primeira publicação (se o site ainda não está no ar)')}</summary>` : ''}
+      <section class="cartao${atualizando ? ' dentro' : ''}">
         <h1>${_('Publicar seu site')}</h1>
         <p class="sub">${_('O site inteiro é um arquivo só, o <code>index.html</code>. Você baixa aqui e envia para o GitHub, que publica de graça.')}</p>
         <ol class="passos-publicar">
@@ -1103,11 +1139,12 @@
           </li>
         </ol>
       </section>
+      ${atualizando ? '</details>' : ''}
 
       <section class="cartao">
         <h2>${_('Para atualizar depois')}</h2>
-        <p>${_('Neste navegador, tudo fica salvo: volte aqui, ajuste, baixe de novo e repita o passo 4. O arquivo novo substitui o antigo.')}</p>
-        <p>${_('Em outro computador, traga o <code>index.html</code> do seu site na etapa Lattes: ele guarda as suas escolhas para você continuar de onde parou.')}</p>
+        <p>${_('Neste navegador, tudo fica salvo: volte aqui, ajuste e baixe o <code>index.html</code> de novo. Depois envie o arquivo novo pela mesma página de envio (passo 4): como o nome é o mesmo, o GitHub substitui o antigo. É só clicar em <strong>Commit changes</strong>.')}</p>
+        <p>${_('Em outro computador, comece pela etapa <strong>0 Atualizar</strong> e traga o <code>index.html</code> publicado: ele guarda as suas escolhas para você continuar de onde parou.')}</p>
       </section>
 
       <div class="barra">
@@ -1230,6 +1267,7 @@
       secoes: (completarProducoes(dados.secoes), dados.secoes),
       ocultos: Array.isArray(dados.ocultos) ? dados.ocultos.map(String) : [],
       publicacao: Object.assign(base.publicacao, dados.publicacao),
+      reaberto: true,
       // Guardado em português; a tela traduz na hora de mostrar.
       avisos: dados.fonte ? ['Site reaberto a partir do index.html, que guarda só o que estava publicado. Para ver de novo todas as produções do Lattes, use “Usar outro arquivo” e traga a página do Lattes: suas escolhas continuam.'] : [],
     });

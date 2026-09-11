@@ -366,6 +366,10 @@ code.repo { font-size: 1rem; }
 }
 .botao-secundario:hover { background: var(--acento-claro); border-color: #8c959f; }
 #estado-download { margin-left: .5rem; }
+/* Publicar, para quem já tem site: o passo a passo completo fica recolhido num <details>. */
+details.cartao { padding: 0; }
+details.cartao > summary { padding: 1rem 1.5rem; font-weight: 600; cursor: pointer; }
+details.cartao > .cartao.dentro { margin: 0; border: 0; border-top: 1px solid var(--borda); border-radius: 0; }
 
 /* ---------- tela: conteúdo ---------- */
 
