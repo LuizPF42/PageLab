@@ -46,6 +46,8 @@
     'Português': 'Português', 'English': 'English',
     'Rótulos e textos fixos do site em português.': 'Labels and fixed texts of the site in Portuguese.',
     'Rótulos e textos fixos do site em inglês.': 'Labels and fixed texts of the site in English.',
+    'Português e inglês': 'Portuguese and English',
+    'O visitante escolhe, com um botão PT/EN. Começa no idioma do navegador dele.': 'Visitors choose with a PT/EN button. It starts in the language of their browser.',
     // fontes: nomes próprios, iguais em qualquer idioma (registrados só para não constarem como faltando)
     'Inter': 'Inter', 'Source Serif': 'Source Serif', 'Playfair Display': 'Playfair Display', 'Nunito': 'Nunito',
     'IBM Plex Sans': 'IBM Plex Sans', 'IBM Plex Mono': 'IBM Plex Mono', 'Inconsolata': 'Inconsolata',
@@ -140,6 +142,9 @@
   const IDIOMAS = [
     { id: 'pt', nome: 'Português', descricao: 'Rótulos e textos fixos do site em português.' },
     { id: 'en', nome: 'English', descricao: 'Rótulos e textos fixos do site em inglês.' },
+    // "ambos": o site sai nas duas línguas, com um botão PT/EN para o visitante; a etapa de conteúdo
+    // ganha os campos em inglês (apresentação, linha abaixo do nome, interesses, textos dos destaques).
+    { id: 'ambos', nome: 'Português e inglês', descricao: 'O visitante escolhe, com um botão PT/EN. Começa no idioma do navegador dele.' },
   ];
 
   // Modo escuro do site gerado. "automatico" segue a preferência do sistema do visitante.

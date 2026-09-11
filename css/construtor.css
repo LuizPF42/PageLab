@@ -386,6 +386,12 @@ code.repo { font-size: 1rem; }
 .campo-nome { flex: 1; display: flex; flex-direction: column; gap: .3rem; }
 .campo-nome label { font-size: .85rem; color: var(--suave); }
 .campo-nome label + input + label { margin-top: .5rem; }
+/* Campos em inglês (site em dois idiomas): mesmo campo, com um rótulo discreto "Em inglês". */
+.rotulo-en { font-size: .85rem; font-weight: 600; color: var(--suave); }
+h3.rotulo-en { margin: 1.25rem 0 0; }
+h3.rotulo-en + .dica { margin-top: .15rem; }
+.campo-en { display: flex; flex-direction: column; gap: .3rem; margin-top: .6rem; }
+.editor-destaque label.rotulo-en { color: var(--suave); }
 #nome { font-size: 1.3rem; font-weight: 600; }
 
 .editor-bio {

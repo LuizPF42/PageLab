@@ -14,7 +14,7 @@ O construtor gera um único arquivo, `index.html`, com tudo dentro (textos, core
 
 O progresso fica salvo no navegador. Para editar depois, reabra o `index.html` gerado no construtor.
 
-O construtor está em português e em inglês (botões PT / EN no cabeçalho), e o site gerado pode sair em qualquer um dos dois idiomas, independentemente do idioma do construtor. Os textos são escritos em português no código; as traduções ficam em blocos `I18n.registrar` no início de cada módulo (`js/i18n.js` explica o mecanismo).
+O construtor está em português e em inglês (botões PT / EN no cabeçalho). O site gerado pode sair em português, em inglês ou **nos dois idiomas**: nesse caso, o visitante alterna com um botão PT/EN, o site começa no idioma do navegador dele, e a etapa Conteúdo ganha os campos em inglês (apresentação, linha abaixo do nome, interesses e textos dos destaques). O que ficar vazio em inglês cai no português. Os textos são escritos em português no código; as traduções ficam em blocos `I18n.registrar` no início de cada módulo (`js/i18n.js` explica o mecanismo).
 
 ## Por que não lançar produções livremente?
 
