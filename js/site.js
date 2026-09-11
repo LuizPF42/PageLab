@@ -4,29 +4,170 @@
  */
 (function (raiz, fabrica) {
   const Tema = raiz.Tema || (typeof require === 'function' ? require('./tema.js') : null);
-  const api = fabrica(Tema);
+  const I18n = raiz.I18n || (typeof require === 'function' ? require('./i18n.js') : null);
+  const api = fabrica(Tema, I18n);
   if (typeof module === 'object' && module.exports) module.exports = api;
   else raiz.Site = api;
-})(typeof self !== 'undefined' ? self : this, function (Tema) {
+})(typeof self !== 'undefined' ? self : this, function (Tema, I18n) {
   'use strict';
+
+  const _ = I18n._;
 
   const VISIVEIS = 5; // itens por seção antes do "ver todos"
 
+  // Título da seção no Lattes -> título curto no site. A tradução do curto fica no registro abaixo;
+  // seções do Lattes fora desta lista aparecem com o título original (em português) em qualquer idioma.
   const TITULOS_CURTOS = {
     'Formação acadêmica/titulação': 'Formação',
     'Formação Complementar': 'Formação complementar',
+    'Pós-doutorado': 'Pós-doutorado',
     'Atuação Profissional': 'Atuação profissional',
+    'Linhas de pesquisa': 'Linhas de pesquisa',
+    'Projetos de pesquisa': 'Projetos de pesquisa',
+    'Projetos de extensão': 'Projetos de extensão',
+    'Projetos de ensino': 'Projetos de ensino',
+    'Outros Projetos': 'Outros projetos',
+    'Áreas de atuação': 'Áreas de atuação',
+    'Idiomas': 'Idiomas',
+    'Prêmios e títulos': 'Prêmios e títulos',
+    'Revisor de periódico': 'Revisor de periódico',
+    'Revisor de projeto de fomento': 'Revisor de projeto de fomento',
+    'Membro de corpo editorial': 'Membro de corpo editorial',
+    'Membro de comitê de assessoramento': 'Membro de comitê de assessoramento',
+    'Outras informações relevantes': 'Outras informações relevantes',
     'Artigos completos publicados em periódicos': 'Artigos em periódicos',
+    'Artigos aceitos para publicação': 'Artigos aceitos para publicação',
     'Livros publicados/organizados ou edições': 'Livros',
     'Capítulos de livros publicados': 'Capítulos de livros',
     'Textos em jornais de notícias/revistas': 'Textos em jornais e revistas',
     'Trabalhos completos publicados em anais de congressos': 'Trabalhos em anais de congressos',
+    'Resumos expandidos publicados em anais de congressos': 'Resumos expandidos em anais de congressos',
+    'Resumos publicados em anais de congressos': 'Resumos em anais de congressos',
     'Apresentações de Trabalho': 'Apresentações de trabalho',
+    'Outras produções bibliográficas': 'Outras produções bibliográficas',
     'Entrevistas, mesas redondas, programas e comentários na mídia': 'Na mídia',
+    'Redes sociais, websites e blogs': 'Redes sociais, websites e blogs',
     'Participação em eventos, congressos, exposições e feiras': 'Participação em eventos',
     'Organização de eventos, congressos, exposições e feiras': 'Organização de eventos',
+    'Produção técnica': 'Produção técnica',
+    'Softwares': 'Software',
+    'Software': 'Software',
+    'Trabalhos técnicos': 'Trabalhos técnicos',
+    'Assessoria e consultoria': 'Assessoria e consultoria',
+    'Cursos de curta duração ministrados': 'Cursos de curta duração ministrados',
     'Demais tipos de produção técnica': 'Outras produções técnicas',
+    // Grupos sem subtítulo (com subtítulo, o leitor do Lattes compõe "Orientações concluídas: Mestrado").
+    'Orientações e supervisões concluídas': 'Orientações concluídas',
+    'Orientações e supervisões em andamento': 'Orientações em andamento',
+    'Participação em bancas de trabalhos de conclusão': 'Bancas',
+    'Participação em bancas de comissões julgadoras': 'Comissões julgadoras',
   };
+
+  I18n.registrar({
+    // títulos curtos das seções
+    'Formação': 'Education',
+    'Formação complementar': 'Other training',
+    'Pós-doutorado': 'Postdoctoral research',
+    'Atuação profissional': 'Professional experience',
+    'Linhas de pesquisa': 'Research lines',
+    'Projetos de pesquisa': 'Research projects',
+    'Projetos de extensão': 'Outreach projects',
+    'Projetos de ensino': 'Teaching projects',
+    'Outros projetos': 'Other projects',
+    'Áreas de atuação': 'Fields',
+    'Idiomas': 'Languages',
+    'Prêmios e títulos': 'Awards',
+    'Revisor de periódico': 'Journal reviewer',
+    'Revisor de projeto de fomento': 'Grant reviewer',
+    'Membro de corpo editorial': 'Editorial board member',
+    'Membro de comitê de assessoramento': 'Advisory committee member',
+    'Outras informações relevantes': 'Other information',
+    'Artigos em periódicos': 'Journal articles',
+    'Artigos aceitos para publicação': 'Articles in press',
+    'Livros': 'Books',
+    'Capítulos de livros': 'Book chapters',
+    'Textos em jornais e revistas': 'Newspaper and magazine articles',
+    'Trabalhos em anais de congressos': 'Conference papers',
+    'Resumos expandidos em anais de congressos': 'Extended conference abstracts',
+    'Resumos em anais de congressos': 'Conference abstracts',
+    'Apresentações de trabalho': 'Talks',
+    'Outras produções bibliográficas': 'Other publications',
+    'Na mídia': 'In the media',
+    'Redes sociais, websites e blogs': 'Social media, websites and blogs',
+    'Participação em eventos': 'Event participation',
+    'Organização de eventos': 'Event organization',
+    'Produção técnica': 'Technical output',
+    'Software': 'Software',
+    'Trabalhos técnicos': 'Technical work',
+    'Assessoria e consultoria': 'Consulting',
+    'Cursos de curta duração ministrados': 'Short courses taught',
+    'Outras produções técnicas': 'Other technical output',
+    'Orientações concluídas': 'Completed advising',
+    'Orientações em andamento': 'Ongoing advising',
+    'Bancas': 'Committees',
+    'Comissões julgadoras': 'Selection committees',
+    // rótulo curto do tipo, nos cartões de destaque
+    'Artigo': 'Article',
+    'Artigo no prelo': 'Article in press',
+    'Livro': 'Book',
+    'Capítulo de livro': 'Book chapter',
+    'Na imprensa': 'In the press',
+    'Trabalho em anais': 'Conference paper',
+    'Resumo expandido': 'Extended abstract',
+    'Resumo': 'Abstract',
+    'Apresentação': 'Talk',
+    // abas e blocos do início
+    'Início': 'Home',
+    'Trajetória': 'Background',
+    'Pesquisa': 'Research',
+    'Produção': 'Publications',
+    'Orientações': 'Advising',
+    'Destaques': 'Highlights',
+    'Interesses': 'Interests',
+    'Seções do site': 'Site sections',
+    // links do perfil (nomes próprios ficam iguais)
+    'E-mail': 'Email',
+    'Lattes': 'Lattes',
+    'ORCID': 'ORCID',
+    'Google Acadêmico': 'Google Scholar',
+    'LinkedIn': 'LinkedIn',
+    // cartões, listas e rodapé
+    'Foto de {nome}': 'Photo of {nome}',
+    'Ler a publicação': 'Read the paper',
+    'Baixar o PDF': 'Download the PDF',
+    'Acessar': 'Open',
+    'com {coautores}': 'with {coautores}',
+    '{a} e {b}': '{a} and {b}',
+    'e mais {n}': 'and {n} more',
+    'e mais outros': 'and others',
+    'Ver todos os {n}': 'See all {n}',
+    'Informações do Currículo Lattes, atualizado em {data}.': 'Data from the Lattes CV, updated on {data}.',
+    'Construído com {pagelab}.': 'Built with {pagelab}.',
+    // conteúdo de exemplo da prévia
+    'Seu Nome': 'Your Name',
+    'Seu cargo · Sua instituição': 'Your role · Your institution',
+    'Aqui entra um texto curto sobre você: o que pesquisa, onde trabalha, o que te interessa. Na etapa de conteúdo, ele vem do resumo do seu Lattes, e você reescreve como quiser.':
+      'A short text about you goes here: what you research, where you work, what interests you. In the content step it comes from your Lattes summary, and you rewrite it as you like.',
+    'Um tema de pesquisa': 'A research topic',
+    'Outro tema': 'Another topic',
+    'Mais um': 'One more',
+    'SOBRENOME, Nome': 'SURNAME, Name',
+    'COAUTORA, Ana': 'COAUTHOR, Ana',
+    'Doutorado em Área do Conhecimento': 'PhD in Field of Knowledge',
+    'Mestrado em Área do Conhecimento': "Master's in Field of Knowledge",
+    'Universidade Federal': 'Federal University',
+    'Universidade Estadual': 'State University',
+    'Título da tese': 'Dissertation title',
+    'Título do seu artigo mais importante': 'Title of your most important article',
+    'Nome da Revista': 'Journal Name',
+    'Uma ou duas frases sobre o trabalho: do que trata e o que ele mostra.': 'One or two sentences about the work: what it is about and what it shows.',
+    'Um livro que você quer mostrar': 'A book you want to show',
+    'Editora': 'Publisher',
+    'Nome do projeto de pesquisa que você coordena': 'Name of the research project you lead',
+    'Coordenação': 'Coordinator',
+    '2024 - Atual': '2024 - Present',
+    'Título de um artigo publicado número {n}': 'Title of a published article number {n}',
+  });
 
   const LINKS = [['email', 'E-mail'], ['lattes', 'Lattes'], ['orcid', 'ORCID'], ['scholar', 'Google Acadêmico'], ['linkedin', 'LinkedIn']];
 
@@ -74,8 +215,9 @@
       const itens = s.itens.filter(i => i.manter);
       if (!itens.length) continue;
       // Destaques livres (fora do Lattes: um software, um projeto, um site) só existem como cartões.
+      // A categoria é texto da pessoa, e por isso não se traduz (categoriaLivre).
       if (s.tipo === 'livre') {
-        itens.forEach(i => { if (i.destaque && (i.dTitulo || '').trim()) destaques.push(Object.assign({}, i, { categoria: (i.categoria || '').trim() })); });
+        itens.forEach(i => { if (i.destaque && (i.dTitulo || '').trim()) destaques.push(Object.assign({}, i, { categoria: (i.categoria || '').trim(), categoriaLivre: true })); });
         continue;
       }
       itens.forEach(i => { if (i.destaque) destaques.push(Object.assign({}, i, { categoria: tipoDe(s.titulo) })); });
@@ -142,58 +284,82 @@
   }
 
   // Conteúdo de exemplo para a prévia, antes de a pessoa trazer o Lattes.
-  function exemplo(perfil) {
-    const autoria = 'SOBRENOME, Nome';
-    return {
-      nome: perfil.nome || 'Seu Nome',
-      subtitulo: perfil.subtitulo || 'Seu cargo · Sua instituição',
-      foto: perfil.foto,
-      bio: perfil.bio || 'Aqui entra um texto curto sobre você: o que pesquisa, onde trabalha, o que te interessa. Na etapa de conteúdo, ele vem do resumo do seu Lattes, e você reescreve como quiser.',
-      links: [{ rotulo: 'E-mail', url: '#' }, { rotulo: 'Lattes', url: '#' }, { rotulo: 'ORCID', url: '#' }],
-      interesses: perfil.interesses && perfil.interesses.length ? perfil.interesses : ['Um tema de pesquisa', 'Outro tema', 'Mais um'],
-      formacao: [
-        { titulo: 'Doutorado em Área do Conhecimento', onde: 'Universidade Federal, 2019–2023' },
-        { titulo: 'Mestrado em Área do Conhecimento', onde: 'Universidade Estadual, 2016–2018' },
-      ],
-      destaques: [
-        {
-          periodo: '2025', categoria: 'Artigo', negrito: autoria, autores: autoria, link: 'https://doi.org/',
-          titulo: `${autoria}. Título do seu artigo mais importante. Nome da Revista, v. 10, p. 1-20, 2025.`,
-          obra: 'Título do seu artigo mais importante', veiculo: 'Nome da Revista',
-          dTexto: 'Uma ou duas frases sobre o trabalho: do que trata e o que ele mostra.',
-        },
-        {
-          periodo: '2023', categoria: 'Livro', negrito: autoria, autores: `${autoria}; COAUTORA, Ana`,
-          titulo: `${autoria}; COAUTORA, Ana. Um livro que você quer mostrar. São Paulo: Editora, 2023.`,
-          obra: 'Um livro que você quer mostrar', veiculo: 'Editora',
-        },
-      ],
-      secoes: [
-        { titulo: 'Formação', aba: 'trajetoria', itens: [
-          { periodo: '2019 - 2023', titulo: 'Doutorado em Área do Conhecimento', detalhe: 'Universidade Federal', obs: 'Título da tese' },
-          { periodo: '2016 - 2018', titulo: 'Mestrado em Área do Conhecimento', detalhe: 'Universidade Estadual' },
-        ] },
-        { titulo: 'Projetos de pesquisa', aba: 'pesquisa', itens: [
-          { periodo: '2024 - Atual', titulo: 'Nome do projeto de pesquisa que você coordena', detalhe: 'Coordenação' },
-        ] },
-        { titulo: 'Artigos em periódicos', tipo: 'producao', aba: 'producao', itens: [2025, 2024, 2022, 2021, 2020, 2019, 2018].map((ano, i) => ({
-          periodo: String(ano), titulo: `${autoria}. Título de um artigo publicado número ${i + 1}. Nome da Revista, v. ${i + 3}, ${ano}.`, negrito: autoria,
-          autores: i % 2 ? `${autoria}; COAUTORA, Ana` : autoria, obra: `Título de um artigo publicado número ${i + 1}`, veiculo: 'Nome da Revista',
-        })) },
-      ],
-      atualizadoEm: '',
-    };
+  // `idioma` é o do site gerado (a aparência, ou só o id): os textos são escritos aqui, antes de html();
+  // sem ele, vale o idioma atual do construtor. Títulos de seção, categorias e rótulos de link ficam
+  // como chaves em português: html() traduz na hora de escrever.
+  function exemplo(perfil, idioma) {
+    const id = idioma && typeof idioma === 'object' ? idioma.idioma : idioma;
+    return I18n.com(id || I18n.idioma(), () => {
+      const autoria = _('SOBRENOME, Nome');
+      const coautora = _('COAUTORA, Ana');
+      const doutorado = _('Doutorado em Área do Conhecimento');
+      const mestrado = _('Mestrado em Área do Conhecimento');
+      const federal = _('Universidade Federal');
+      const estadual = _('Universidade Estadual');
+      const artigo = _('Título do seu artigo mais importante');
+      const revista = _('Nome da Revista');
+      const livro = _('Um livro que você quer mostrar');
+      const editora = _('Editora');
+      return {
+        nome: perfil.nome || _('Seu Nome'),
+        subtitulo: perfil.subtitulo || _('Seu cargo · Sua instituição'),
+        foto: perfil.foto,
+        bio: perfil.bio || _('Aqui entra um texto curto sobre você: o que pesquisa, onde trabalha, o que te interessa. Na etapa de conteúdo, ele vem do resumo do seu Lattes, e você reescreve como quiser.'),
+        links: [{ rotulo: 'E-mail', url: '#' }, { rotulo: 'Lattes', url: '#' }, { rotulo: 'ORCID', url: '#' }],
+        interesses: perfil.interesses && perfil.interesses.length ? perfil.interesses : [_('Um tema de pesquisa'), _('Outro tema'), _('Mais um')],
+        formacao: [
+          { titulo: doutorado, onde: `${federal}, 2019–2023` },
+          { titulo: mestrado, onde: `${estadual}, 2016–2018` },
+        ],
+        destaques: [
+          {
+            periodo: '2025', categoria: 'Artigo', negrito: autoria, autores: autoria, link: 'https://doi.org/',
+            titulo: `${autoria}. ${artigo}. ${revista}, v. 10, p. 1-20, 2025.`,
+            obra: artigo, veiculo: revista,
+            dTexto: _('Uma ou duas frases sobre o trabalho: do que trata e o que ele mostra.'),
+          },
+          {
+            periodo: '2023', categoria: 'Livro', negrito: autoria, autores: `${autoria}; ${coautora}`,
+            titulo: `${autoria}; ${coautora}. ${livro}. São Paulo: ${editora}, 2023.`,
+            obra: livro, veiculo: editora,
+          },
+        ],
+        secoes: [
+          { titulo: 'Formação', aba: 'trajetoria', itens: [
+            { periodo: '2019 - 2023', titulo: doutorado, detalhe: federal, obs: _('Título da tese') },
+            { periodo: '2016 - 2018', titulo: mestrado, detalhe: estadual },
+          ] },
+          { titulo: 'Projetos de pesquisa', aba: 'pesquisa', itens: [
+            { periodo: _('2024 - Atual'), titulo: _('Nome do projeto de pesquisa que você coordena'), detalhe: _('Coordenação') },
+          ] },
+          { titulo: 'Artigos em periódicos', tipo: 'producao', aba: 'producao', itens: [2025, 2024, 2022, 2021, 2020, 2019, 2018].map((ano, i) => {
+            const obra = _('Título de um artigo publicado número {n}', { n: i + 1 });
+            return {
+              periodo: String(ano), titulo: `${autoria}. ${obra}. ${revista}, v. ${i + 3}, ${ano}.`, negrito: autoria,
+              autores: i % 2 ? `${autoria}; ${coautora}` : autoria, obra, veiculo: revista,
+            };
+          }) },
+        ],
+        atualizadoEm: '',
+      };
+    });
   }
 
   // ---------- dados do site -> HTML ----------
 
+  // Toda a geração roda com o idioma do site ativo: os _() daqui para baixo seguem `ap.idioma`,
+  // e não o idioma do construtor.
   function html(d, aparencia, opcoes = {}) {
     const ap = Tema.normalizar(aparencia);
+    return I18n.com(ap.idioma, () => gerar(d, ap, opcoes));
+  }
+
+  function gerar(d, ap, opcoes) {
     // Prévia: fontes vindas da pasta fonts/ do construtor. Arquivo final: fontes embutidas (fontesCss).
     const fontes = opcoes.previa ? `<style>${Tema.cssFontes(opcoes.baseFontes)}</style>` : (opcoes.fontesCss ? `<style>${opcoes.fontesCss}</style>` : '');
     const abas = ap.layout === 'abas' ? montarAbas(d, ap.estrutura, ap.referencias === 'completas') : null;
     const alvo = opcoes.previa ? ' target="_self"' : ''; // na prévia, os outros links abrem fora dela
-    const nav = abas ? `<nav class="abas" aria-label="Seções do site">${abas.map(a => `<a href="#${a.id}"${alvo}>${a.nome}</a>`).join('')}</nav>` : '';
+    const nav = abas ? `<nav class="abas" aria-label="${esc(_('Seções do site'))}">${abas.map(a => `<a href="#${a.id}"${alvo}>${esc(a.nome)}</a>`).join('')}</nav>` : '';
     const conteudo = abas
       ? abas.map(a => `<div class="aba aba-${a.id}">${a.html}</div>`).join('')
       : (ap.estrutura === 'topo' ? apresentacao(d) : inicio(d)) + d.secoes.map(s => secao(s, ap.referencias === 'completas')).join('');
@@ -218,7 +384,7 @@
     }
 
     return `<!doctype html>
-<html lang="pt-BR">
+<html lang="${I18n.lang(ap.idioma)}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -254,11 +420,11 @@ ${opcoes.dadosConstrutor ? `<script type="application/json" id="dados-do-constru
   function perfil(d) {
     return `
     <header class="perfil">
-      ${d.foto ? `<img class="foto" src="${esc(d.foto)}" alt="Foto de ${esc(d.nome)}">` : ''}
+      ${d.foto ? `<img class="foto" src="${esc(d.foto)}" alt="${_('Foto de {nome}', { nome: esc(d.nome) })}">` : ''}
       <div class="perfil-texto">
         <h1>${esc(d.nome)}</h1>
         ${d.subtitulo ? `<p class="subtitulo">${esc(d.subtitulo)}</p>` : ''}
-        ${d.links.length ? `<ul class="links">${d.links.map(l => `<li><a href="${esc(l.url)}">${esc(l.rotulo)}</a></li>`).join('')}</ul>` : ''}
+        ${d.links.length ? `<ul class="links">${d.links.map(l => `<li><a href="${esc(l.url)}">${esc(_(l.rotulo))}</a></li>`).join('')}</ul>` : ''}
       </div>
     </header>`;
   }
@@ -270,8 +436,8 @@ ${opcoes.dadosConstrutor ? `<script type="application/json" id="dados-do-constru
 
   function rodape(d) {
     const partes = [
-      d.atualizadoEm ? `Informações do Currículo Lattes, atualizado em ${esc(d.atualizadoEm)}.` : '',
-      'Construído com <a href="https://github.com/LuizPF42/PageLab">PageLab</a>.',
+      d.atualizadoEm ? _('Informações do Currículo Lattes, atualizado em {data}.', { data: esc(d.atualizadoEm) }) : '',
+      _('Construído com {pagelab}.', { pagelab: '<a href="https://github.com/LuizPF42/PageLab">PageLab</a>' }),
     ].filter(Boolean);
     return `<footer class="rodape">${partes.join(' ')}</footer>`;
   }
@@ -280,10 +446,10 @@ ${opcoes.dadosConstrutor ? `<script type="application/json" id="dados-do-constru
   function montarAbas(d, estrutura, completas) {
     const abas = [];
     const htmlInicio = estrutura === 'topo' ? apresentacao(d) : inicio(d);
-    if (htmlInicio.trim()) abas.push({ id: 'inicio', nome: 'Início', html: htmlInicio });
+    if (htmlInicio.trim()) abas.push({ id: 'inicio', nome: _('Início'), html: htmlInicio });
     for (const a of ABAS) {
       const secoes = d.secoes.filter(s => s.aba === a.id);
-      if (secoes.length) abas.push({ id: a.id, nome: a.nome, html: secoes.map(s => secao(s, completas)).join('') });
+      if (secoes.length) abas.push({ id: a.id, nome: _(a.nome), html: secoes.map(s => secao(s, completas)).join('') });
     }
     return abas.length >= 2 ? abas : null;
   }
@@ -311,8 +477,8 @@ ${cada(id => `.abas a[href="#${id}"]`)}{color:var(--texto);border-color:var(--ac
     if (!interesses && !formacao) return '';
     return `
   <div class="resumo-perfil">
-    ${interesses ? `<section class="interesses"><h2>Interesses</h2><ul>${d.interesses.map(i => `<li>${esc(i)}</li>`).join('')}</ul></section>` : ''}
-    ${formacao ? `<section class="formacao"><h2>Formação</h2><ul>${d.formacao.map(f => `<li><strong>${esc(f.titulo)}</strong>${f.onde ? `<span>${esc(f.onde)}</span>` : ''}</li>`).join('')}</ul></section>` : ''}
+    ${interesses ? `<section class="interesses"><h2>${esc(_('Interesses'))}</h2><ul>${d.interesses.map(i => `<li>${esc(i)}</li>`).join('')}</ul></section>` : ''}
+    ${formacao ? `<section class="formacao"><h2>${esc(_('Formação'))}</h2><ul>${d.formacao.map(f => `<li><strong>${esc(f.titulo)}</strong>${f.onde ? `<span>${esc(f.onde)}</span>` : ''}</li>`).join('')}</ul></section>` : ''}
   </div>`;
   }
 
@@ -322,7 +488,7 @@ ${cada(id => `.abas a[href="#${id}"]`)}{color:var(--texto);border-color:var(--ac
   ${resumoPerfil(d)}
   ${d.destaques.length ? `
   <section>
-    <h2>Destaques</h2>
+    <h2>${esc(_('Destaques'))}</h2>
     <ol class="destaques">${d.destaques.map(destaque).join('')}</ol>
   </section>` : ''}`;
   }
@@ -331,14 +497,16 @@ ${cada(id => `.abas a[href="#${id}"]`)}{color:var(--texto);border-color:var(--ac
   // Sem título separado (produção antiga ou fora do padrão), mostra a referência inteira.
   function destaque(it) {
     const c = camposDestaque(it);
-    const topo = [it.categoria, it.periodo].filter(Boolean).join(' · ');
+    // A categoria vem de tipoDe() (chave traduzível) ou, nos destaques livres, do texto da pessoa.
+    const categoria = it.categoria && !it.categoriaLivre ? _(it.categoria) : it.categoria;
+    const topo = [categoria, it.periodo].filter(Boolean).join(' · ');
     return `
       <li class="destaque">
         ${topo ? `<p class="destaque-tipo">${esc(topo)}</p>` : ''}
         ${c.titulo ? `<h3 class="destaque-titulo">${esc(c.titulo)}</h3>` : `<p class="destaque-citacao">${citacao(Object.assign({}, it, { link: '' }))}</p>`}
         ${c.veiculo ? `<p class="destaque-veiculo">${esc(c.veiculo)}</p>` : ''}
         ${c.texto ? `<p class="destaque-texto">${esc(c.texto)}</p>` : ''}
-        ${c.coautores ? `<p class="destaque-autores">com ${esc(c.coautores)}</p>` : ''}
+        ${c.coautores ? `<p class="destaque-autores">${_('com {coautores}', { coautores: esc(c.coautores) })}</p>` : ''}
         ${it.link ? `<a class="destaque-link" href="${esc(urlSegura(it.link))}">${rotuloDestaque(it.link)} ↗</a>` : ''}
       </li>`;
   }
@@ -368,9 +536,9 @@ ${cada(id => `.abas a[href="#${id}"]`)}{color:var(--texto);border-color:var(--ac
   }
 
   function rotuloDestaque(url) {
-    if (/doi\.org/i.test(url)) return 'Ler a publicação';
-    if (/\.pdf($|[?#])/i.test(url)) return 'Baixar o PDF';
-    return 'Acessar';
+    if (/doi\.org/i.test(url)) return _('Ler a publicação');
+    if (/\.pdf($|[?#])/i.test(url)) return _('Baixar o PDF');
+    return _('Acessar');
   }
 
   // "SILVA FILHO, Ana C.; COSTA, Pedro Henrique" -> "Pedro Henrique Costa" (sem a própria pessoa).
@@ -385,8 +553,10 @@ ${cada(id => `.abas a[href="#${id}"]`)}{color:var(--texto);border-color:var(--ac
         return a && a.toLowerCase().replace(/\.$/, '') !== eu;
       })
       .map(nomeLegivel);
-    if (nomes.length > 4 || (outros && nomes.length)) return nomes.slice(0, 3).join(', ') + ` e mais ${nomes.length > 3 ? nomes.length - 3 : 'outros'}`;
-    return nomes.length > 1 ? nomes.slice(0, -1).join(', ') + ' e ' + nomes[nomes.length - 1] : (nomes[0] || '');
+    if (nomes.length > 4 || (outros && nomes.length)) {
+      return nomes.slice(0, 3).join(', ') + ' ' + (nomes.length > 3 ? _('e mais {n}', { n: nomes.length - 3 }) : _('e mais outros'));
+    }
+    return nomes.length > 1 ? _('{a} e {b}', { a: nomes.slice(0, -1).join(', '), b: nomes[nomes.length - 1] }) : (nomes[0] || '');
   }
 
   function nomeLegivel(autor) {
@@ -415,9 +585,9 @@ ${cada(id => `.abas a[href="#${id}"]`)}{color:var(--texto);border-color:var(--ac
     const resto = s.itens.slice(VISIVEIS);
     return `
   <section>
-    <h2>${esc(s.titulo)}</h2>
+    <h2>${esc(_(s.titulo))}</h2>
     <ul class="lista">${lista(primeiros)}</ul>
-    ${resto.length ? `<details><summary>Ver todos os ${s.itens.length}</summary><ul class="lista">${lista(resto)}</ul></details>` : ''}
+    ${resto.length ? `<details><summary>${esc(_('Ver todos os {n}', { n: s.itens.length }))}</summary><ul class="lista">${lista(resto)}</ul></details>` : ''}
   </section>`;
   }
 
@@ -426,7 +596,7 @@ ${cada(id => `.abas a[href="#${id}"]`)}{color:var(--texto);border-color:var(--ac
   function item(it, modo) {
     if (modo === 'simples' && it.obra) {
       const c = camposDestaque(it);
-      const detalhe = [c.veiculo, c.coautores && `com ${c.coautores}`].filter(Boolean).join(' · ');
+      const detalhe = [c.veiculo, c.coautores && _('com {coautores}', { coautores: c.coautores })].filter(Boolean).join(' · ');
       return `
       <li>
         <span class="quando">${esc(it.periodo || '')}</span>
@@ -459,7 +629,7 @@ ${cada(id => `.abas a[href="#${id}"]`)}{color:var(--texto);border-color:var(--ac
   function rotuloLink(url) {
     if (/doi\.org/i.test(url)) return 'DOI';
     if (/\.pdf($|[?#])/i.test(url)) return 'PDF';
-    return 'Acessar';
+    return _('Acessar');
   }
 
   function paragrafos(texto) {

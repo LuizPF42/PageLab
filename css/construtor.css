@@ -68,6 +68,14 @@ button { font: inherit; cursor: pointer; }
 }
 .etapas li:has(button):hover { background: var(--acento-claro); color: var(--texto); }
 
+.idiomas { display: flex; gap: .15rem; font-size: .8rem; }
+.idiomas button {
+  padding: .2rem .5rem; border: 1px solid transparent; border-radius: 6px; background: none;
+  color: var(--suave); font-weight: 600;
+}
+.idiomas button:hover { color: var(--texto); border-color: var(--borda); }
+.idiomas button[aria-pressed="true"] { color: var(--texto); background: var(--acento-claro); }
+
 body.larga { --largura: 1180px; }
 
 /* ---------- estrutura ---------- */

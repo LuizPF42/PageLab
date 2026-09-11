@@ -5,6 +5,243 @@
 (function () {
   'use strict';
 
+  // Traduções da interface do construtor para o inglês (o português é a chave).
+  I18n.registrar({
+    // etapas e cabeçalho
+    'Monte seu site pessoal': 'Build your personal site',
+    'Aparência': 'Appearance',
+    'Lattes': 'Lattes',
+    'Conteúdo': 'Content',
+    'Revisão': 'Review',
+    'Publicar': 'Publish',
+    'em breve': 'coming soon',
+    // dispositivos
+    'Celular': 'Phone',
+    'Tablet': 'Tablet',
+    'Computador': 'Desktop',
+    // links do perfil
+    'E-mail': 'Email',
+    'Currículo Lattes': 'Lattes CV',
+    'ORCID': 'ORCID',
+    'Google Acadêmico': 'Google Scholar',
+    'LinkedIn': 'LinkedIn',
+    'voce@exemplo.com': 'you@example.com',
+    // tipos de destaque livre
+    'Software': 'Software',
+    'Projeto': 'Project',
+    'Site': 'Website',
+    'Prêmio': 'Award',
+    'Curso': 'Course',
+    'Podcast': 'Podcast',
+    'Base de dados': 'Dataset',
+    'Grupo de pesquisa': 'Research group',
+    // aparência
+    'Escolher outra cor': 'Pick another color',
+    'Outra cor': 'Other color',
+    'Escolha o visual do seu site': 'Choose the look of your site',
+    'Dá para mudar depois, a qualquer momento.': 'You can change it later, at any time.',
+    'Seu nome': 'Your name',
+    'Como você quer aparecer no site': 'How you want to appear on the site',
+    'Fundo': 'Background',
+    'Cor de destaque': 'Accent color',
+    'Esta cor é clara demais para textos sobre este fundo. Nos links e títulos, o site usa uma versão um pouco mais escura dela, para garantir a leitura.':
+      'This color is too light for text on this background. In links and headings, the site uses a slightly darker version of it, so it stays readable.',
+    'Estrutura': 'Structure',
+    'Foto': 'Photo',
+    'Sua foto aparece na prévia ao lado.': 'Your photo appears in the preview beside this.',
+    'Uma foto sua, de preferência quadrada ou em retrato.': 'A photo of you, ideally square or portrait.',
+    'Tirar a foto': 'Remove the photo',
+    'Na revisão, dá para arrastar o canto da foto para mudar o tamanho.': 'In the review step, you can drag the corner of the photo to resize it.',
+    'Fontes': 'Fonts',
+    'Seu Nome': 'Your Name',
+    'Ou combine como quiser:': 'Or mix and match:',
+    'Títulos': 'Headings',
+    'Texto': 'Text',
+    'Organização': 'Layout',
+    'Modo escuro': 'Dark mode',
+    'Idioma do site': 'Site language',
+    'Prévia do seu site': 'Preview of your site',
+    'Prévia com o seu conteúdo.': 'Preview with your content.',
+    'Prévia com textos de exemplo. O seu conteúdo entra nas próximas etapas.': 'Preview with sample text. Your content comes in the next steps.',
+    'Tudo fica salvo neste navegador.': 'Everything is saved in this browser.',
+    'Continuar': 'Continue',
+    'Trocar foto': 'Change photo',
+    'Adicionar foto': 'Add photo',
+    '☀ Ver no claro': '☀ View in light',
+    '☾ Ver no escuro': '☾ View in dark',
+    // revisão
+    'Tamanho da tela': 'Screen size',
+    'Cor': 'Color',
+    'Fonte': 'Font',
+    'Personalizada': 'Custom',
+    'Tamanho': 'Size',
+    'Voltar ao tamanho padrão': 'Back to the default size',
+    'Voltar ao tamanho padrão da foto': 'Back to the default photo size',
+    'Referências': 'References',
+    'Idioma': 'Language',
+    'Largura da prévia': 'Preview width',
+    'Arraste para mudar a largura': 'Drag to change the width',
+    'Voltar ao conteúdo': 'Back to content',
+    'Abrir numa aba nova': 'Open in a new tab',
+    'reduzido a {p}%': 'scaled to {p}%',
+    'Arraste para mudar o tamanho da foto': 'Drag to resize the photo',
+    // publicar
+    'seu-usuario': 'your-username',
+    'Publicar seu site': 'Publish your site',
+    'O site inteiro é um arquivo só, o <code>index.html</code>. Você baixa aqui e envia para o GitHub, que publica de graça.':
+      'The whole site is a single file, <code>index.html</code>. You download it here and upload it to GitHub, which publishes it for free.',
+    'Baixe o seu site': 'Download your site',
+    'Baixar index.html': 'Download index.html',
+    'O nome precisa ser exatamente <code>index.html</code>. Se o navegador salvar como “index (1).html”, renomeie antes de enviar.':
+      'The name must be exactly <code>index.html</code>. If the browser saves it as “index (1).html”, rename it before uploading.',
+    'Seu usuário no GitHub': 'Your GitHub username',
+    'Ainda não tem conta? {link} e volte aqui.': 'Don’t have an account yet? {link} and come back here.',
+    'Crie uma de graça': 'Create one for free',
+    'Nome de usuário': 'Username',
+    'Use o nome exato da sua conta: só letras, números e hífen.': 'Use the exact name of your account: only letters, numbers and hyphens.',
+    'Seu site vai ficar em': 'Your site will be at',
+    'Crie o repositório': 'Create the repository',
+    '(só na primeira vez)': '(first time only)',
+    'O nome do repositório precisa ser exatamente': 'The repository name must be exactly',
+    'Copiar': 'Copy',
+    'Criar o repositório no GitHub ↗': 'Create the repository on GitHub ↗',
+    'Deixe como <strong>Public</strong> e clique em <strong>Create repository</strong>. Não precisa marcar mais nada.':
+      'Leave it as <strong>Public</strong> and click <strong>Create repository</strong>. No need to check anything else.',
+    'Envie o arquivo': 'Upload the file',
+    'Abrir a página de envio ↗': 'Open the upload page ↗',
+    'Arraste o <code>index.html</code> para a página, desça até o fim e clique em <strong>Commit changes</strong>.':
+      'Drag <code>index.html</code> onto the page, scroll to the bottom and click <strong>Commit changes</strong>.',
+    'No repositório recém-criado, se a página de envio não abrir, entre nele e clique em “uploading an existing file”.':
+      'If the upload page does not open in the newly created repository, open the repository and click “uploading an existing file”.',
+    'Pronto!': 'Done!',
+    'Em um ou dois minutos o site aparece em {link}. Até lá, o endereço pode mostrar “404”: é o GitHub terminando de publicar.':
+      'In a minute or two the site appears at {link}. Until then, the address may show “404”: that is GitHub finishing the publication.',
+    'Para atualizar depois': 'To update it later',
+    'Neste navegador, tudo fica salvo: volte aqui, ajuste, baixe de novo e repita o passo 4. O arquivo novo substitui o antigo.':
+      'In this browser, everything is saved: come back here, adjust, download again and repeat step 4. The new file replaces the old one.',
+    'Em outro computador, traga o <code>index.html</code> do seu site na etapa Lattes: ele guarda as suas escolhas para você continuar de onde parou.':
+      'On another computer, bring the <code>index.html</code> of your site in the Lattes step: it keeps your choices so you can pick up where you left off.',
+    'Voltar à revisão': 'Back to review',
+    'Página do site': 'Site page',
+    'Gerando o arquivo…': 'Generating the file…',
+    'Pronto: index.html salvo ({kb} KB).': 'Done: index.html saved ({kb} KB).',
+    'Pronto: index.html baixado ({kb} KB). Confira se o nome ficou index.html.': 'Done: index.html downloaded ({kb} KB). Check that the name is still index.html.',
+    'Não consegui gerar o arquivo.': 'Could not generate the file.',
+    'Não consegui ler as escolhas guardadas neste index.html.': 'Could not read the choices stored in this index.html.',
+    'Site reaberto a partir do index.html, que guarda só o que estava publicado. Para ver de novo todas as produções do Lattes, use “Usar outro arquivo” e traga a página do Lattes: suas escolhas continuam.':
+      'Site reopened from index.html, which keeps only what was published. To see all your Lattes works again, use “Use another file” and bring the Lattes page: your choices are kept.',
+    // lattes
+    'Traga seu currículo Lattes': 'Bring your Lattes CV',
+    'O construtor lê a página pública do seu currículo e monta a base do site. Na próxima tela, você escolhe o que entra.':
+      'The builder reads the public page of your CV and builds the base of the site. On the next screen, you choose what goes in.',
+    'Abra seu currículo na {busca} e resolva o “Não sou um robô”.': 'Open your CV in the {busca} and solve the “I’m not a robot” check.',
+    'busca do Lattes': 'Lattes search',
+    'Com o currículo aberto, aperte <kbd>Ctrl</kbd> + <kbd>S</kbd> (no Mac, <kbd>⌘</kbd> + <kbd>S</kbd>) e salve. No Safari, escolha o formato <em>Código-fonte da página</em>.':
+      'With the CV open, press <kbd>Ctrl</kbd> + <kbd>S</kbd> (on a Mac, <kbd>⌘</kbd> + <kbd>S</kbd>) and save. In Safari, choose the <em>Page Source</em> format.',
+    'Traga para cá o arquivo <code>.html</code> que foi salvo. A pasta que o navegador cria junto não é necessária.':
+      'Bring the saved <code>.html</code> file here. The folder the browser creates alongside it is not needed.',
+    'Arraste o arquivo aqui': 'Drag the file here',
+    'ou clique para escolher': 'or click to choose',
+    'O arquivo é lido no seu navegador e não sai do seu computador.': 'The file is read in your browser and never leaves your computer.',
+    'Já fez seu site aqui e quer continuar editando em outro computador? Traga o <code>index.html</code> do seu site do mesmo jeito.':
+      'Already made your site here and want to keep editing on another computer? Bring the <code>index.html</code> of your site the same way.',
+    'Voltar para o conteúdo, sem trocar o arquivo': 'Back to content, without changing the file',
+    'Não tenho Lattes, prefiro preencher à mão': 'I don’t have a Lattes CV, I’d rather fill it in by hand',
+    'Não consegui ler este arquivo. Confira se é a página do currículo salva pelo navegador (arquivo .html).':
+      'Could not read this file. Check that it is the CV page saved by the browser (.html file).',
+    'Não consegui abrir esta imagem.': 'Could not open this image.',
+    // conteúdo
+    'Dados do Lattes atualizado em {data}.': 'Data from Lattes, updated on {data}.',
+    'Dados do Lattes.': 'Data from Lattes.',
+    'Usar outro arquivo': 'Use another file',
+    'Nome': 'Name',
+    'Linha abaixo do nome': 'Line below the name',
+    'Ex.: Professora na Universidade X': 'E.g.: Professor at University X',
+    'Sobre você': 'About you',
+    'Este é o resumo do seu Lattes, mas aqui o texto é seu: reescreva à vontade.': 'This is the summary from your Lattes, but here the text is yours: rewrite it as you like.',
+    'Conte quem você é e com o que trabalha.': 'Tell who you are and what you work on.',
+    'Num site pessoal, a primeira pessoa costuma funcionar melhor: “Sou doutorando em…”, “Pesquiso…”. Para transformar um trecho em link, selecione e clique com o botão direito.':
+      'On a personal site, the first person usually works better: “I am a PhD student in…”, “I research…”. To turn a passage into a link, select it and right-click.',
+    '{n} caracteres': '{n} characters',
+    'Selecione um trecho e clique aqui (ou Ctrl+K)': 'Select a passage and click here (or Ctrl+K)',
+    'Inserir link': 'Insert link',
+    'Voltar ao texto do Lattes': 'Back to the Lattes text',
+    'Interesses': 'Interests',
+    'Três a seis temas, separados por vírgula. Aparecem no início do site, ao lado da sua formação.':
+      'Three to six topics, separated by commas. They appear at the top of the site, next to your education.',
+    'Vieram das áreas de atuação do seu Lattes.': 'They came from the areas of expertise in your Lattes.',
+    'Ex.: Direito e Desenvolvimento, Regulação, Métodos empíricos': 'E.g.: Law and Development, Regulation, Empirical methods',
+    'Links': 'Links',
+    'Começar de novo': 'Start over',
+    'Revisar o site': 'Review the site',
+    // destaques
+    'Destaques': 'Highlights',
+    'Aparecem em cartões no topo do site, nesta ordem. O título e onde saiu vêm do Lattes: ajuste se precisar e escreva uma frase sobre cada um, dizendo do que trata, o que mostra ou por que importa.':
+      'They appear as cards at the top of the site, in this order. The title and where it was published come from Lattes: adjust if needed and write a sentence about each one, saying what it is about, what it shows or why it matters.',
+    'Nenhum destaque ainda. Marque com ★ até {max} produções nas listas abaixo.': 'No highlights yet. Mark up to {max} works with ★ in the lists below.',
+    'Algo que não está no Lattes? Um software, um site, um projeto, um prêmio.': 'Something that is not in Lattes? A piece of software, a website, a project, an award.',
+    '+ Adicionar destaque livre': '+ Add a custom highlight',
+    'Fora do Lattes': 'Outside Lattes',
+    'Mover para cima': 'Move up',
+    'Mover para baixo': 'Move down',
+    'Excluir': 'Delete',
+    'Tirar dos destaques': 'Remove from highlights',
+    'Excluir este destaque': 'Delete this highlight',
+    'Tipo': 'Type',
+    'Software, projeto, prêmio…': 'Software, project, award…',
+    'Ano': 'Year',
+    'Título': 'Title',
+    'Nome do software, do projeto…': 'Name of the software, the project…',
+    'Título da obra': 'Title of the work',
+    'Onde': 'Where',
+    'Onde saiu': 'Where it was published',
+    'Instituição, grupo, parceria… (opcional)': 'Institution, group, partnership… (optional)',
+    'Revista, livro, evento…': 'Journal, book, event…',
+    'Link': 'Link',
+    'https:// (opcional)': 'https:// (optional)',
+    'Sobre': 'About',
+    'Sobre o trabalho': 'About the work',
+    'Em uma ou duas frases: do que trata e o que mostra.': 'In one or two sentences: what it is about and what it shows.',
+    'Marque com a estrela até {max} produções para aparecerem em destaque no topo do site. As que você já tinha marcado como relevantes no Lattes vêm pré-selecionadas.':
+      'Star up to {max} works to feature them at the top of the site. The ones you had already marked as relevant in Lattes come pre-selected.',
+    'Já são {n} destaques. Tire um para acrescentar outro.': 'There are already {n} highlights. Remove one to add another.',
+    'Já são {n} destaques. Tire um para escolher outro.': 'There are already {n} highlights. Remove one to choose another.',
+    // seções e itens
+    'Ver o item': 'Show the item',
+    'Ver os {n} itens': 'Show the {n} items',
+    'Marcar todos': 'Select all',
+    'Desmarcar todos': 'Deselect all',
+    'Mostrar todos os {n}': 'Show all {n}',
+    'Texto do item': 'Item text',
+    '(opcional: página do artigo, PDF, vídeo…)': '(optional: article page, PDF, video…)',
+    'Salvar': 'Save',
+    'Cancelar': 'Cancel',
+    'Adicionar um link para este item': 'Add a link to this item',
+    '+ link': '+ link',
+    'Manter no site': 'Keep on the site',
+    'Destacar': 'Highlight',
+    'Editar texto e link': 'Edit text and link',
+    '{n} de {total} no site': '{n} of {total} on the site',
+    '<strong>{n}</strong> {itens} no site · <strong>{d}</strong> de {max} destaques': '<strong>{n}</strong> {itens} on the site · <strong>{d}</strong> of {max} highlights',
+    'item': 'item',
+    'itens': 'items',
+    // ações e avisos
+    'Copiado!': 'Copied!',
+    'Selecione e copie': 'Select and copy',
+    'Apagar tudo o que foi feito aqui e começar de novo?': 'Erase everything done here and start over?',
+    'Selecione um trecho do texto “Sobre você” para virar link.': 'Select a passage of the “About you” text to turn it into a link.',
+    'Selecione um trecho do texto para virar link.': 'Select a passage of the text to turn it into a link.',
+    // editor de links da bio
+    'Endereço do link': 'Link address',
+    'Aplicar': 'Apply',
+    'Editar link': 'Edit link',
+    'Remover link': 'Remove link',
+    'Adicionar link': 'Add link',
+  });
+
+  const _ = I18n._;
+  I18n.definir(I18n.detectar());
+
   const CHAVE = 'construtor-site:v1';
   const MAX_DESTAQUES = 5;
   // Sugestões de tipo para os destaques fora do Lattes (a pessoa pode escrever outro).
@@ -168,7 +405,9 @@
   // ---------- telas ----------
 
   function render() {
+    renderIdiomas();
     renderEtapas();
+    popover.innerHTML = htmlPopover();
     document.body.classList.toggle('larga', estado.etapa === 'aparencia');
     document.body.classList.toggle('total', estado.etapa === 'revisao');
     app.innerHTML =
@@ -189,10 +428,20 @@
   function renderEtapas() {
     document.getElementById('etapas').innerHTML = '<ol>' + ETAPAS.map((et, i) => {
       const atual = et.id === estado.etapa;
-      const conteudo = `<span class="num">${i + 1}</span>${et.nome}${et.pronta ? '' : ' <small>em breve</small>'}`;
+      const conteudo = `<span class="num">${i + 1}</span>${_(et.nome)}${et.pronta ? '' : ` <small>${_('em breve')}</small>`}`;
       return `<li class="${atual ? 'atual' : ''}${et.pronta ? '' : ' em-breve'}"${atual ? ' aria-current="step"' : ''}>${
         !atual && et.pronta && podeIr(et.id) ? `<button type="button" data-ir="${et.id}">${conteudo}</button>` : conteudo}</li>`;
     }).join('') + '</ol>';
+  }
+
+  // Seletor de idioma do construtor (PT / EN), no cabeçalho, ao lado das etapas.
+  function renderIdiomas() {
+    const el = document.getElementById('idiomas');
+    if (!el) return;
+    document.documentElement.lang = I18n.lang(I18n.idioma());
+    document.title = 'PageLab · ' + _('Monte seu site pessoal');
+    el.innerHTML = I18n.IDIOMAS.map(i =>
+      `<button type="button" data-idioma="${i.id}" lang="${i.lang}" title="${esc(i.nome)}" aria-pressed="${I18n.idioma() === i.id}">${i.id.toUpperCase()}</button>`).join('');
   }
 
   function irPara(etapa) {
@@ -213,151 +462,164 @@
   function htmlCores(ap) {
     const personalizada = !Tema.ACENTOS.some(a => a.cor === ap.acento);
     return Tema.ACENTOS.map(a => `
-      <label class="opcao-cor" title="${a.nome}">
+      <label class="opcao-cor" title="${esc(_(a.nome))}">
         <input type="radio" name="acento" value="${a.cor}" data-aparencia="acento" class="invisivel"${ap.acento === a.cor ? ' checked' : ''}>
-        <span class="bolinha" style="background:${a.cor}"></span><span class="invisivel">${a.nome}</span>
+        <span class="bolinha" style="background:${a.cor}"></span><span class="invisivel">${esc(_(a.nome))}</span>
       </label>`).join('') + `
-      <label class="opcao-cor outra${personalizada ? ' selecionada' : ''}" title="Escolher outra cor">
+      <label class="opcao-cor outra${personalizada ? ' selecionada' : ''}" title="${esc(_('Escolher outra cor'))}">
         <input type="color" value="${esc(ap.acento)}" data-aparencia="acento-livre" class="invisivel">
         <span class="bolinha arco-iris"${personalizada ? ` style="background:${esc(ap.acento)}"` : ''}></span>
-        <span>Outra cor</span>
+        <span>${_('Outra cor')}</span>
       </label>`;
   }
 
   function telaAparencia() {
     const ap = estado.aparencia;
+    const idiomasSite = Tema.IDIOMAS || I18n.IDIOMAS;
     return `
       <div class="aparencia">
         <section class="cartao controles">
-          <h1>Escolha o visual do seu site</h1>
-          <p class="sub">Dá para mudar depois, a qualquer momento.</p>
+          <h1>${_('Escolha o visual do seu site')}</h1>
+          <p class="sub">${_('Dá para mudar depois, a qualquer momento.')}</p>
           ${estado.fonte ? '' : `
-          <label class="campo">Seu nome
-            <input data-perfil="nome" value="${esc(estado.perfil.nome)}" placeholder="Como você quer aparecer no site" autocomplete="name">
+          <label class="campo">${_('Seu nome')}
+            <input data-perfil="nome" value="${esc(estado.perfil.nome)}" placeholder="${esc(_('Como você quer aparecer no site'))}" autocomplete="name">
           </label>`}
 
           <fieldset class="grupo">
-            <legend>Fundo</legend>
+            <legend>${_('Fundo')}</legend>
             <div class="opcoes-fundo">
               ${Tema.FUNDOS.map(f => `
               <label class="opcao-fundo">
                 <input type="radio" name="fundo" value="${f.id}" data-aparencia="fundo" class="invisivel"${ap.fundo === f.id ? ' checked' : ''}>
-                <span class="amostra" style="background:${f.fundo}"></span>${f.nome}
+                <span class="amostra" style="background:${f.fundo}"></span>${esc(_(f.nome))}
               </label>`).join('')}
             </div>
           </fieldset>
 
           <fieldset class="grupo">
-            <legend>Cor de destaque</legend>
+            <legend>${_('Cor de destaque')}</legend>
             <div class="opcoes-cor">${htmlCores(ap)}</div>
-            <p class="dica" id="aviso-contraste"${acentoAjustado() ? '' : ' hidden'}>Esta cor é clara demais para textos sobre este fundo.
-              Nos links e títulos, o site usa uma versão um pouco mais escura dela, para garantir a leitura.</p>
+            <p class="dica" id="aviso-contraste"${acentoAjustado() ? '' : ' hidden'}>${_('Esta cor é clara demais para textos sobre este fundo. Nos links e títulos, o site usa uma versão um pouco mais escura dela, para garantir a leitura.')}</p>
           </fieldset>
 
           <fieldset class="grupo">
-            <legend>Estrutura</legend>
+            <legend>${_('Estrutura')}</legend>
             <div class="opcoes-estrutura">
               ${Tema.ESTRUTURAS.map(e => `
-              <label class="opcao-estrutura" title="${esc(e.descricao)}">
+              <label class="opcao-estrutura" title="${esc(_(e.descricao))}">
                 <input type="radio" name="estrutura" value="${e.id}" data-aparencia="estrutura" class="invisivel"${ap.estrutura === e.id ? ' checked' : ''}>
-                ${miniatura(e.id)}<span>${e.nome}</span>
+                ${miniatura(e.id)}<span>${esc(_(e.nome))}</span>
               </label>`).join('')}
             </div>
           </fieldset>
 
           <fieldset class="grupo">
-            <legend>Foto</legend>
+            <legend>${_('Foto')}</legend>
             <div class="foto-aparencia">
               ${htmlFoto()}
               <div class="foto-texto">
-                <p>${estado.perfil.foto ? 'Sua foto aparece na prévia ao lado.' : 'Uma foto sua, de preferência quadrada ou em retrato.'}</p>
-                ${estado.perfil.foto ? '<button type="button" class="link" data-acao="remover-foto">Tirar a foto</button>' : ''}
+                <p>${estado.perfil.foto ? _('Sua foto aparece na prévia ao lado.') : _('Uma foto sua, de preferência quadrada ou em retrato.')}</p>
+                ${estado.perfil.foto ? `<button type="button" class="link" data-acao="remover-foto">${_('Tirar a foto')}</button>` : ''}
               </div>
             </div>
             <div class="opcoes-estrutura">
               ${Tema.FOTOS.map(f => `
               <label class="opcao-estrutura">
                 <input type="radio" name="foto" value="${f.id}" data-aparencia="foto" class="invisivel"${ap.foto === f.id ? ' checked' : ''}>
-                ${formatoFoto(f.id)}<span>${f.nome}</span>
+                ${formatoFoto(f.id)}<span>${esc(_(f.nome))}</span>
               </label>`).join('')}
             </div>
-            <p class="dica">Na revisão, dá para arrastar o canto da foto para mudar o tamanho.</p>
+            <p class="dica">${_('Na revisão, dá para arrastar o canto da foto para mudar o tamanho.')}</p>
           </fieldset>
 
           <fieldset class="grupo">
-            <legend>Fontes</legend>
+            <legend>${_('Fontes')}</legend>
             <div class="opcoes-fonte">
               ${Tema.COMBINACOES.map(c => {
                 const t = Tema.familia(c.titulo);
                 return `
               <label class="opcao-fonte">
                 <input type="radio" name="combinacao" value="${c.id}" data-aparencia="combinacao" class="invisivel"${(Tema.combinacaoAtual(ap) || {}).id === c.id ? ' checked' : ''}>
-                <span class="fonte-amostra" style="font-family:${esc(Tema.pilha(c.titulo))};font-weight:${t.peso};letter-spacing:${t.espaco}">${esc(estado.perfil.nome || 'Seu Nome')}</span>
-                <span class="fonte-nome" style="font-family:${esc(Tema.pilha(c.texto))}">${c.nome} · ${t.nome}${c.texto !== c.titulo ? ' + ' + Tema.familia(c.texto).nome : ''}</span>
+                <span class="fonte-amostra" style="font-family:${esc(Tema.pilha(c.titulo))};font-weight:${t.peso};letter-spacing:${t.espaco}">${esc(estado.perfil.nome || _('Seu Nome'))}</span>
+                <span class="fonte-nome" style="font-family:${esc(Tema.pilha(c.texto))}">${esc(_(c.nome))} · ${t.nome}${c.texto !== c.titulo ? ' + ' + Tema.familia(c.texto).nome : ''}</span>
               </label>`;
               }).join('')}
             </div>
             <div class="fontes-livres">
-              <span>Ou combine como quiser:</span>
-              <label>Títulos ${selectFamilias('fonteTitulo', ap.fonteTitulo, Tema.FAMILIAS)}</label>
-              <label>Texto ${selectFamilias('fonteTexto', ap.fonteTexto, Tema.FAMILIAS.filter(f => !f.soTitulos))}</label>
+              <span>${_('Ou combine como quiser:')}</span>
+              <label>${_('Títulos')} ${selectFamilias('fonteTitulo', ap.fonteTitulo, Tema.FAMILIAS)}</label>
+              <label>${_('Texto')} ${selectFamilias('fonteTexto', ap.fonteTexto, Tema.FAMILIAS.filter(f => !f.soTitulos))}</label>
             </div>
           </fieldset>
 
           <fieldset class="grupo">
-            <legend>Organização</legend>
+            <legend>${_('Organização')}</legend>
             <div class="opcoes-layout">
               ${Tema.LAYOUTS.map(l => `
               <label class="opcao-layout">
                 <input type="radio" name="layout" value="${l.id}" data-aparencia="layout" class="invisivel"${ap.layout === l.id ? ' checked' : ''}>
-                <strong>${l.nome}</strong>
-                <span>${l.descricao}</span>
+                <strong>${esc(_(l.nome))}</strong>
+                <span>${esc(_(l.descricao))}</span>
               </label>`).join('')}
             </div>
           </fieldset>
 
           <fieldset class="grupo">
-            <legend>Modo escuro</legend>
+            <legend>${_('Modo escuro')}</legend>
             <div class="opcoes-layout opcoes-escuro">
               ${Tema.ESCURO.map(e => `
               <label class="opcao-layout">
                 <input type="radio" name="escuro" value="${e.id}" data-aparencia="escuro" class="invisivel"${ap.escuro === e.id ? ' checked' : ''}>
-                <strong>${e.nome}</strong>
-                <span>${e.descricao}</span>
+                <strong>${esc(_(e.nome))}</strong>
+                <span>${esc(_(e.descricao))}</span>
+              </label>`).join('')}
+            </div>
+          </fieldset>
+
+          <fieldset class="grupo">
+            <legend>${_('Idioma do site')}</legend>
+            <div class="opcoes-layout opcoes-escuro">
+              ${idiomasSite.map(i => `
+              <label class="opcao-layout">
+                <input type="radio" name="idioma" value="${i.id}" data-aparencia="idioma" class="invisivel"${(ap.idioma || 'pt') === i.id ? ' checked' : ''}>
+                <strong>${esc(i.nome)}</strong>
+                ${i.descricao ? `<span>${esc(_(i.descricao))}</span>` : ''}
               </label>`).join('')}
             </div>
           </fieldset>
         </section>
 
         <div class="previa">
-          <div class="navegador"><span class="bolinhas" aria-hidden="true"><i></i><i></i><i></i></span><span class="endereco" aria-hidden="true">seu-usuario.github.io</span>${botaoTema()}</div>
+          <div class="navegador"><span class="bolinhas" aria-hidden="true"><i></i><i></i><i></i></span><span class="endereco" aria-hidden="true">${_('seu-usuario')}.github.io</span>${botaoTema()}</div>
           <div class="previa-moldura" id="previa-moldura">
-            <iframe id="previa" title="Prévia do seu site" sandbox="allow-same-origin" tabindex="-1"></iframe>
+            <iframe id="previa" title="${esc(_('Prévia do seu site'))}" sandbox="allow-same-origin" tabindex="-1"></iframe>
           </div>
-          <p class="dica">${temConteudo() ? 'Prévia com o seu conteúdo.' : 'Prévia com textos de exemplo. O seu conteúdo entra nas próximas etapas.'}</p>
+          <p class="dica">${temConteudo() ? _('Prévia com o seu conteúdo.') : _('Prévia com textos de exemplo. O seu conteúdo entra nas próximas etapas.')}</p>
         </div>
       </div>
 
       <div class="barra">
-        <span class="dica">Tudo fica salvo neste navegador.</span>
-        <span class="barra-acoes"><button type="button" class="botao" data-acao="continuar">Continuar</button></span>
+        <span class="dica">${_('Tudo fica salvo neste navegador.')}</span>
+        <span class="barra-acoes"><button type="button" class="botao" data-acao="continuar">${_('Continuar')}</button></span>
       </div>`;
   }
 
   // Botão redondo de foto: mostra a atual e abre o seletor de arquivo (aparência e conteúdo).
   function htmlFoto() {
     const foto = estado.perfil.foto;
+    const rotulo = foto ? _('Trocar foto') : _('Adicionar foto');
     return `
-        <label class="foto" title="${foto ? 'Trocar foto' : 'Adicionar foto'}">
+        <label class="foto" title="${esc(rotulo)}">
           <input type="file" accept="image/*" class="invisivel" data-arquivo="foto">
           ${foto ? `<img src="${esc(foto)}" alt="">` : ''}
-          <span>${foto ? 'Trocar foto' : 'Adicionar foto'}</span>
+          <span>${esc(rotulo)}</span>
         </label>`;
   }
 
   function selectFamilias(campo, valor, familias) {
     return `<select data-aparencia="${campo}">${familias.map(f =>
-      `<option value="${f.id}"${f.id === valor ? ' selected' : ''}>${f.nome}</option>`).join('')}</select>`;
+      `<option value="${f.id}"${f.id === valor ? ' selected' : ''}>${esc(f.nome)}</option>`).join('')}</select>`;
   }
 
   // Desenhos pequenos de cada estrutura de página, para a escolha ser visual.
@@ -391,7 +653,7 @@
   function montarPrevia() {
     const iframe = document.getElementById('previa');
     if (!iframe) return;
-    const d = temConteudo() ? Site.dados(estado) : Site.exemplo(estado.perfil);
+    const d = temConteudo() ? Site.dados(estado) : Site.exemplo(estado.perfil, estado.aparencia);
     if (urlPrevia) URL.revokeObjectURL(urlPrevia);
     urlPrevia = URL.createObjectURL(new Blob([Site.html(d, estado.aparencia, { previa: true, baseFontes: BASE_FONTES })], { type: 'text/html' }));
     iframe.onload = () => {
@@ -425,7 +687,7 @@
   // Botão que alterna a prévia entre claro e escuro; só aparece no modo automático.
   function botaoTema() {
     const escuro = ui.temaPrevia === 'escuro';
-    return `<button type="button" class="botao-tema" data-acao="tema-previa" aria-pressed="${escuro}"${estado.aparencia.escuro === 'automatico' ? '' : ' hidden'}>${escuro ? '☀ Ver no claro' : '☾ Ver no escuro'}</button>`;
+    return `<button type="button" class="botao-tema" data-acao="tema-previa" aria-pressed="${escuro}"${estado.aparencia.escuro === 'automatico' ? '' : ' hidden'}>${escuro ? _('☀ Ver no claro') : _('☾ Ver no escuro')}</button>`;
   }
 
   function atualizarBotaoTema() {
@@ -433,7 +695,7 @@
       const escuro = ui.temaPrevia === 'escuro';
       b.hidden = estado.aparencia.escuro !== 'automatico';
       b.setAttribute('aria-pressed', String(escuro));
-      b.textContent = escuro ? '☀ Ver no claro' : '☾ Ver no escuro';
+      b.textContent = escuro ? _('☀ Ver no claro') : _('☾ Ver no escuro');
     });
   }
 
@@ -483,51 +745,55 @@
 
   function telaRevisao() {
     const ap = estado.aparencia;
+    const idiomasSite = Tema.IDIOMAS || I18n.IDIOMAS;
     return `
       <div class="revisao-barra">
-        <div class="dispositivos" role="group" aria-label="Tamanho da tela">
-          ${DISPOSITIVOS.map(d => `<button type="button" data-acao="largura" data-largura="${d.largura}" aria-pressed="${ui.largura === d.largura}">${d.nome}</button>`).join('')}
+        <div class="dispositivos" role="group" aria-label="${esc(_('Tamanho da tela'))}">
+          ${DISPOSITIVOS.map(d => `<button type="button" data-acao="largura" data-largura="${d.largura}" aria-pressed="${ui.largura === d.largura}">${_(d.nome)}</button>`).join('')}
           <span class="largura-atual" id="largura-atual"></span>
           ${botaoTema()}
         </div>
         <div class="ajustes-rapidos">
-          <span class="ajuste" role="radiogroup" aria-label="Fundo">Fundo
+          <span class="ajuste" role="radiogroup" aria-label="${esc(_('Fundo'))}">${_('Fundo')}
             ${Tema.FUNDOS.map(f => `
-            <label class="opcao-cor" title="${f.nome}">
+            <label class="opcao-cor" title="${esc(_(f.nome))}">
               <input type="radio" name="fundo" value="${f.id}" data-aparencia="fundo" class="invisivel"${ap.fundo === f.id ? ' checked' : ''}>
-              <span class="bolinha" style="background:${f.fundo}"></span><span class="invisivel">${f.nome}</span>
+              <span class="bolinha" style="background:${f.fundo}"></span><span class="invisivel">${esc(_(f.nome))}</span>
             </label>`).join('')}
           </span>
-          <span class="ajuste ajuste-cores" role="radiogroup" aria-label="Cor de destaque">Cor ${htmlCores(ap)}</span>
-          <label class="ajuste">Fonte
+          <span class="ajuste ajuste-cores" role="radiogroup" aria-label="${esc(_('Cor de destaque'))}">${_('Cor')} ${htmlCores(ap)}</span>
+          <label class="ajuste">${_('Fonte')}
             <select data-aparencia="combinacao">
-              ${Tema.COMBINACOES.map(c => `<option value="${c.id}"${(Tema.combinacaoAtual(ap) || {}).id === c.id ? ' selected' : ''}>${c.nome}</option>`).join('')}
-              <option value="" disabled${Tema.combinacaoAtual(ap) ? '' : ' selected'}>Personalizada</option>
+              ${Tema.COMBINACOES.map(c => `<option value="${c.id}"${(Tema.combinacaoAtual(ap) || {}).id === c.id ? ' selected' : ''}>${esc(_(c.nome))}</option>`).join('')}
+              <option value="" disabled${Tema.combinacaoAtual(ap) ? '' : ' selected'}>${_('Personalizada')}</option>
             </select>
           </label>
-          <label class="ajuste">Estrutura
-            <select data-aparencia="estrutura">${Tema.ESTRUTURAS.map(e => `<option value="${e.id}"${ap.estrutura === e.id ? ' selected' : ''}>${e.nome}</option>`).join('')}</select>
+          <label class="ajuste">${_('Estrutura')}
+            <select data-aparencia="estrutura">${Tema.ESTRUTURAS.map(e => `<option value="${e.id}"${ap.estrutura === e.id ? ' selected' : ''}>${esc(_(e.nome))}</option>`).join('')}</select>
           </label>
-          <label class="ajuste">Foto
-            <select data-aparencia="foto">${Tema.FOTOS.map(f => `<option value="${f.id}"${ap.foto === f.id ? ' selected' : ''}>${f.nome}</option>`).join('')}</select>
+          <label class="ajuste">${_('Foto')}
+            <select data-aparencia="foto">${Tema.FOTOS.map(f => `<option value="${f.id}"${ap.foto === f.id ? ' selected' : ''}>${esc(_(f.nome))}</option>`).join('')}</select>
           </label>
           ${estado.perfil.foto ? `
           <span class="ajuste">
-            <label for="tamanho-foto">Tamanho</label>
+            <label for="tamanho-foto">${_('Tamanho')}</label>
             <input type="range" id="tamanho-foto" data-foto-tamanho min="${Tema.FOTO_LARGURA[0]}" max="480" step="2" value="${ap.fotoLargura || 160}">
-            <button type="button" class="link" data-acao="foto-padrao" title="Voltar ao tamanho padrão" aria-label="Voltar ao tamanho padrão da foto">↺</button>
+            <button type="button" class="link" data-acao="foto-padrao" title="${esc(_('Voltar ao tamanho padrão'))}" aria-label="${esc(_('Voltar ao tamanho padrão da foto'))}">↺</button>
           </span>` : ''}
-          <label class="ajuste">Organização
-            <select data-aparencia="layout">${Tema.LAYOUTS.map(l => `<option value="${l.id}"${ap.layout === l.id ? ' selected' : ''}>${l.nome}</option>`).join('')}</select>
+          <label class="ajuste">${_('Organização')}
+            <select data-aparencia="layout">${Tema.LAYOUTS.map(l => `<option value="${l.id}"${ap.layout === l.id ? ' selected' : ''}>${esc(_(l.nome))}</option>`).join('')}</select>
           </label>
-          <label class="ajuste">Referências
-            <select data-aparencia="referencias">${Tema.REFERENCIAS.map(r => `<option value="${r.id}"${ap.referencias === r.id ? ' selected' : ''}>${r.nome}</option>`).join('')}</select>
+          <label class="ajuste">${_('Referências')}
+            <select data-aparencia="referencias">${Tema.REFERENCIAS.map(r => `<option value="${r.id}"${ap.referencias === r.id ? ' selected' : ''}>${esc(_(r.nome))}</option>`).join('')}</select>
           </label>
-          <label class="ajuste">Texto
-            <select data-aparencia="alinhamento">${Tema.ALINHAMENTOS.map(a => `<option value="${a.id}"${ap.alinhamento === a.id ? ' selected' : ''}>${a.nome}</option>`).join('')}</select>
+          <label class="ajuste">${_('Texto')}
+            <select data-aparencia="alinhamento">${Tema.ALINHAMENTOS.map(a => `<option value="${a.id}"${ap.alinhamento === a.id ? ' selected' : ''}>${esc(_(a.nome))}</option>`).join('')}</select>
           </label>
-          <label class="ajuste">Modo escuro
-            <select data-aparencia="escuro">${Tema.ESCURO.map(e => `<option value="${e.id}"${ap.escuro === e.id ? ' selected' : ''}>${e.nome}</option>`).join('')}</select>
+          <label class="ajuste">${_('Modo escuro')}
+            <select data-aparencia="escuro">${Tema.ESCURO.map(e => `<option value="${e.id}"${ap.escuro === e.id ? ' selected' : ''}>${esc(_(e.nome))}</option>`).join('')}</select>
+          </label>
+          <label class="ajuste">${_('Idioma')}
+            <select data-aparencia="idioma">${idiomasSite.map(i => `<option value="${i.id}"${(ap.idioma || 'pt') === i.id ? ' selected' : ''}>${esc(i.nome)}</option>`).join('')}</select>
           </label>
         </div>
       </div>
@@ -535,20 +801,20 @@
       <div class="palco" id="palco">
         <div class="quadro">
           <div class="moldura-revisao" id="previa-moldura">
-            <iframe id="previa" title="Prévia do seu site" sandbox="allow-same-origin"></iframe>
+            <iframe id="previa" title="${esc(_('Prévia do seu site'))}" sandbox="allow-same-origin"></iframe>
           </div>
-          <div class="alca" id="alca" tabindex="0" role="slider" aria-label="Largura da prévia"
-            aria-valuemin="${LARGURA_MIN}" aria-valuemax="${LARGURA_MAX}" aria-valuenow="${ui.largura}" title="Arraste para mudar a largura"></div>
+          <div class="alca" id="alca" tabindex="0" role="slider" aria-label="${esc(_('Largura da prévia'))}"
+            aria-valuemin="${LARGURA_MIN}" aria-valuemax="${LARGURA_MAX}" aria-valuenow="${ui.largura}" title="${esc(_('Arraste para mudar a largura'))}"></div>
         </div>
       </div>
 
       <div class="barra">
         <span class="barra-acoes">
-          <button type="button" class="link" data-acao="voltar-conteudo">Voltar ao conteúdo</button>
-          <button type="button" class="link" data-acao="abrir-site">Abrir numa aba nova</button>
+          <button type="button" class="link" data-acao="voltar-conteudo">${_('Voltar ao conteúdo')}</button>
+          <button type="button" class="link" data-acao="abrir-site">${_('Abrir numa aba nova')}</button>
         </span>
         <span class="barra-acoes">
-          <button type="button" class="botao" data-acao="continuar">Publicar</button>
+          <button type="button" class="botao" data-acao="continuar">${_('Publicar')}</button>
         </span>
       </div>`;
   }
@@ -571,7 +837,7 @@
     moldura.style.width = largura * k + 'px';
     moldura.style.height = altura + 'px';
 
-    document.getElementById('largura-atual').textContent = `${largura} px${k < 1 ? ` · reduzido a ${Math.round(k * 100)}%` : ''}`;
+    document.getElementById('largura-atual').textContent = `${largura} px${k < 1 ? ' · ' + _('reduzido a {p}%', { p: Math.round(k * 100) }) : ''}`;
     document.getElementById('alca').setAttribute('aria-valuenow', largura);
     app.querySelectorAll('[data-largura]').forEach(b => b.setAttribute('aria-pressed', String(Number(b.dataset.largura) === largura)));
   }
@@ -604,7 +870,7 @@
     doc.head.appendChild(estilo);
     const alca = doc.createElement('span');
     alca.className = 'alca-foto';
-    alca.title = 'Arraste para mudar o tamanho da foto';
+    alca.title = _('Arraste para mudar o tamanho da foto');
     doc.body.appendChild(alca);
 
     posicionarAlcaFoto = () => {
@@ -679,68 +945,69 @@
 
   // Troca {u} pelo usuário do GitHub (ou por "seu-usuario" enquanto não foi preenchido).
   function comUsuario(modelo) {
-    return String(modelo || '').replace(/\{u\}/g, usuarioAtual() || 'seu-usuario');
+    return String(modelo || '').replace(/\{u\}/g, usuarioAtual() || _('seu-usuario'));
   }
 
   function telaPublicar() {
     const link = (modelo, conteudo, classe) =>
       `<a class="${classe}" data-href="${modelo}" href="${esc(comUsuario(modelo))}" target="_blank" rel="noopener">${conteudo}</a>`;
     const trecho = modelo => `<span data-texto="${modelo}">${esc(comUsuario(modelo))}</span>`;
+    // Os modelos de endereço usam {u} (usuário do GitHub); ficam fora do _() para não se confundirem com os marcadores.
     return `
       <section class="cartao">
-        <h1>Publicar seu site</h1>
-        <p class="sub">O site inteiro é um arquivo só, o <code>index.html</code>. Você baixa aqui e envia para o GitHub, que publica de graça.</p>
+        <h1>${_('Publicar seu site')}</h1>
+        <p class="sub">${_('O site inteiro é um arquivo só, o <code>index.html</code>. Você baixa aqui e envia para o GitHub, que publica de graça.')}</p>
         <ol class="passos-publicar">
           <li class="passo">
             <span class="passo-num">1</span>
-            <h2>Baixe o seu site</h2>
-            <p><button type="button" class="botao" data-acao="baixar">Baixar index.html</button>
+            <h2>${_('Baixe o seu site')}</h2>
+            <p><button type="button" class="botao" data-acao="baixar">${_('Baixar index.html')}</button>
               <span id="estado-download" class="dica" role="status"></span></p>
-            <p class="dica">O nome precisa ser exatamente <code>index.html</code>. Se o navegador salvar como “index (1).html”, renomeie antes de enviar.</p>
+            <p class="dica">${_('O nome precisa ser exatamente <code>index.html</code>. Se o navegador salvar como “index (1).html”, renomeie antes de enviar.')}</p>
           </li>
           <li class="passo">
             <span class="passo-num">2</span>
-            <h2>Seu usuário no GitHub</h2>
-            <p>Ainda não tem conta? <a href="https://github.com/signup" target="_blank" rel="noopener">Crie uma de graça</a> e volte aqui.</p>
-            <label class="campo-usuario">Nome de usuário
-              <input data-publicar="usuario" value="${esc(estado.publicacao.usuario)}" placeholder="seu-usuario" autocomplete="off" spellcheck="false">
+            <h2>${_('Seu usuário no GitHub')}</h2>
+            <p>${_('Ainda não tem conta? {link} e volte aqui.', { link: `<a href="https://github.com/signup" target="_blank" rel="noopener">${_('Crie uma de graça')}</a>` })}</p>
+            <label class="campo-usuario">${_('Nome de usuário')}
+              <input data-publicar="usuario" value="${esc(estado.publicacao.usuario)}" placeholder="${esc(_('seu-usuario'))}" autocomplete="off" spellcheck="false">
             </label>
-            <p class="dica" id="aviso-usuario"${estado.publicacao.usuario && !usuarioAtual() ? '' : ' hidden'}>Use o nome exato da sua conta: só letras, números e hífen.</p>
-            <p>Seu site vai ficar em <strong>https://${trecho('{u}')}.github.io</strong></p>
+            <p class="dica" id="aviso-usuario"${estado.publicacao.usuario && !usuarioAtual() ? '' : ' hidden'}>${_('Use o nome exato da sua conta: só letras, números e hífen.')}</p>
+            <p>${_('Seu site vai ficar em')} <strong>https://${trecho('{u}')}.github.io</strong></p>
           </li>
           <li class="passo">
             <span class="passo-num">3</span>
-            <h2>Crie o repositório <small>(só na primeira vez)</small></h2>
-            <p>O nome do repositório precisa ser exatamente
+            <h2>${_('Crie o repositório')} <small>${_('(só na primeira vez)')}</small></h2>
+            <p>${_('O nome do repositório precisa ser exatamente')}
               <code class="repo">${trecho('{u}.github.io')}</code>
-              <button type="button" class="link" data-acao="copiar" data-copiar="{u}.github.io">Copiar</button></p>
-            <p>${link('https://github.com/new?name={u}.github.io&visibility=public', 'Criar o repositório no GitHub ↗', 'botao-secundario')}</p>
-            <p class="dica">Deixe como <strong>Public</strong> e clique em <strong>Create repository</strong>. Não precisa marcar mais nada.</p>
+              <button type="button" class="link" data-acao="copiar" data-copiar="{u}.github.io">${_('Copiar')}</button></p>
+            <p>${link('https://github.com/new?name={u}.github.io&visibility=public', _('Criar o repositório no GitHub ↗'), 'botao-secundario')}</p>
+            <p class="dica">${_('Deixe como <strong>Public</strong> e clique em <strong>Create repository</strong>. Não precisa marcar mais nada.')}</p>
           </li>
           <li class="passo">
             <span class="passo-num">4</span>
-            <h2>Envie o arquivo</h2>
-            <p>${link('https://github.com/{u}/{u}.github.io/upload/main', 'Abrir a página de envio ↗', 'botao-secundario')}</p>
-            <p>Arraste o <code>index.html</code> para a página, desça até o fim e clique em <strong>Commit changes</strong>.</p>
-            <p class="dica">No repositório recém-criado, se a página de envio não abrir, entre nele e clique em “uploading an existing file”.</p>
+            <h2>${_('Envie o arquivo')}</h2>
+            <p>${link('https://github.com/{u}/{u}.github.io/upload/main', _('Abrir a página de envio ↗'), 'botao-secundario')}</p>
+            <p>${_('Arraste o <code>index.html</code> para a página, desça até o fim e clique em <strong>Commit changes</strong>.')}</p>
+            <p class="dica">${_('No repositório recém-criado, se a página de envio não abrir, entre nele e clique em “uploading an existing file”.')}</p>
           </li>
           <li class="passo">
             <span class="passo-num">5</span>
-            <h2>Pronto!</h2>
-            <p>Em um ou dois minutos o site aparece em ${link('https://{u}.github.io', trecho('https://{u}.github.io'), 'link-site')}.
-              Até lá, o endereço pode mostrar “404”: é o GitHub terminando de publicar.</p>
+            <h2>${_('Pronto!')}</h2>
+            <p>${_('Em um ou dois minutos o site aparece em {link}. Até lá, o endereço pode mostrar “404”: é o GitHub terminando de publicar.',
+              { link: link('https://{u}.github.io', trecho('https://{u}.github.io'), 'link-site') })}</p>
           </li>
         </ol>
       </section>
 
       <section class="cartao">
-        <h2>Para atualizar depois</h2>
-        <p>Neste navegador, tudo fica salvo: volte aqui, ajuste, baixe de novo e repita o passo 4. O arquivo novo substitui o antigo.</p>
-        <p>Em outro computador, traga o <code>index.html</code> do seu site na etapa Lattes: ele guarda as suas escolhas para você continuar de onde parou.</p>
+        <h2>${_('Para atualizar depois')}</h2>
+        <p>${_('Neste navegador, tudo fica salvo: volte aqui, ajuste, baixe de novo e repita o passo 4. O arquivo novo substitui o antigo.')}</p>
+        <p>${_('Em outro computador, traga o <code>index.html</code> do seu site na etapa Lattes: ele guarda as suas escolhas para você continuar de onde parou.')}</p>
       </section>
 
       <div class="barra">
-        <span class="barra-acoes"><button type="button" class="link" data-acao="voltar-revisao">Voltar à revisão</button></span>
+        <span class="barra-acoes"><button type="button" class="link" data-acao="voltar-revisao">${_('Voltar à revisão')}</button></span>
         <span></span>
       </div>`;
   }
@@ -787,14 +1054,14 @@
         try {
           destino = await window.showSaveFilePicker({
             suggestedName: 'index.html',
-            types: [{ description: 'Página do site', accept: { 'text/html': ['.html'] } }],
+            types: [{ description: _('Página do site'), accept: { 'text/html': ['.html'] } }],
           });
         } catch (e) {
           if (e.name === 'AbortError') return; // a pessoa cancelou
           destino = null;
         }
       }
-      aviso.textContent = 'Gerando o arquivo…';
+      aviso.textContent = _('Gerando o arquivo…');
       const blob = new Blob([await gerarArquivoFinal()], { type: 'text/html' });
       if (destino) {
         const escrita = await destino.createWritable();
@@ -810,10 +1077,10 @@
         setTimeout(() => URL.revokeObjectURL(a.href), 10000);
       }
       const kb = Math.round(blob.size / 1024);
-      aviso.textContent = destino ? `Pronto: index.html salvo (${kb} KB).` : `Pronto: index.html baixado (${kb} KB). Confira se o nome ficou index.html.`;
+      aviso.textContent = destino ? _('Pronto: index.html salvo ({kb} KB).', { kb }) : _('Pronto: index.html baixado ({kb} KB). Confira se o nome ficou index.html.', { kb });
     } catch (e) {
       console.error(e);
-      aviso.textContent = 'Não consegui gerar o arquivo. ' + e.message;
+      aviso.textContent = _('Não consegui gerar o arquivo.') + ' ' + e.message;
     } finally {
       botao.disabled = false;
     }
@@ -825,7 +1092,7 @@
     let dados = null;
     try { dados = JSON.parse(doc.getElementById('dados-do-construtor').textContent); } catch (e) { /* segue para o erro abaixo */ }
     if (!dados || dados.construtor !== 'site-pessoal' || !Array.isArray(dados.secoes)) {
-      throw Object.assign(new Error('Não consegui ler as escolhas guardadas neste index.html.'), { amigavel: true });
+      throw Object.assign(new Error(_('Não consegui ler as escolhas guardadas neste index.html.')), { amigavel: true });
     }
     const img = doc.querySelector('img.foto');
     const src = img ? img.getAttribute('src') || '' : '';
@@ -846,6 +1113,7 @@
       secoes: (completarProducoes(dados.secoes), dados.secoes),
       ocultos: Array.isArray(dados.ocultos) ? dados.ocultos.map(String) : [],
       publicacao: Object.assign(base.publicacao, dados.publicacao),
+      // Guardado em português; a tela traduz na hora de mostrar.
       avisos: dados.fonte ? ['Site reaberto a partir do index.html, que guarda só o que estava publicado. Para ver de novo todas as produções do Lattes, use “Usar outro arquivo” e traga a página do Lattes: suas escolhas continuam.'] : [],
     });
   }
@@ -853,24 +1121,24 @@
   function telaLattes() {
     return `
       <section class="cartao">
-        <h1>Traga seu currículo Lattes</h1>
-        <p class="sub">O construtor lê a página pública do seu currículo e monta a base do site. Na próxima tela, você escolhe o que entra.</p>
+        <h1>${_('Traga seu currículo Lattes')}</h1>
+        <p class="sub">${_('O construtor lê a página pública do seu currículo e monta a base do site. Na próxima tela, você escolhe o que entra.')}</p>
         <ol class="passos">
-          <li>Abra seu currículo na <a href="https://buscatextual.cnpq.br/buscatextual/busca.do" target="_blank" rel="noopener">busca do Lattes</a> e resolva o “Não sou um robô”.</li>
-          <li>Com o currículo aberto, aperte <kbd>Ctrl</kbd> + <kbd>S</kbd> (no Mac, <kbd>⌘</kbd> + <kbd>S</kbd>) e salve. No Safari, escolha o formato <em>Código-fonte da página</em>.</li>
-          <li>Traga para cá o arquivo <code>.html</code> que foi salvo. A pasta que o navegador cria junto não é necessária.</li>
+          <li>${_('Abra seu currículo na {busca} e resolva o “Não sou um robô”.', { busca: `<a href="https://buscatextual.cnpq.br/buscatextual/busca.do" target="_blank" rel="noopener">${_('busca do Lattes')}</a>` })}</li>
+          <li>${_('Com o currículo aberto, aperte <kbd>Ctrl</kbd> + <kbd>S</kbd> (no Mac, <kbd>⌘</kbd> + <kbd>S</kbd>) e salve. No Safari, escolha o formato <em>Código-fonte da página</em>.')}</li>
+          <li>${_('Traga para cá o arquivo <code>.html</code> que foi salvo. A pasta que o navegador cria junto não é necessária.')}</li>
         </ol>
         <label class="soltar" id="soltar">
           <input type="file" accept=".html,.htm,text/html" class="invisivel" data-arquivo="lattes">
-          <strong>Arraste o arquivo aqui</strong>
-          <span>ou clique para escolher</span>
+          <strong>${_('Arraste o arquivo aqui')}</strong>
+          <span>${_('ou clique para escolher')}</span>
         </label>
         <p class="erro" role="alert"${ui.erro ? '' : ' hidden'}>${esc(ui.erro)}</p>
-        <p class="privacidade">O arquivo é lido no seu navegador e não sai do seu computador.</p>
-        <p class="dica">Já fez seu site aqui e quer continuar editando em outro computador? Traga o <code>index.html</code> do seu site do mesmo jeito.</p>
+        <p class="privacidade">${_('O arquivo é lido no seu navegador e não sai do seu computador.')}</p>
+        <p class="dica">${_('Já fez seu site aqui e quer continuar editando em outro computador? Traga o <code>index.html</code> do seu site do mesmo jeito.')}</p>
         <p class="alternativa">${estado.fonte
-          ? '<button type="button" class="link" data-acao="voltar-conteudo">Voltar para o conteúdo, sem trocar o arquivo</button>'
-          : '<button type="button" class="link" data-acao="sem-lattes">Não tenho Lattes, prefiro preencher à mão</button>'}</p>
+          ? `<button type="button" class="link" data-acao="voltar-conteudo">${_('Voltar para o conteúdo, sem trocar o arquivo')}</button>`
+          : `<button type="button" class="link" data-acao="sem-lattes">${_('Não tenho Lattes, prefiro preencher à mão')}</button>`}</p>
       </section>`;
   }
 
@@ -879,54 +1147,53 @@
     const f = estado.fonte;
     const primeiraProducao = estado.secoes.findIndex(s => s.tipo === 'producao');
     return `
-      ${f ? `<p class="origem">Dados do Lattes${f.atualizadoEm ? ` atualizado em ${esc(f.atualizadoEm)}` : ''}.
-        <button type="button" class="link" data-acao="trocar-lattes">Usar outro arquivo</button></p>` : ''}
-      ${estado.avisos.length ? `<div class="aviso">${estado.avisos.map(a => `<p>${esc(a)}</p>`).join('')}</div>` : ''}
+      ${f ? `<p class="origem">${f.atualizadoEm ? _('Dados do Lattes atualizado em {data}.', { data: esc(f.atualizadoEm) }) : _('Dados do Lattes.')}
+        <button type="button" class="link" data-acao="trocar-lattes">${_('Usar outro arquivo')}</button></p>` : ''}
+      ${estado.avisos.length ? `<div class="aviso">${estado.avisos.map(a => `<p>${esc(_(a))}</p>`).join('')}</div>` : ''}
 
       <section class="cartao perfil">
         ${htmlFoto()}
         <div class="campo-nome">
-          <label for="nome">Nome</label>
+          <label for="nome">${_('Nome')}</label>
           <input id="nome" data-perfil="nome" value="${esc(p.nome)}" autocomplete="name">
-          <label for="subtitulo">Linha abaixo do nome</label>
+          <label for="subtitulo">${_('Linha abaixo do nome')}</label>
           <input id="subtitulo" data-perfil="subtitulo" value="${esc(p.subtitulo)}"
-            placeholder="${esc(Site.subtituloPadrao(estado) || 'Ex.: Professora na Universidade X')}">
+            placeholder="${esc(Site.subtituloPadrao(estado) || _('Ex.: Professora na Universidade X'))}">
         </div>
       </section>
 
       <section class="cartao">
-        <h2 id="rotulo-bio">Sobre você</h2>
-        <p class="dica">${f ? 'Este é o resumo do seu Lattes, mas aqui o texto é seu: reescreva à vontade.' : 'Conte quem você é e com o que trabalha.'}
-          Num site pessoal, a primeira pessoa costuma funcionar melhor: “Sou doutorando em…”, “Pesquiso…”.
-          Para transformar um trecho em link, selecione e clique com o botão direito.</p>
+        <h2 id="rotulo-bio">${_('Sobre você')}</h2>
+        <p class="dica">${f ? _('Este é o resumo do seu Lattes, mas aqui o texto é seu: reescreva à vontade.') : _('Conte quem você é e com o que trabalha.')}
+          ${_('Num site pessoal, a primeira pessoa costuma funcionar melhor: “Sou doutorando em…”, “Pesquiso…”. Para transformar um trecho em link, selecione e clique com o botão direito.')}</p>
         <div id="bio" class="editor-bio" contenteditable="true" role="textbox" aria-multiline="true"
           aria-labelledby="rotulo-bio" spellcheck="true">${htmlEditorBio(p.bio)}</div>
         <div class="rodape-campo">
-          <span id="contador">${Site.textoPuro(p.bio).length} caracteres</span>
+          <span id="contador">${_('{n} caracteres', { n: Site.textoPuro(p.bio).length })}</span>
           <span class="barra-acoes">
-            <button type="button" class="link" data-acao="inserir-link" title="Selecione um trecho e clique aqui (ou Ctrl+K)">Inserir link</button>
-            <button type="button" class="link" data-acao="restaurar-bio" id="restaurar-bio"${podeRestaurarBio() ? '' : ' hidden'}>Voltar ao texto do Lattes</button>
+            <button type="button" class="link" data-acao="inserir-link" title="${esc(_('Selecione um trecho e clique aqui (ou Ctrl+K)'))}">${_('Inserir link')}</button>
+            <button type="button" class="link" data-acao="restaurar-bio" id="restaurar-bio"${podeRestaurarBio() ? '' : ' hidden'}>${_('Voltar ao texto do Lattes')}</button>
           </span>
         </div>
       </section>
 
       <section class="cartao">
-        <h2 id="rotulo-interesses">Interesses</h2>
-        <p class="dica">Três a seis temas, separados por vírgula. Aparecem no início do site, ao lado da sua formação.${f ? ' Vieram das áreas de atuação do seu Lattes.' : ''}</p>
+        <h2 id="rotulo-interesses">${_('Interesses')}</h2>
+        <p class="dica">${_('Três a seis temas, separados por vírgula. Aparecem no início do site, ao lado da sua formação.')}${f ? ' ' + _('Vieram das áreas de atuação do seu Lattes.') : ''}</p>
         <input data-perfil="interesses" aria-labelledby="rotulo-interesses" value="${esc((p.interesses || []).join(', '))}"
-          placeholder="Ex.: Direito e Desenvolvimento, Regulação, Métodos empíricos">
+          placeholder="${esc(_('Ex.: Direito e Desenvolvimento, Regulação, Métodos empíricos'))}">
       </section>
 
       <section class="cartao">
-        <h2>Links</h2>
+        <h2>${_('Links')}</h2>
         <div class="grade-links">
-          ${LINKS.map(l => `<label>${l.nome}
-            <input type="${l.tipo}" data-link="${l.id}" value="${esc(p.links[l.id] || '')}" placeholder="${esc(l.exemplo)}"></label>`).join('')}
+          ${LINKS.map(l => `<label>${_(l.nome)}
+            <input type="${l.tipo}" data-link="${l.id}" value="${esc(p.links[l.id] || '')}" placeholder="${esc(l.tipo === 'email' ? _(l.exemplo) : l.exemplo)}"></label>`).join('')}
         </div>
       </section>
 
       ${telaDestaques()}
-      <datalist id="tipos-livres">${TIPOS_LIVRES.map(t => `<option value="${t}">`).join('')}</datalist>
+      <datalist id="tipos-livres">${TIPOS_LIVRES.map(t => `<option value="${esc(_(t))}">`).join('')}</datalist>
 
       ${estado.secoes.map((s, si) => (s.tipo === 'livre' ? '' : (si === primeiraProducao ? telaDicaDestaques() : '') + telaSecao(s, si))).join('')}
 
@@ -936,8 +1203,8 @@
           <span id="aviso-barra" class="aviso-barra" role="status"></span>
         </span>
         <span class="barra-acoes">
-          <button type="button" class="link" data-acao="recomecar">Começar de novo</button>
-          <button type="button" class="botao" data-acao="continuar">Revisar o site</button>
+          <button type="button" class="link" data-acao="recomecar">${_('Começar de novo')}</button>
+          <button type="button" class="botao" data-acao="continuar">${_('Revisar o site')}</button>
         </span>
       </div>`;
   }
@@ -961,15 +1228,14 @@
     const lista = destaquesOrdenados();
     return `
       <section class="cartao" id="cartao-destaques">
-        <h2>Destaques</h2>
-        <p class="dica">Aparecem em cartões no topo do site, nesta ordem. O título e onde saiu vêm do Lattes: ajuste se precisar
-          e escreva uma frase sobre cada um, dizendo do que trata, o que mostra ou por que importa.</p>
+        <h2>${_('Destaques')}</h2>
+        <p class="dica">${_('Aparecem em cartões no topo do site, nesta ordem. O título e onde saiu vêm do Lattes: ajuste se precisar e escreva uma frase sobre cada um, dizendo do que trata, o que mostra ou por que importa.')}</p>
         ${lista.length
           ? `<ol class="lista-destaques">${lista.map((x, n) => editorDestaque(x, n, lista.length)).join('')}</ol>`
-          : `<p class="vazio">Nenhum destaque ainda. Marque com ★ até ${MAX_DESTAQUES} produções nas listas abaixo.</p>`}
+          : `<p class="vazio">${_('Nenhum destaque ainda. Marque com ★ até {max} produções nas listas abaixo.', { max: MAX_DESTAQUES })}</p>`}
         <p class="rodape-campo">
-          <span>Algo que não está no Lattes? Um software, um site, um projeto, um prêmio.</span>
-          <button type="button" class="link" data-acao="novo-destaque-livre">+ Adicionar destaque livre</button>
+          <span>${_('Algo que não está no Lattes? Um software, um site, um projeto, um prêmio.')}</span>
+          <button type="button" class="link" data-acao="novo-destaque-livre">${_('+ Adicionar destaque livre')}</button>
         </p>
       </section>`;
   }
@@ -988,25 +1254,25 @@
     const c = Site.camposDestaque(it);
     const chave = `${si}:${ii}`;
     const livre = estado.secoes[si].tipo === 'livre';
-    const tipo = livre ? 'Fora do Lattes' : [Site.tipoDe(estado.secoes[si].titulo), it.periodo].filter(Boolean).join(' · ');
+    const tipo = livre ? _('Fora do Lattes') : [_(Site.tipoDe(estado.secoes[si].titulo)), it.periodo].filter(Boolean).join(' · ');
     return `
       <li class="editor-destaque${livre ? ' livre' : ''}" data-destaque="${chave}">
         <div class="editor-destaque-topo">
           <span class="editor-destaque-tipo">${n + 1}. ${esc(tipo)}</span>
           <span class="item-acoes">
-            <button type="button" class="icone" data-acao="subir-destaque" data-item="${chave}"${n === 0 ? ' disabled' : ''} title="Mover para cima" aria-label="Mover para cima">↑</button>
-            <button type="button" class="icone" data-acao="descer-destaque" data-item="${chave}"${n === total - 1 ? ' disabled' : ''} title="Mover para baixo" aria-label="Mover para baixo">↓</button>
-            <button type="button" class="icone" data-acao="destaque" data-item="${chave}" title="${livre ? 'Excluir' : 'Tirar dos destaques'}" aria-label="${livre ? 'Excluir este destaque' : 'Tirar dos destaques'}">✕</button>
+            <button type="button" class="icone" data-acao="subir-destaque" data-item="${chave}"${n === 0 ? ' disabled' : ''} title="${esc(_('Mover para cima'))}" aria-label="${esc(_('Mover para cima'))}">↑</button>
+            <button type="button" class="icone" data-acao="descer-destaque" data-item="${chave}"${n === total - 1 ? ' disabled' : ''} title="${esc(_('Mover para baixo'))}" aria-label="${esc(_('Mover para baixo'))}">↓</button>
+            <button type="button" class="icone" data-acao="destaque" data-item="${chave}" title="${esc(livre ? _('Excluir') : _('Tirar dos destaques'))}" aria-label="${esc(livre ? _('Excluir este destaque') : _('Tirar dos destaques'))}">✕</button>
           </span>
         </div>
         ${livre ? `
-        <label>Tipo <input data-destaque-campo="categoria" value="${esc(it.categoria || '')}" placeholder="Software, projeto, prêmio…" list="tipos-livres"></label>
-        <label>Ano <input data-destaque-campo="periodo" value="${esc(it.periodo || '')}" placeholder="2025" inputmode="numeric" maxlength="11"></label>` : ''}
-        <label class="campo-largo">Título <input data-destaque-campo="dTitulo" value="${esc(c.titulo)}" placeholder="${livre ? 'Nome do software, do projeto…' : 'Título da obra'}"></label>
-        <label>${livre ? 'Onde' : 'Onde saiu'} <input data-destaque-campo="dVeiculo" value="${esc(c.veiculo)}" placeholder="${livre ? 'Instituição, grupo, parceria… (opcional)' : 'Revista, livro, evento…'}"></label>
-        <label>Link <input type="url" data-destaque-campo="link" value="${esc(it.link || '')}" placeholder="https:// (opcional)"></label>
-        <label class="campo-largo">${livre ? 'Sobre' : 'Sobre o trabalho'}
-          <textarea data-destaque-campo="dTexto" rows="2" placeholder="Em uma ou duas frases: do que trata e o que mostra.">${esc(c.texto)}</textarea></label>
+        <label>${_('Tipo')} <input data-destaque-campo="categoria" value="${esc(it.categoria || '')}" placeholder="${esc(_('Software, projeto, prêmio…'))}" list="tipos-livres"></label>
+        <label>${_('Ano')} <input data-destaque-campo="periodo" value="${esc(it.periodo || '')}" placeholder="2025" inputmode="numeric" maxlength="11"></label>` : ''}
+        <label class="campo-largo">${_('Título')} <input data-destaque-campo="dTitulo" value="${esc(c.titulo)}" placeholder="${esc(livre ? _('Nome do software, do projeto…') : _('Título da obra'))}"></label>
+        <label>${livre ? _('Onde') : _('Onde saiu')} <input data-destaque-campo="dVeiculo" value="${esc(c.veiculo)}" placeholder="${esc(livre ? _('Instituição, grupo, parceria… (opcional)') : _('Revista, livro, evento…'))}"></label>
+        <label>${_('Link')} <input type="url" data-destaque-campo="link" value="${esc(it.link || '')}" placeholder="${esc(_('https:// (opcional)'))}"></label>
+        <label class="campo-largo">${livre ? _('Sobre') : _('Sobre o trabalho')}
+          <textarea data-destaque-campo="dTexto" rows="2" placeholder="${esc(_('Em uma ou duas frases: do que trata e o que mostra.'))}">${esc(c.texto)}</textarea></label>
       </li>`;
   }
 
@@ -1019,8 +1285,7 @@
     return `
       <section class="cartao dica-destaques">
         <span class="estrela-exemplo" aria-hidden="true">★</span>
-        <p>Marque com a estrela até ${MAX_DESTAQUES} produções para aparecerem em destaque no topo do site.
-          As que você já tinha marcado como relevantes no Lattes vêm pré-selecionadas.</p>
+        <p>${_('Marque com a estrela até {max} produções para aparecerem em destaque no topo do site. As que você já tinha marcado como relevantes no Lattes vêm pré-selecionadas.', { max: MAX_DESTAQUES })}</p>
       </section>`;
   }
 
@@ -1037,13 +1302,13 @@
           <h2>${esc(s.titulo)}</h2>
           <span class="contagem" id="contagem-${si}">${contagemSecao(s)}</span>
           <span class="secao-acoes">
-            ${visiveis ? '' : `<button type="button" class="link" data-acao="expandir" data-secao="${si}">${total === 1 ? 'Ver o item' : `Ver os ${total} itens`}</button>`}
-            ${marcados < total ? `<button type="button" class="link" data-acao="todos" data-secao="${si}">Marcar todos</button>` : ''}
-            ${marcados ? `<button type="button" class="link" data-acao="nenhum" data-secao="${si}">Desmarcar todos</button>` : ''}
+            ${visiveis ? '' : `<button type="button" class="link" data-acao="expandir" data-secao="${si}">${total === 1 ? _('Ver o item') : _('Ver os {n} itens', { n: total })}</button>`}
+            ${marcados < total ? `<button type="button" class="link" data-acao="todos" data-secao="${si}">${_('Marcar todos')}</button>` : ''}
+            ${marcados ? `<button type="button" class="link" data-acao="nenhum" data-secao="${si}">${_('Desmarcar todos')}</button>` : ''}
           </span>
         </header>
         ${visiveis ? `<ul class="itens">${s.itens.slice(0, visiveis).map((it, ii) => telaItem(s, si, it, ii)).join('')}</ul>` : ''}
-        ${visiveis && visiveis < total ? `<button type="button" class="mais" data-acao="expandir" data-secao="${si}">Mostrar todos os ${total}</button>` : ''}
+        ${visiveis && visiveis < total ? `<button type="button" class="mais" data-acao="expandir" data-secao="${si}">${_('Mostrar todos os {n}', { n: total })}</button>` : ''}
       </section>`;
   }
 
@@ -1053,14 +1318,14 @@
     const editando = ui.editando === chave;
     const conteudo = editando ? `
       <div class="editor">
-        <textarea data-editor="${chave}" rows="3" aria-label="Texto do item">${esc(it.titulo)}</textarea>
+        <textarea data-editor="${chave}" rows="3" aria-label="${esc(_('Texto do item'))}">${esc(it.titulo)}</textarea>
         <label class="editor-link">
-          <span>Link <em>(opcional: página do artigo, PDF, vídeo…)</em></span>
+          <span>${_('Link')} <em>${_('(opcional: página do artigo, PDF, vídeo…)')}</em></span>
           <input type="url" data-editor-link="${chave}" value="${esc(it.link || '')}" placeholder="https://">
         </label>
         <span class="editor-acoes">
-          <button type="button" class="botao pequeno" data-acao="salvar-edicao" data-item="${chave}">Salvar</button>
-          <button type="button" class="link" data-acao="cancelar-edicao" data-item="${chave}">Cancelar</button>
+          <button type="button" class="botao pequeno" data-acao="salvar-edicao" data-item="${chave}">${_('Salvar')}</button>
+          <button type="button" class="link" data-acao="cancelar-edicao" data-item="${chave}">${_('Cancelar')}</button>
         </span>
       </div>` : `
       <div class="coluna-texto">
@@ -1071,28 +1336,29 @@
         </label>
         ${it.link || s.tipo === 'producao' ? `
         <button type="button" class="item-link${it.link ? '' : ' vazio'}" data-acao="editar" data-foco="link" data-item="${chave}"
-          title="${it.link ? esc(it.link) : 'Adicionar um link para este item'}">${it.link ? '↗ ' + esc(dominio(it.link)) : '+ link'}</button>` : ''}
+          title="${it.link ? esc(it.link) : esc(_('Adicionar um link para este item'))}">${it.link ? '↗ ' + esc(dominio(it.link)) : _('+ link')}</button>` : ''}
       </div>`;
     return `
       <li class="item${it.manter ? '' : ' fora'}${it.destaque ? ' destacado' : ''}" data-li="${chave}">
-        <input type="checkbox" id="${id}" data-marcar="${chave}"${it.manter ? ' checked' : ''}${editando ? ' aria-label="Manter no site"' : ''}>
+        <input type="checkbox" id="${id}" data-marcar="${chave}"${it.manter ? ' checked' : ''}${editando ? ` aria-label="${esc(_('Manter no site'))}"` : ''}>
         ${conteudo}
         <span class="periodo">${esc(it.periodo)}</span>
         <span class="item-acoes">
           ${s.tipo === 'producao' ? `<button type="button" class="estrela" data-acao="destaque" data-item="${chave}"
-            aria-pressed="${it.destaque}" title="${it.destaque ? 'Tirar dos destaques' : 'Destacar'}" aria-label="Destacar">★</button>` : ''}
-          ${editando ? '' : `<button type="button" class="icone" data-acao="editar" data-item="${chave}" title="Editar texto e link" aria-label="Editar texto e link">✎</button>`}
+            aria-pressed="${it.destaque}" title="${esc(it.destaque ? _('Tirar dos destaques') : _('Destacar'))}" aria-label="${esc(_('Destacar'))}">★</button>` : ''}
+          ${editando ? '' : `<button type="button" class="icone" data-acao="editar" data-item="${chave}" title="${esc(_('Editar texto e link'))}" aria-label="${esc(_('Editar texto e link'))}">✎</button>`}
         </span>
       </li>`;
   }
 
   function contagemSecao(s) {
-    return `${s.itens.filter(i => i.manter).length} de ${s.itens.length} no site`;
+    return _('{n} de {total} no site', { n: s.itens.filter(i => i.manter).length, total: s.itens.length });
   }
 
   function resumoSelecao() {
     const t = totais();
-    return `<strong>${t.itens}</strong> ${t.itens === 1 ? 'item' : 'itens'} no site · <strong>${t.destaques}</strong> de ${MAX_DESTAQUES} destaques`;
+    return _('<strong>{n}</strong> {itens} no site · <strong>{d}</strong> de {max} destaques',
+      { n: t.itens, itens: t.itens === 1 ? _('item') : _('itens'), d: t.destaques, max: MAX_DESTAQUES });
   }
 
   function podeRestaurarBio() {
@@ -1145,7 +1411,7 @@
       window.scrollTo(0, 0);
     } catch (e) {
       console.error(e);
-      ui.erro = e.amigavel ? e.message : 'Não consegui ler este arquivo. Confira se é a página do currículo salva pelo navegador (arquivo .html).';
+      ui.erro = e.amigavel ? e.message : _('Não consegui ler este arquivo. Confira se é a página do currículo salva pelo navegador (arquivo .html).');
       render();
     }
   }
@@ -1167,7 +1433,7 @@
       };
       img.onerror = () => {
         URL.revokeObjectURL(url);
-        falha(new Error('Não consegui abrir esta imagem.'));
+        falha(new Error(_('Não consegui abrir esta imagem.')));
       };
       img.src = url;
     });
@@ -1195,9 +1461,9 @@
       case 'copiar': {
         const texto = comUsuario(b.dataset.copiar);
         navigator.clipboard.writeText(texto).then(() => {
-          b.textContent = 'Copiado!';
-          setTimeout(() => { b.textContent = 'Copiar'; }, 1800);
-        }, () => { b.textContent = 'Selecione e copie'; });
+          b.textContent = _('Copiado!');
+          setTimeout(() => { b.textContent = _('Copiar'); }, 1800);
+        }, () => { b.textContent = _('Selecione e copie'); });
         break;
       }
 
@@ -1249,7 +1515,7 @@
         break;
 
       case 'recomecar':
-        if (!confirm('Apagar tudo o que foi feito aqui e começar de novo?')) return;
+        if (!confirm(_('Apagar tudo o que foi feito aqui e começar de novo?'))) return;
         estado = novoEstado();
         ui.expandidas.clear();
         ui.editando = null;
@@ -1265,7 +1531,7 @@
         break;
 
       case 'inserir-link':
-        if (!pedirLink()) avisar('Selecione um trecho do texto “Sobre você” para virar link.');
+        if (!pedirLink()) avisar(_('Selecione um trecho do texto “Sobre você” para virar link.'));
         break;
 
       case 'todos':
@@ -1288,7 +1554,7 @@
 
       case 'novo-destaque-livre': {
         if (totais().destaques >= MAX_DESTAQUES) {
-          avisar(`Já são ${MAX_DESTAQUES} destaques. Tire um para acrescentar outro.`);
+          avisar(_('Já são {n} destaques. Tire um para acrescentar outro.', { n: MAX_DESTAQUES }));
           return;
         }
         const s = secaoLivres(true);
@@ -1316,7 +1582,7 @@
         }
         const it = estado.secoes[si].itens[ii];
         if (!it.destaque && totais().destaques >= MAX_DESTAQUES) {
-          avisar(`Já são ${MAX_DESTAQUES} destaques. Tire um para escolher outro.`);
+          avisar(_('Já são {n} destaques. Tire um para escolher outro.', { n: MAX_DESTAQUES }));
           return;
         }
         it.destaque = !it.destaque;
@@ -1391,7 +1657,7 @@
   app.addEventListener('keydown', e => {
     if (e.target.id === 'bio' && (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
       e.preventDefault();
-      if (!pedirLink()) avisar('Selecione um trecho do texto para virar link.');
+      if (!pedirLink()) avisar(_('Selecione um trecho do texto para virar link.'));
       return;
     }
     if (e.target.id === 'alca' && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
@@ -1412,6 +1678,15 @@
     if (b && podeIr(b.dataset.ir)) irPara(b.dataset.ir);
   });
 
+  // #idiomas fica fora de #app: precisa do próprio listener.
+  const seletorIdiomas = document.getElementById('idiomas');
+  if (seletorIdiomas) seletorIdiomas.addEventListener('click', e => {
+    const b = e.target.closest('[data-idioma]');
+    if (!b || b.dataset.idioma === I18n.idioma()) return;
+    I18n.definir(b.dataset.idioma);
+    render();
+  });
+
   function mudarAparencia(t) {
     const campo = t.dataset.aparencia;
     const ap = estado.aparencia;
@@ -1423,8 +1698,8 @@
       ap.fonteTexto = c.texto;
     } else ap[campo] = t.value;
     salvar();
-    // Organização, estrutura e foto mudam o HTML; cor e fonte só mudam variáveis CSS.
-    if (campo === 'layout' || campo === 'estrutura' || campo === 'foto' || campo === 'referencias') montarPrevia();
+    // Organização, estrutura, foto e idioma mudam o HTML; cor e fonte só mudam variáveis CSS.
+    if (campo === 'layout' || campo === 'estrutura' || campo === 'foto' || campo === 'referencias' || campo === 'idioma') montarPrevia();
     atualizarAparencia();
   }
 
@@ -1498,7 +1773,7 @@
       estado.perfil[t.dataset.perfil] = t.value;
       if (estado.etapa === 'aparencia') {
         // O nome aparece nas amostras de fonte e na prévia.
-        app.querySelectorAll('.fonte-amostra').forEach(el => { el.textContent = t.value || 'Seu Nome'; });
+        app.querySelectorAll('.fonte-amostra').forEach(el => { el.textContent = t.value || _('Seu Nome'); });
         clearTimeout(timerPrevia);
         timerPrevia = setTimeout(montarPrevia, 300);
       }
@@ -1563,7 +1838,7 @@
     const ed = editorBio();
     if (!ed) return;
     estado.perfil.bio = serializarBio(ed);
-    document.getElementById('contador').textContent = `${Site.textoPuro(estado.perfil.bio).length} caracteres`;
+    document.getElementById('contador').textContent = _('{n} caracteres', { n: Site.textoPuro(estado.perfil.bio).length });
     document.getElementById('restaurar-bio').hidden = !podeRestaurarBio();
     salvar();
   }
@@ -1585,12 +1860,15 @@
   const popover = document.createElement('div');
   popover.className = 'popover-link';
   popover.hidden = true;
-  popover.innerHTML = `
-    <label>Endereço do link <input type="url" placeholder="https://"></label>
+  // Montado a cada render(), para acompanhar o idioma.
+  function htmlPopover() {
+    return `
+    <label>${_('Endereço do link')} <input type="url" placeholder="https://"></label>
     <span class="popover-acoes">
-      <button type="button" class="botao pequeno" data-popover="aplicar">Aplicar</button>
-      <button type="button" class="link" data-popover="cancelar">Cancelar</button>
+      <button type="button" class="botao pequeno" data-popover="aplicar">${_('Aplicar')}</button>
+      <button type="button" class="link" data-popover="cancelar">${_('Cancelar')}</button>
     </span>`;
+  }
   document.body.append(menu, popover);
 
   let edicaoLink = null; // { range, link } enquanto o menu ou a caixa do link estão abertos
@@ -1682,7 +1960,7 @@
     if (!link && !temSelecao) return;
     e.preventDefault();
     edicaoLink = { range: temSelecao ? sel.getRangeAt(0).cloneRange() : null, link };
-    const itens = link ? [['editar', 'Editar link'], ['remover', 'Remover link']] : [['criar', 'Adicionar link']];
+    const itens = link ? [['editar', _('Editar link')], ['remover', _('Remover link')]] : [['criar', _('Adicionar link')]];
     menu.innerHTML = itens.map(([acao, rotulo]) => `<button type="button" role="menuitem" data-menu="${acao}">${rotulo}</button>`).join('');
     menu.hidden = false;
     posicionar(menu, e.clientX, e.clientY);

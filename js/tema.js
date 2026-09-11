@@ -3,11 +3,55 @@
  * e o cálculo das cores com contraste suficiente para leitura (WCAG, 4.5:1).
  */
 (function (raiz, fabrica) {
-  const api = fabrica();
+  const I18n = raiz.I18n || (typeof require === 'function' ? require('./i18n.js') : null);
+  const api = fabrica(I18n);
   if (typeof module === 'object' && module.exports) module.exports = api;
   else raiz.Tema = api;
-})(typeof self !== 'undefined' ? self : this, function () {
+})(typeof self !== 'undefined' ? self : this, function (I18n) {
   'use strict';
+
+  const _ = I18n._;
+
+  // As constantes abaixo ficam em português (são as chaves); quem mostra na tela usa nome()/descricao(),
+  // que traduzem no momento do uso.
+  I18n.registrar({
+    // fundos
+    'Branco': 'White', 'Creme': 'Cream', 'Cinza': 'Gray',
+    // cores de destaque
+    'Azul': 'Blue', 'Petróleo': 'Teal', 'Verde': 'Green', 'Terracota': 'Terracotta', 'Vinho': 'Wine',
+    'Rosa': 'Pink', 'Roxo': 'Purple', 'Grafite': 'Graphite',
+    // combinações de fontes
+    'Moderno': 'Modern', 'Clássico': 'Classic', 'Elegante': 'Elegant', 'Amigável': 'Friendly',
+    'Técnico': 'Technical', 'Datilografado': 'Typewritten',
+    // estruturas
+    'Lateral': 'Sidebar', 'Foto, nome e menu numa coluna à esquerda.': 'Photo, name and menu in a column on the left.',
+    'Menu no topo': 'Top menu', 'Barra com seu nome e as abas no alto da página.': 'A bar with your name and the tabs at the top of the page.',
+    'Centralizada': 'Centered', 'Tudo numa coluna, com a foto em cima.': 'Everything in one column, with the photo on top.',
+    // fotos
+    'Circular': 'Round', 'Retangular': 'Rectangular',
+    // modo escuro
+    'Seguir o sistema': 'Follow the system',
+    'Quem usa o computador ou o celular no modo escuro vê o site com fundo escuro.': 'Visitors whose computer or phone is in dark mode see the site with a dark background.',
+    'Sempre claro': 'Always light', 'O site fica claro para todo mundo.': 'The site is light for everyone.',
+    'Sempre escuro': 'Always dark', 'O site fica escuro para todo mundo.': 'The site is dark for everyone.',
+    // alinhamento
+    'Justificado': 'Justified', 'À esquerda': 'Left-aligned',
+    // referências
+    'Simplificadas': 'Simplified', 'Completas (ABNT)': 'Complete (ABNT)',
+    // organização
+    'Em abas': 'In tabs',
+    'Início, Trajetória, Pesquisa, Produção e Orientações, conforme o que você tiver.': 'Home, Background, Research, Publications and Advising, depending on what you have.',
+    'Página única': 'Single page', 'Tudo em sequência, rolando a página.': 'Everything in sequence, scrolling down the page.',
+    // idioma do site (os nomes das línguas não mudam de idioma para idioma)
+    'Português': 'Português', 'English': 'English',
+    'Rótulos e textos fixos do site em português.': 'Labels and fixed texts of the site in Portuguese.',
+    'Rótulos e textos fixos do site em inglês.': 'Labels and fixed texts of the site in English.',
+    // fontes: nomes próprios, iguais em qualquer idioma (registrados só para não constarem como faltando)
+    'Inter': 'Inter', 'Source Serif': 'Source Serif', 'Playfair Display': 'Playfair Display', 'Nunito': 'Nunito',
+    'IBM Plex Sans': 'IBM Plex Sans', 'IBM Plex Mono': 'IBM Plex Mono', 'Inconsolata': 'Inconsolata',
+    // erros
+    'Não consegui carregar a fonte {familia}.': 'Could not load the font {familia}.',
+  });
 
   // Cada fundo tem a versão escura correspondente (mesma temperatura: neutra, quente, fria),
   // usada quando o visitante prefere o modo escuro.
@@ -89,7 +133,14 @@
   ];
   const LATIN = 'U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD';
 
-  const PADRAO = { fundo: 'branco', acento: '#0f766e', fonteTitulo: 'inter', fonteTexto: 'inter', layout: 'abas', estrutura: 'lateral', foto: 'redonda', referencias: 'simples', alinhamento: 'justificado', escuro: 'automatico' };
+  const PADRAO = { fundo: 'branco', acento: '#0f766e', fonteTitulo: 'inter', fonteTexto: 'inter', layout: 'abas', estrutura: 'lateral', foto: 'redonda', referencias: 'simples', alinhamento: 'justificado', escuro: 'automatico', idioma: 'pt' };
+
+  // Idioma dos rótulos e textos fixos do site gerado (abas, "Destaques", rodapé...). O conteúdo
+  // vindo do Lattes ou escrito pela pessoa fica como está. Os nomes das línguas não se traduzem.
+  const IDIOMAS = [
+    { id: 'pt', nome: 'Português', descricao: 'Rótulos e textos fixos do site em português.' },
+    { id: 'en', nome: 'English', descricao: 'Rótulos e textos fixos do site em inglês.' },
+  ];
 
   // Modo escuro do site gerado. "automatico" segue a preferência do sistema do visitante.
   const ESCURO = [
@@ -144,6 +195,7 @@
       referencias: valido(REFERENCIAS, ap.referencias) ? ap.referencias : PADRAO.referencias,
       alinhamento: valido(ALINHAMENTOS, ap.alinhamento) ? ap.alinhamento : PADRAO.alinhamento,
       escuro: valido(ESCURO, ap.escuro) ? ap.escuro : PADRAO.escuro,
+      idioma: valido(IDIOMAS, ap.idioma) ? ap.idioma : PADRAO.idioma,
       fotoLargura: numero(ap.fotoLargura, FOTO_LARGURA),     // null: tamanho padrão da estrutura
       fotoProporcao: numero(ap.fotoProporcao, FOTO_PROPORCAO), // null: 3:2
     };
@@ -156,6 +208,16 @@
   // A combinação pronta que corresponde às fontes escolhidas, se houver.
   function combinacaoAtual(ap) {
     return COMBINACOES.find(c => c.titulo === ap.fonteTitulo && c.texto === ap.fonteTexto) || null;
+  }
+
+  // Nome e descrição de uma opção (fundo, estrutura, idioma...) no idioma atual do construtor.
+  // Nomes próprios (fontes, "Português", "English") não têm tradução registrada e voltam como estão.
+  function nome(obj) {
+    return obj && obj.nome ? _(obj.nome) : '';
+  }
+
+  function descricao(obj) {
+    return obj && obj.descricao ? _(obj.descricao) : '';
   }
 
   // ---------- variáveis CSS do site ----------
@@ -226,7 +288,7 @@
     const familias = new Set([familia(ap.fonteTitulo).familia, familia(ap.fonteTexto).familia]);
     const partes = await Promise.all(ARQUIVOS.filter(a => familias.has(a.familia)).map(async a => {
       const resposta = await fetch(base + a.arquivo);
-      if (!resposta.ok) throw new Error(`Não consegui carregar a fonte ${a.familia}.`);
+      if (!resposta.ok) throw new Error(_('Não consegui carregar a fonte {familia}.', { familia: a.familia }));
       const dados = base64(await resposta.arrayBuffer());
       return `/* ${a.familia}: SIL Open Font License 1.1 */\n` + fontFace(a, `data:font/woff2;base64,${dados}`);
     }));
@@ -326,8 +388,8 @@
   }
 
   return {
-    FUNDOS, ACENTOS, FAMILIAS, COMBINACOES, ESTRUTURAS, FOTOS, FOTO_LARGURA, LAYOUTS, REFERENCIAS, ALINHAMENTOS, ESCURO, PADRAO,
-    normalizar, combinacaoAtual, familia, variaveis, css, pilha,
+    FUNDOS, ACENTOS, FAMILIAS, COMBINACOES, ESTRUTURAS, FOTOS, FOTO_LARGURA, LAYOUTS, REFERENCIAS, ALINHAMENTOS, ESCURO, IDIOMAS, PADRAO,
+    normalizar, combinacaoAtual, familia, nome, descricao, variaveis, css, pilha,
     cssFontes, cssFontesEmbutidas, carregarFontes, corValida, contraste,
   };
 });

@@ -14,6 +14,8 @@ O construtor gera um único arquivo, `index.html`, com tudo dentro (textos, core
 
 O progresso fica salvo no navegador. Para editar depois, reabra o `index.html` gerado no construtor.
 
+O construtor está em português e em inglês (botões PT / EN no cabeçalho), e o site gerado pode sair em qualquer um dos dois idiomas, independentemente do idioma do construtor. Os textos são escritos em português no código; as traduções ficam em blocos `I18n.registrar` no início de cada módulo (`js/i18n.js` explica o mecanismo).
+
 ## Por que não lançar produções livremente?
 
 Porque o Lattes já é a fonte oficial da produção acadêmica no Brasil, e manter uma segunda lista, editada à mão no site, cria retrabalho e confusão de fontes: cada artigo novo teria que ser cadastrado duas vezes, e cedo ou tarde o site e o currículo divergiriam.

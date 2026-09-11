@@ -6,11 +6,14 @@
  * Funciona no navegador (DOMParser nativo) e no Node (com linkedom, nos testes).
  */
 (function (raiz, fabrica) {
-  const api = fabrica();
+  const I18n = raiz.I18n || (typeof require === 'function' ? require('./i18n.js') : null);
+  const api = fabrica(I18n);
   if (typeof module === 'object' && module.exports) module.exports = api;
   else raiz.Lattes = api;
-})(typeof self !== 'undefined' ? self : this, function () {
+})(typeof self !== 'undefined' ? self : this, function (I18n) {
   'use strict';
+
+  const _ = I18n._;
 
   const MENSAGENS = {
     pdf: 'Esse é o PDF do currículo. O construtor precisa da página do currículo salva pelo navegador (arquivo .html).',
@@ -19,19 +22,56 @@
     'nao-lattes': 'Não reconheci este arquivo como uma página do Currículo Lattes. Confira se você salvou a página do currículo já aberto, com seu nome e suas produções.',
   };
 
+  I18n.registrar({
+    [MENSAGENS.pdf]: 'This is the PDF of the CV. The builder needs the CV page saved by the browser (an .html file).',
+    [MENSAGENS.webarchive]: 'Safari saved the page as a “Web Archive”. Save it again choosing the “Page Source” format.',
+    [MENSAGENS.mhtml]: 'The page was saved as a “single file” (.mhtml). Save it again choosing “Webpage, complete”.',
+    [MENSAGENS['nao-lattes']]: 'This file does not look like a Lattes CV page. Check that you saved the CV page while it was open, showing your name and your publications.',
+    'Não consegui ler a seção “{titulo}”.': 'Could not read the “{titulo}” section.',
+  });
+
   // "Educação e Popularização de C&T" e "Inovação" só repetem itens já listados em outras seções.
   const IGNORADAS = /^(Endereco|EducacaoPopularizacaoCTA|PotencialInovacao)$/;
 
   // Em orientações e bancas, o subtítulo sozinho ("Mestrado") não diz nada; junta com o grupo.
+  // O terceiro campo é a tradução do prefixo, para o site em inglês.
   const GRUPOS = [
-    [/^Orientações e supervisões em andamento/i, 'Orientações em andamento'],
-    [/^Orientações e supervisões concluídas/i, 'Orientações concluídas'],
-    [/^Participação em bancas de trabalhos de conclusão/i, 'Bancas'],
-    [/^Participação em bancas de comissões julgadoras/i, 'Comissões julgadoras'],
+    [/^Orientações e supervisões em andamento/i, 'Orientações em andamento', 'Ongoing advising'],
+    [/^Orientações e supervisões concluídas/i, 'Orientações concluídas', 'Completed advising'],
+    [/^Participação em bancas de trabalhos de conclusão/i, 'Bancas', 'Committees'],
+    [/^Participação em bancas de comissões julgadoras/i, 'Comissões julgadoras', 'Selection committees'],
   ];
 
+  // Subtítulos que o Lattes usa nesses grupos. Os títulos compostos ("Bancas: Mestrado") são os
+  // que o site exibe; um subtítulo fora desta lista fica em português no site em inglês.
+  const SUBTITULOS = {
+    // orientações
+    'Tese de doutorado': 'Doctoral dissertation',
+    'Dissertação de mestrado': "Master's thesis",
+    'Monografia de conclusão de curso de aperfeiçoamento/especialização': 'Specialization monograph',
+    'Trabalho de conclusão de curso de graduação': 'Undergraduate thesis',
+    'Iniciação científica': 'Undergraduate research',
+    'Supervisão de pós-doutorado': 'Postdoctoral supervision',
+    'Orientações de outra natureza': 'Other advising',
+    // bancas de trabalhos de conclusão
+    'Mestrado': "Master's",
+    'Teses de doutorado': 'Doctoral dissertations',
+    'Qualificações de Doutorado': 'Doctoral qualifying exams',
+    'Qualificações de Mestrado': "Master's qualifying exams",
+    'Monografias de cursos de aperfeiçoamento/especialização': 'Specialization monographs',
+    'Trabalhos de conclusão de curso de graduação': 'Undergraduate theses',
+    // comissões julgadoras
+    'Concurso público': 'Faculty hiring',
+    'Professor titular': 'Full professorship',
+    'Livre docência': 'Habilitation',
+    'Avaliação de cursos': 'Program evaluation',
+    'Outras participações': 'Other',
+  };
+  I18n.registrar(Object.fromEntries(GRUPOS.flatMap(([, rotulo, en]) =>
+    [[rotulo, en]].concat(Object.entries(SUBTITULOS).map(([sub, subEn]) => [`${rotulo}: ${sub}`, `${en}: ${subEn}`])))));
+
   function erro(codigo) {
-    const e = new Error(MENSAGENS[codigo]);
+    const e = new Error(_(MENSAGENS[codigo]));
     e.codigo = codigo;
     e.amigavel = true;
     return e;
@@ -119,7 +159,7 @@
         generico(bloco, nome);
 
       if (itens.length) secoes.push({ id: idSecao, titulo, tipo: 'lista', itens });
-      else if (limpa(bloco.textContent).length > titulo.length + 20) avisos.push(`Não consegui ler a seção “${titulo}”.`);
+      else if (limpa(bloco.textContent).length > titulo.length + 20) avisos.push(_('Não consegui ler a seção “{titulo}”.', { titulo }));
     }
 
     for (const s of secoes) for (const it of s.itens) it.id = hash([s.id, it.periodo, it.titulo, it.detalhe].join('|'));
