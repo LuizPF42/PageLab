@@ -1,4 +1,9 @@
-<p align="center"><img src="logo.png" alt="PageLab" width="160"></p>
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="logo-escuro.png">
+    <img src="logo.png" alt="PageLab" width="180">
+  </picture>
+</p>
 
 # PageLab
 
