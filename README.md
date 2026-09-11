@@ -1,3 +1,5 @@
+<p align="center"><img src="logo.png" alt="PageLab" width="160"></p>
+
 # PageLab
 
 Monte seu site pessoal a partir do Currículo Lattes e publique no GitHub Pages.
