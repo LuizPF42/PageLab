@@ -240,6 +240,7 @@
       nome: p.nome,
       subtitulo: (en && p.subtituloEn) || p.subtitulo || subtituloPadrao(estado),
       foto: p.foto,
+      fotoProporcao: p.fotoProporcaoNatural || 0, // largura/altura da imagem original
       bio: (en && p.bioEn) || p.bio,
       interesses,
       formacao: resumoFormacao(estado.secoes, idioma),
@@ -338,6 +339,7 @@
         nome: perfil.nome || _('Seu Nome'),
         subtitulo: (en && perfil.subtituloEn) || perfil.subtitulo || _('Seu cargo · Sua instituição'),
         foto: perfil.foto,
+        fotoProporcao: perfil.fotoProporcaoNatural || 0,
         bio: (en && perfil.bioEn) || perfil.bio || _('Aqui entra um texto curto sobre você: o que pesquisa, onde trabalha, o que te interessa. Na etapa de conteúdo, ele vem do resumo do seu Lattes, e você reescreve como quiser.'),
         links: [{ rotulo: 'E-mail', url: '#' }, { rotulo: 'Lattes', url: '#' }, { rotulo: 'ORCID', url: '#' }],
         interesses: interesses && interesses.length ? interesses : [_('Um tema de pesquisa'), _('Outro tema'), _('Mais um')],
@@ -438,7 +440,7 @@
     const partes = versoes.map(([id, dv]) => [id, I18n.com(id, () => corpoSite(dv, ap, opcoes, seletor))]);
     const abas = partes[0][1].abas;
     // A foto entra uma vez só, como variável CSS: as versões em dois idiomas compartilham a mesma imagem.
-    const foto = d.foto ? `<style id="foto">:root{--foto-src:url("${String(d.foto).replace(/["\\]/g, '')}")}</style>` : '';
+    const foto = d.foto ? `<style id="foto">${cssFoto(d, ap)}</style>` : '';
 
     return `<!doctype html>
 <html lang="${I18n.lang(versoes[0][0])}">
@@ -476,6 +478,20 @@ html:not([data-idioma="en"]) .versao-en{display:none}`;
 function ap(x){h.setAttribute('data-idioma',x);h.lang=x==='en'?'en':'pt-BR';var b=document.querySelectorAll('.idioma-site button');for(var i=0;i<b.length;i++)b[i].setAttribute('aria-pressed',String(b[i].getAttribute('data-idioma')===x))}
 ap(s==='en'||s==='pt'?s:(/^pt/i.test(navigator.language||'')?'pt':'en'));
 document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('.idioma-site button');if(!b)return;var x=b.getAttribute('data-idioma');try{localStorage.setItem(k,x)}catch(e2){}ap(x)})})()</script>`;
+
+  // A foto (uma vez só, como variável) e, se a pessoa ajustou o zoom, o tamanho da imagem dentro do quadro.
+  // Zoom 1 equivale a "cover": a largura da imagem em % do quadro é max(100, proporção da foto / proporção do quadro).
+  function cssFoto(d, aparencia) {
+    if (!d.foto) return '';
+    const ap = Tema.normalizar(aparencia || {});
+    let tamanho = '';
+    if (ap.fotoZoom && d.fotoProporcao > 0) {
+      const quadro = ap.foto === 'redonda' ? 1 : ap.fotoProporcao || 1.5;
+      const largura = Math.max(100, (d.fotoProporcao / quadro) * 100) * ap.fotoZoom;
+      tamanho = `;--foto-tamanho:${Math.round(largura * 10) / 10}% auto`;
+    }
+    return `:root{--foto-src:url("${String(d.foto).replace(/["\\]/g, '')}")${tamanho}}`;
+  }
 
   // Ícone da aba: as iniciais do nome sobre a cor de destaque.
   function favicon(nome, cor) {
@@ -756,7 +772,7 @@ h2::before{content:"";flex:none;width:1rem;height:.22rem;border-radius:2px;backg
 .perfil{display:flex;align-items:center;gap:1.5rem;margin-bottom:2rem}
 /* Foto: --foto-largura e --foto-proporcao existem só se a pessoa ajustou o tamanho na revisão;
    senão valem os padrões de cada estrutura. Nunca passa da largura disponível. */
-.foto{flex:none;display:block;max-width:100%;height:auto;background:var(--foto-src) var(--foto-posicao,50% 30%)/cover no-repeat}
+.foto{flex:none;display:block;max-width:100%;height:auto;background:var(--foto-src) var(--foto-posicao,50% 30%)/var(--foto-tamanho,cover) no-repeat var(--superficie)}
 .idioma-site{display:inline-flex;gap:.1rem;margin-bottom:.7rem;padding:.15rem;border:1px solid var(--borda);border-radius:999px;background:var(--superficie)}
 .idioma-site button{padding:.15rem .6rem;border:0;border-radius:999px;background:none;color:var(--suave);font:inherit;font-size:.76rem;font-weight:700;letter-spacing:.04em;cursor:pointer}
 .idioma-site button[aria-pressed="true"]{background:var(--acento);color:var(--sobre-acento)}
@@ -872,5 +888,5 @@ details[open]>summary{display:none}
   .lista li{grid-template-columns:1fr;gap:.1rem}
 }`;
 
-  return { dados, exemplo, html, subtituloPadrao, interessesPadrao, textoComLinks, textoPuro, camposDestaque, tipoDe };
+  return { dados, exemplo, html, cssFoto, subtituloPadrao, interessesPadrao, textoComLinks, textoPuro, camposDestaque, tipoDe };
 });

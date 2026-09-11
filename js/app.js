@@ -51,7 +51,9 @@
     'Sua foto aparece na prévia ao lado.': 'Your photo appears in the preview beside this.',
     'Uma foto sua, de preferência quadrada ou em retrato.': 'A photo of you, ideally square or portrait.',
     'Tirar a foto': 'Remove the photo',
-    'Na revisão, dá para arrastar a foto para enquadrar e o canto dela para mudar o tamanho.': 'In the review step, you can drag the photo to reframe it and its corner to resize it.',
+    'Na revisão, arraste a foto dentro da moldura para enquadrar, e o canto para ampliar ou reduzir.': 'In the review step, drag the photo inside the frame to reframe it, and its corner to zoom in or out.',
+    'Arraste para ampliar ou reduzir a foto': 'Drag to zoom the photo in or out',
+    'Proporção': 'Proportions',
     'Arraste a foto para enquadrar': 'Drag the photo to reframe it',
     'Voltar ao tamanho e enquadramento padrão': 'Back to the default size and framing',
     'Voltar ao tamanho e enquadramento padrão da foto': 'Back to the default size and framing of the photo',
@@ -319,7 +321,7 @@
       fonte: null,
       semLattes: false,
       // Os campos *En são a versão em inglês, usados quando o site sai nos dois idiomas.
-      perfil: { nome: '', subtitulo: '', subtituloEn: '', bio: '', bioEn: '', bioOriginal: '', foto: '', links: {}, interesses: [], interessesEn: [], interessesEditados: false },
+      perfil: { nome: '', subtitulo: '', subtituloEn: '', bio: '', bioEn: '', bioOriginal: '', foto: '', fotoProporcaoNatural: 0, links: {}, interesses: [], interessesEn: [], interessesEditados: false },
       secoes: [],
       avisos: [],
       publicacao: { usuario: '' },
@@ -444,6 +446,7 @@
       estado.etapa === 'publicar' ? telaPublicar() :
       telaLattes();
     if (estado.etapa === 'aparencia' || estado.etapa === 'revisao') montarPrevia();
+    medirFoto();
   }
 
   function podeIr(id) {
@@ -557,7 +560,7 @@
                 ${formatoFoto(f.id)}<span>${esc(_(f.nome))}</span>
               </label>`).join('')}
             </div>
-            <p class="dica">${_('Na revisão, dá para arrastar a foto para enquadrar e o canto dela para mudar o tamanho.')}</p>
+            <p class="dica">${_('Na revisão, arraste a foto dentro da moldura para enquadrar, e o canto para ampliar ou reduzir.')}</p>
           </fieldset>
 
           <fieldset class="grupo">
@@ -707,6 +710,8 @@
     if (!doc || !doc.documentElement) return;
     const estilo = doc.getElementById('tema');
     if (estilo) estilo.textContent = Tema.css(estado.aparencia);
+    const estiloFoto = doc.getElementById('foto');
+    if (estiloFoto) estiloFoto.textContent = Site.cssFoto({ foto: estado.perfil.foto, fotoProporcao: estado.perfil.fotoProporcaoNatural }, estado.aparencia);
     doc.documentElement.dataset.tema = ui.temaPrevia;
     // O script do botão PT/EN não roda na prévia (iframe sem scripts): o construtor faz o papel dele.
     doc.documentElement.dataset.idioma = ui.idiomaPrevia;
@@ -747,6 +752,7 @@
   function atualizarAparencia() {
     atualizarCores();
     atualizarBotaoTema();
+    app.querySelectorAll('[data-so-retangular]').forEach(el => { el.hidden = estado.aparencia.foto !== 'retangular'; });
     const aviso = document.getElementById('aviso-contraste');
     if (aviso) aviso.hidden = !acentoAjustado();
     const personalizada = !Tema.ACENTOS.some(a => a.cor === estado.aparencia.acento);
@@ -824,7 +830,10 @@
             <label for="tamanho-foto">${_('Tamanho')}</label>
             <input type="range" id="tamanho-foto" data-foto-tamanho min="${Tema.FOTO_LARGURA[0]}" max="480" step="2" value="${ap.fotoLargura || 160}">
             <button type="button" class="link" data-acao="foto-padrao" title="${esc(_('Voltar ao tamanho e enquadramento padrão'))}" aria-label="${esc(_('Voltar ao tamanho e enquadramento padrão da foto'))}">↺</button>
-          </span>` : ''}
+          </span>
+          <label class="ajuste" data-so-retangular${ap.foto === 'retangular' ? '' : ' hidden'}>${_('Proporção')}
+            <select data-foto-proporcao>${Tema.FOTO_PROPORCOES.map(p => `<option value="${p.valor == null ? '' : p.valor}"${(ap.fotoProporcao == null ? '' : String(ap.fotoProporcao)) === (p.valor == null ? '' : String(p.valor)) ? ' selected' : ''}>${p.nome}</option>`).join('')}</select>
+          </label>` : ''}
           <label class="ajuste">${_('Organização')}
             <select data-aparencia="layout">${Tema.LAYOUTS.map(l => `<option value="${l.id}"${ap.layout === l.id ? ' selected' : ''}>${esc(_(l.nome))}</option>`).join('')}</select>
           </label>
@@ -917,7 +926,7 @@
     doc.head.appendChild(estilo);
     const alca = doc.createElement('span');
     alca.className = 'alca-foto';
-    alca.title = _('Arraste para mudar o tamanho da foto');
+    alca.title = _('Arraste para ampliar ou reduzir a foto');
     doc.body.appendChild(alca);
     foto.title = _('Arraste a foto para enquadrar');
 
@@ -938,14 +947,18 @@
       mover = { x: e.clientX, y: e.clientY, px: ap.fotoX != null ? ap.fotoX : 50, py: ap.fotoY != null ? ap.fotoY : 30, w: r.width, h: r.height };
       doc.documentElement.classList.add('movendo-foto');
     });
+    // Quanto a imagem "sobra" (ou falta) em cada eixo, dado o zoom: com a posição em %, cada pixel
+    // arrastado vale 100/sobra por cento, nos dois casos (imagem maior ou menor que o quadro).
+    const sobras = (w, h) => {
+      const escala = Math.max(w / natural.w, h / natural.h) * (estado.aparencia.fotoZoom || 1);
+      return { x: natural.w * escala - w, y: natural.h * escala - h };
+    };
     foto.addEventListener('pointermove', e => {
       if (!mover || !natural.w) return;
-      const escala = Math.max(mover.w / natural.w, mover.h / natural.h);
-      const sobraX = natural.w * escala - mover.w;
-      const sobraY = natural.h * escala - mover.h;
+      const sobra = sobras(mover.w, mover.h);
       const ap = estado.aparencia;
-      if (sobraX > 1) ap.fotoX = limitar(mover.px - ((e.clientX - mover.x) / sobraX) * 100);
-      if (sobraY > 1) ap.fotoY = limitar(mover.py - ((e.clientY - mover.y) / sobraY) * 100);
+      if (Math.abs(sobra.x) > 1) ap.fotoX = limitar(mover.px - ((e.clientX - mover.x) / sobra.x) * 100);
+      if (Math.abs(sobra.y) > 1) ap.fotoY = limitar(mover.py - ((e.clientY - mover.y) / sobra.y) * 100);
       atualizarCores();
     });
     const soltarFoto = () => {
@@ -975,19 +988,16 @@
       e.preventDefault();
       try { alca.setPointerCapture(e.pointerId); } catch (err) { /* segue sem captura */ }
       const r = foto.getBoundingClientRect();
-      inicio = { x: e.clientX, y: e.clientY, w: r.width, h: r.height };
+      inicio = { x: e.clientX, y: e.clientY, w: r.width, h: r.height, zoom: estado.aparencia.fotoZoom || 1 };
       doc.documentElement.classList.add('redimensionando-foto');
     });
+    // O canto amplia ou reduz a imagem dentro do quadro (o tamanho do quadro é o controle "Tamanho").
     alca.addEventListener('pointermove', e => {
       if (!inicio) return;
-      const ap = estado.aparencia;
-      const [min, max] = Tema.FOTO_LARGURA;
-      const w = Math.min(max, Math.max(min, inicio.w + e.clientX - inicio.x));
-      ap.fotoLargura = Math.round(w);
-      if (ap.foto === 'retangular') {
-        const h = Math.max(40, inicio.h + e.clientY - inicio.y);
-        ap.fotoProporcao = Math.min(2.5, Math.max(0.4, Math.round((w / h) * 100) / 100));
-      }
+      const [min, max] = Tema.FOTO_ZOOM;
+      const fator = 1 + (e.clientX - inicio.x + e.clientY - inicio.y) / (inicio.w + inicio.h);
+      const zoom = Math.round(Math.min(max, Math.max(min, inicio.zoom * fator)) * 100) / 100;
+      estado.aparencia.fotoZoom = Math.abs(zoom - 1) < 0.03 ? null : zoom; // perto de 1, volta ao "preencher"
       atualizarCores();
     });
     const soltar = () => {
@@ -1588,6 +1598,21 @@
 
   // Reduz a foto sem recortar: o recorte (redonda, quadrada, retangular) é feito pelo CSS do site,
   // então dá para trocar o formato depois sem mandar a foto de novo.
+  // Proporção original da foto (largura/altura), necessária para o zoom e o enquadramento.
+  // Fotos guardadas antes desta medida são medidas na hora de mostrar.
+  function medirFoto() {
+    const p = estado.perfil;
+    if (!p.foto || p.fotoProporcaoNatural) return;
+    const img = new Image();
+    img.onload = () => {
+      if (estado.perfil.foto !== img.src || !img.naturalHeight) return;
+      estado.perfil.fotoProporcaoNatural = Math.round((img.naturalWidth / img.naturalHeight) * 1000) / 1000;
+      salvar();
+      atualizarCores();
+    };
+    img.src = p.foto;
+  }
+
   function lerFoto(arquivo) {
     return new Promise((ok, falha) => {
       const url = URL.createObjectURL(arquivo);
@@ -1666,6 +1691,8 @@
         estado.aparencia.fotoProporcao = null;
         estado.aparencia.fotoX = null;
         estado.aparencia.fotoY = null;
+        estado.aparencia.fotoZoom = null;
+        app.querySelectorAll('select[data-foto-proporcao]').forEach(s => { s.value = ''; });
         salvar();
         atualizarCores();
         break;
@@ -1887,6 +1914,12 @@
     const t = e.target;
 
     if (t.dataset.aparencia) { mudarAparencia(t); return; }
+    if (t.dataset.fotoProporcao !== undefined) {
+      estado.aparencia.fotoProporcao = t.value ? Number(t.value) : null;
+      salvar();
+      atualizarCores();
+      return;
+    }
 
     if (t.dataset.marcar) {
       const [si, ii] = t.dataset.marcar.split(':').map(Number);
@@ -1910,6 +1943,8 @@
     if (t.dataset.arquivo === 'foto' && t.files[0]) {
       try {
         estado.perfil.foto = await lerFoto(t.files[0]);
+        estado.perfil.fotoProporcaoNatural = 0;
+        Object.assign(estado.aparencia, { fotoX: null, fotoY: null, fotoZoom: null }); // foto nova, enquadramento novo
         salvar();
         render();
       } catch (err) {

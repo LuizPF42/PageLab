@@ -119,6 +119,12 @@
   // Tamanho da foto ajustado na revisão (largura em px e, na retangular, largura/altura).
   const FOTO_LARGURA = [60, 600];
   const FOTO_PROPORCAO = [0.4, 2.5];
+  // Zoom da imagem dentro do quadro: 1 = preenche o quadro (cover); menos que 1 mostra a foto inteira, com sobra.
+  const FOTO_ZOOM = [0.3, 4];
+  // Proporções oferecidas para o quadro retangular (largura/altura); null = 3:2, o padrão do CSS.
+  const FOTO_PROPORCOES = [
+    { valor: null, nome: '3:2' }, { valor: 1, nome: '1:1' }, { valor: 0.8, nome: '4:5' }, { valor: 0.667, nome: '2:3' }, { valor: 1.778, nome: '16:9' },
+  ];
 
   // Arquivos em fonts/: subconjunto "latin" (cobre o português) baixado do Google Fonts,
   // com as licenças OFL ao lado. Os "variavel" trazem vários pesos num arquivo só.
@@ -206,6 +212,7 @@
       // Enquadramento: ponto da imagem que fica no centro do recorte, em % (null: 50% 30%, rosto no alto).
       fotoX: numero(ap.fotoX, [0, 100]),
       fotoY: numero(ap.fotoY, [0, 100]),
+      fotoZoom: numero(ap.fotoZoom, FOTO_ZOOM), // null: preenche o quadro
     };
   }
 
@@ -397,7 +404,7 @@
   }
 
   return {
-    FUNDOS, ACENTOS, FAMILIAS, COMBINACOES, ESTRUTURAS, FOTOS, FOTO_LARGURA, LAYOUTS, REFERENCIAS, ALINHAMENTOS, ESCURO, IDIOMAS, PADRAO,
+    FUNDOS, ACENTOS, FAMILIAS, COMBINACOES, ESTRUTURAS, FOTOS, FOTO_LARGURA, FOTO_ZOOM, FOTO_PROPORCOES, LAYOUTS, REFERENCIAS, ALINHAMENTOS, ESCURO, IDIOMAS, PADRAO,
     normalizar, combinacaoAtual, familia, nome, descricao, variaveis, css, pilha,
     cssFontes, cssFontesEmbutidas, carregarFontes, corValida, contraste,
   };
