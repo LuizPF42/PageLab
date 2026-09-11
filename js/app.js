@@ -41,7 +41,8 @@
   const PRODUCOES_LIGADAS = /artigo|livro|cap[ií]tulo/i;
 
   const app = document.getElementById('app');
-  const ui = { erro: '', editando: null, expandidas: new Set(), largura: 1280 };
+  // temaPrevia: a prévia mostra o site no claro ou no escuro (só faz diferença no modo automático).
+  const ui = { erro: '', editando: null, expandidas: new Set(), largura: 1280, temaPrevia: 'claro' };
   let estado = carregar() || novoEstado();
 
   // ---------- estado ----------
@@ -298,10 +299,22 @@
               </label>`).join('')}
             </div>
           </fieldset>
+
+          <fieldset class="grupo">
+            <legend>Modo escuro</legend>
+            <div class="opcoes-layout opcoes-escuro">
+              ${Tema.ESCURO.map(e => `
+              <label class="opcao-layout">
+                <input type="radio" name="escuro" value="${e.id}" data-aparencia="escuro" class="invisivel"${ap.escuro === e.id ? ' checked' : ''}>
+                <strong>${e.nome}</strong>
+                <span>${e.descricao}</span>
+              </label>`).join('')}
+            </div>
+          </fieldset>
         </section>
 
         <div class="previa">
-          <div class="navegador" aria-hidden="true"><i></i><i></i><i></i><span>seu-usuario.github.io</span></div>
+          <div class="navegador"><span class="bolinhas" aria-hidden="true"><i></i><i></i><i></i></span><span class="endereco" aria-hidden="true">seu-usuario.github.io</span>${botaoTema()}</div>
           <div class="previa-moldura" id="previa-moldura">
             <iframe id="previa" title="Prévia do seu site" sandbox="allow-same-origin" tabindex="-1"></iframe>
           </div>
@@ -371,19 +384,35 @@
     else ajustarEscala();
   }
 
-  // Troca de cor ou fonte: só atualiza as variáveis CSS da prévia, sem recarregá-la.
+  // Troca de cor, fonte ou modo escuro: só refaz o bloco de variáveis CSS da prévia, sem recarregá-la.
   function atualizarCores() {
     const iframe = document.getElementById('previa');
     const doc = iframe && iframe.contentDocument;
     if (!doc || !doc.documentElement) return;
-    // Variável vazia (ex.: tamanho da foto de volta ao padrão) vira "initial": assim o var(--x, padrão)
-    // do CSS usa o padrão, mesmo que a prévia tenha sido montada com um valor antigo no :root.
-    for (const [k, v] of Object.entries(Tema.variaveis(estado.aparencia))) doc.documentElement.style.setProperty(k, v || 'initial');
+    const estilo = doc.getElementById('tema');
+    if (estilo) estilo.textContent = Tema.css(estado.aparencia);
+    doc.documentElement.dataset.tema = ui.temaPrevia;
     posicionarAlcaFoto();
+  }
+
+  // Botão que alterna a prévia entre claro e escuro; só aparece no modo automático.
+  function botaoTema() {
+    const escuro = ui.temaPrevia === 'escuro';
+    return `<button type="button" class="botao-tema" data-acao="tema-previa" aria-pressed="${escuro}"${estado.aparencia.escuro === 'automatico' ? '' : ' hidden'}>${escuro ? '☀ Ver no claro' : '☾ Ver no escuro'}</button>`;
+  }
+
+  function atualizarBotaoTema() {
+    app.querySelectorAll('[data-acao="tema-previa"]').forEach(b => {
+      const escuro = ui.temaPrevia === 'escuro';
+      b.hidden = estado.aparencia.escuro !== 'automatico';
+      b.setAttribute('aria-pressed', String(escuro));
+      b.textContent = escuro ? '☀ Ver no claro' : '☾ Ver no escuro';
+    });
   }
 
   function atualizarAparencia() {
     atualizarCores();
+    atualizarBotaoTema();
     const aviso = document.getElementById('aviso-contraste');
     if (aviso) aviso.hidden = !acentoAjustado();
     const personalizada = !Tema.ACENTOS.some(a => a.cor === estado.aparencia.acento);
@@ -432,6 +461,7 @@
         <div class="dispositivos" role="group" aria-label="Tamanho da tela">
           ${DISPOSITIVOS.map(d => `<button type="button" data-acao="largura" data-largura="${d.largura}" aria-pressed="${ui.largura === d.largura}">${d.nome}</button>`).join('')}
           <span class="largura-atual" id="largura-atual"></span>
+          ${botaoTema()}
         </div>
         <div class="ajustes-rapidos">
           <span class="ajuste" role="radiogroup" aria-label="Fundo">Fundo
@@ -468,6 +498,9 @@
           </label>
           <label class="ajuste">Texto
             <select data-aparencia="alinhamento">${Tema.ALINHAMENTOS.map(a => `<option value="${a.id}"${ap.alinhamento === a.id ? ' selected' : ''}>${a.nome}</option>`).join('')}</select>
+          </label>
+          <label class="ajuste">Modo escuro
+            <select data-aparencia="escuro">${Tema.ESCURO.map(e => `<option value="${e.id}"${ap.escuro === e.id ? ' selected' : ''}>${e.nome}</option>`).join('')}</select>
           </label>
         </div>
       </div>
@@ -1121,6 +1154,12 @@
 
       case 'largura':
         mudarLargura(Number(b.dataset.largura));
+        break;
+
+      case 'tema-previa':
+        ui.temaPrevia = ui.temaPrevia === 'escuro' ? 'claro' : 'escuro';
+        atualizarCores();
+        atualizarBotaoTema();
         break;
 
       case 'foto-padrao':

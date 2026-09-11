@@ -184,7 +184,8 @@ ${d.subtitulo || d.bio ? `<meta property="og:description" content="${esc(d.subti
 <link rel="icon" href="${favicon(d.nome, Tema.variaveis(ap)['--acento'])}">
 ${opcoes.previa ? '<base target="_blank">' : ''}
 ${fontes}
-<style>${Tema.css(ap)}${CSS}${abas ? cssAbas(abas) : ''}${opcoes.previa ? 'html{scrollbar-width:thin}' : ''}</style>
+<style id="tema">${Tema.css(ap)}</style>
+<style>${CSS}${abas ? cssAbas(abas) : ''}${opcoes.previa ? 'html{scrollbar-width:thin}' : ''}</style>
 </head>
 <body>
 ${abas ? abas.map(a => `<span class="alvo" id="${a.id}"></span>`).join('') : ''}

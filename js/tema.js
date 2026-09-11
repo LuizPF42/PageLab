@@ -9,10 +9,15 @@
 })(typeof self !== 'undefined' ? self : this, function () {
   'use strict';
 
+  // Cada fundo tem a versão escura correspondente (mesma temperatura: neutra, quente, fria),
+  // usada quando o visitante prefere o modo escuro.
   const FUNDOS = [
-    { id: 'branco', nome: 'Branco', fundo: '#ffffff', superficie: '#f6f6f4', texto: '#1c1c1e', suave: '#5f6368', borda: '#e6e5e1' },
-    { id: 'creme', nome: 'Creme', fundo: '#fbf7ef', superficie: '#f3ecdf', texto: '#29241f', suave: '#6a6157', borda: '#e7dccb' },
-    { id: 'cinza', nome: 'Cinza', fundo: '#f1f2f4', superficie: '#e6e8eb', texto: '#1d2126', suave: '#5a606a', borda: '#d9dce1' },
+    { id: 'branco', nome: 'Branco', fundo: '#ffffff', superficie: '#f6f6f4', texto: '#1c1c1e', suave: '#5f6368', borda: '#e6e5e1',
+      escuro: { fundo: '#151517', superficie: '#1f1f22', texto: '#ececea', suave: '#a3a3a8', borda: '#333338' } },
+    { id: 'creme', nome: 'Creme', fundo: '#fbf7ef', superficie: '#f3ecdf', texto: '#29241f', suave: '#6a6157', borda: '#e7dccb',
+      escuro: { fundo: '#1a1714', superficie: '#25211c', texto: '#efe9df', suave: '#aea597', borda: '#3a342c' } },
+    { id: 'cinza', nome: 'Cinza', fundo: '#f1f2f4', superficie: '#e6e8eb', texto: '#1d2126', suave: '#5a606a', borda: '#d9dce1',
+      escuro: { fundo: '#15181c', superficie: '#1f2328', texto: '#e8eaed', suave: '#9aa1ab', borda: '#30363d' } },
   ];
 
   const ACENTOS = [
@@ -84,7 +89,14 @@
   ];
   const LATIN = 'U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD';
 
-  const PADRAO = { fundo: 'branco', acento: '#0f766e', fonteTitulo: 'inter', fonteTexto: 'inter', layout: 'abas', estrutura: 'lateral', foto: 'redonda', referencias: 'simples', alinhamento: 'justificado' };
+  const PADRAO = { fundo: 'branco', acento: '#0f766e', fonteTitulo: 'inter', fonteTexto: 'inter', layout: 'abas', estrutura: 'lateral', foto: 'redonda', referencias: 'simples', alinhamento: 'justificado', escuro: 'automatico' };
+
+  // Modo escuro do site gerado. "automatico" segue a preferência do sistema do visitante.
+  const ESCURO = [
+    { id: 'automatico', nome: 'Seguir o sistema', descricao: 'Quem usa o computador ou o celular no modo escuro vê o site com fundo escuro.' },
+    { id: 'nunca', nome: 'Sempre claro', descricao: 'O site fica claro para todo mundo.' },
+    { id: 'sempre', nome: 'Sempre escuro', descricao: 'O site fica escuro para todo mundo.' },
+  ];
 
   // Alinhamento dos textos corridos (apresentação e textos dos destaques); listas ficam sempre à esquerda.
   const ALINHAMENTOS = [
@@ -131,6 +143,7 @@
       foto: valido(FOTOS, ap.foto) ? ap.foto : PADRAO.foto,
       referencias: valido(REFERENCIAS, ap.referencias) ? ap.referencias : PADRAO.referencias,
       alinhamento: valido(ALINHAMENTOS, ap.alinhamento) ? ap.alinhamento : PADRAO.alinhamento,
+      escuro: valido(ESCURO, ap.escuro) ? ap.escuro : PADRAO.escuro,
       fotoLargura: numero(ap.fotoLargura, FOTO_LARGURA),     // null: tamanho padrão da estrutura
       fotoProporcao: numero(ap.fotoProporcao, FOTO_PROPORCAO), // null: 3:2
     };
@@ -147,21 +160,25 @@
 
   // ---------- variáveis CSS do site ----------
 
-  function variaveis(aparencia) {
+  // `modo` é "claro" ou "escuro": o mesmo tema, sobre o fundo claro ou sobre o escuro correspondente.
+  function variaveis(aparencia, modo = 'claro') {
     const ap = normalizar(aparencia);
     const f = FUNDOS.find(x => x.id === ap.fundo);
+    const paleta = modo === 'escuro' ? f.escuro : f;
     const titulo = familia(ap.fonteTitulo);
-    const acento = ap.acento;
+    // No escuro, a cor de destaque também clareia um pouco nos detalhes (barras, bordas), senão some.
+    const acento = modo === 'escuro' ? paraTexto(ap.acento, paleta.fundo, 3) : ap.acento;
     return {
-      '--fundo': f.fundo,
-      '--superficie': f.superficie,
-      '--texto': f.texto,
-      '--suave': f.suave,
-      '--borda': f.borda,
-      '--acento': acento,                          // detalhes decorativos: barras, bordas, preenchimentos
-      '--acento-texto': paraTexto(acento, f.fundo), // links e textos coloridos sobre o fundo
-      '--sobre-acento': sobre(acento),              // texto em cima de um preenchimento com a cor
-      '--acento-fundo': misturar(acento, f.fundo, 0.09),
+      'color-scheme': modo === 'escuro' ? 'dark' : 'light',
+      '--fundo': paleta.fundo,
+      '--superficie': paleta.superficie,
+      '--texto': paleta.texto,
+      '--suave': paleta.suave,
+      '--borda': paleta.borda,
+      '--acento': acento,                               // detalhes decorativos: barras, bordas, preenchimentos
+      '--acento-texto': paraTexto(acento, paleta.fundo), // links e textos coloridos sobre o fundo
+      '--sobre-acento': sobre(acento),                   // texto em cima de um preenchimento com a cor
+      '--acento-fundo': misturar(acento, paleta.fundo, modo === 'escuro' ? 0.16 : 0.09),
       '--fonte-titulo': pilha(titulo.id),
       '--fonte-texto': pilha(ap.fonteTexto),
       '--peso-titulo': String(titulo.peso),
@@ -175,8 +192,15 @@
     };
   }
 
-  function css(ap) {
-    return ':root{' + Object.entries(variaveis(ap)).filter(([, v]) => v).map(([k, v]) => `${k}:${v}`).join(';') + '}';
+  // CSS das variáveis do site. No modo automático, o escuro entra pela preferência do sistema;
+  // html[data-tema="claro"|"escuro"] força um dos dois (é como a prévia do construtor alterna).
+  function css(aparencia) {
+    const ap = normalizar(aparencia);
+    const bloco = modo => Object.entries(variaveis(ap, modo)).filter(([, v]) => v).map(([k, v]) => `${k}:${v}`).join(';');
+    if (ap.escuro === 'sempre') return `:root{${bloco('escuro')}}`;
+    if (ap.escuro === 'nunca') return `:root{${bloco('claro')}}`;
+    const escuro = bloco('escuro');
+    return `:root{${bloco('claro')}}@media (prefers-color-scheme:dark){:root:not([data-tema="claro"]){${escuro}}}:root[data-tema="escuro"]{${escuro}}`;
   }
 
   function pilha(id) {
@@ -252,12 +276,14 @@
     return (claro + 0.05) / (escuro + 0.05);
   }
 
-  // Escurece a cor, mantendo o matiz, até ela ser legível como texto sobre o fundo.
+  // Ajusta a cor, mantendo o matiz, até ela ser legível como texto sobre o fundo:
+  // escurece sobre fundo claro, clareia sobre fundo escuro.
   function paraTexto(cor, fundo, minimo = 4.5) {
     let [h, s, l] = hsl(rgb(cor));
+    const passo = luminancia(fundo) < 0.18 ? 0.01 : -0.01;
     let atual = cor;
-    while (contraste(atual, fundo) < minimo && l > 0) {
-      l = Math.max(0, l - 0.01);
+    while (contraste(atual, fundo) < minimo && (passo > 0 ? l < 1 : l > 0)) {
+      l = Math.min(1, Math.max(0, l + passo));
       atual = hex(deHsl(h, s, l));
     }
     return atual;
@@ -300,7 +326,7 @@
   }
 
   return {
-    FUNDOS, ACENTOS, FAMILIAS, COMBINACOES, ESTRUTURAS, FOTOS, FOTO_LARGURA, LAYOUTS, REFERENCIAS, ALINHAMENTOS, PADRAO,
+    FUNDOS, ACENTOS, FAMILIAS, COMBINACOES, ESTRUTURAS, FOTOS, FOTO_LARGURA, LAYOUTS, REFERENCIAS, ALINHAMENTOS, ESCURO, PADRAO,
     normalizar, combinacaoAtual, familia, variaveis, css, pilha,
     cssFontes, cssFontesEmbutidas, carregarFontes, corValida, contraste,
   };
