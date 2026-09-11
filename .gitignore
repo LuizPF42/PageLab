@@ -1,0 +1,7 @@
+# Currículos e sites gerados em testes não entram no repositório
+*.pdf
+lattes*.html
+Currículo*.html
+node_modules/
+.DS_Store
+Thumbs.db
