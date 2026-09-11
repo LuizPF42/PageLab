@@ -192,6 +192,8 @@
     'Ver em inglês': 'View in English',
     // tradução automática
     'Traduzir com IA': 'Translate with AI',
+    'Orientação: {nome}': 'Advisor: {nome}',
+    'Coorientação: {nome}': 'Co-advisor: {nome}',
     'Preencha primeiro o texto em português.': 'Fill in the Portuguese text first.',
     'Na primeira vez, o construtor baixa o tradutor ({mb} MB) para o seu navegador. Depois ele fica guardado e traduzir é rápido. O seu texto não sai do computador. Baixar agora?': 'The first time, the builder downloads the translator ({mb} MB) into your browser. After that it stays cached and translating is fast. Your text never leaves your computer. Download now?',
     'Traduzindo…': 'Translating…',
@@ -1411,6 +1413,7 @@
           <span class="titulo">${esc(it.titulo)}</span>
           ${it.detalhe ? `<span class="detalhe">${esc(it.detalhe)}</span>` : ''}
           ${it.obs ? `<span class="obs">${esc(resumir(it.obs, 160))}</span>` : ''}
+          ${it.orientador ? `<span class="obs">${esc(_('Orientação: {nome}', { nome: it.orientador }))}${it.coorientador ? ` · ${esc(_('Coorientação: {nome}', { nome: it.coorientador }))}` : ''}</span>` : ''}
         </label>
         ${it.link || s.tipo === 'producao' ? `
         <button type="button" class="item-link${it.link ? '' : ' vazio'}" data-acao="editar" data-foco="link" data-item="${chave}"

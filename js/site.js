@@ -143,6 +143,8 @@
     'Ver todos os {n}': 'See all {n}',
     'Informações do Currículo Lattes, atualizado em {data}.': 'Data from the Lattes CV, updated on {data}.',
     'Construído com {pagelab}.': 'Built with {pagelab}.',
+    'Orientação: {nome}': 'Advisor: {nome}',
+    'Coorientação: {nome}': 'Co-advisor: {nome}',
     // conteúdo de exemplo da prévia
     'Seu Nome': 'Your Name',
     'Seu cargo · Sua instituição': 'Your role · Your institution',
@@ -281,6 +283,7 @@
       .slice(0, 3)
       .map(i => ({
         titulo: grau(capsParaTitulo(i.titulo.replace(/\s*\(.*?\)\s*$/, ''))),
+        orientador: i.orientador || '',
         // "Fundação Getúlio Vargas, FGV" -> "Fundação Getúlio Vargas"; períodos "2019 - 2021" -> "2019–2021"
         onde: [(i.detalhe || '').replace(/,\s*[A-ZÀ-Ú][A-ZÀ-Ú0-9\/.-]*\s*$/, '').trim(), (i.periodo || '').replace(/\s*-\s*/, '–')].filter(Boolean).join(', '),
       }));
@@ -546,7 +549,7 @@ ${cada(id => `.abas a[href="#${id}"]`)}{color:var(--texto);border-color:var(--ac
     return `
   <div class="resumo-perfil">
     ${interesses ? `<section class="interesses"><h2>${esc(_('Interesses'))}</h2><ul>${d.interesses.map(i => `<li>${esc(i)}</li>`).join('')}</ul></section>` : ''}
-    ${formacao ? `<section class="formacao"><h2>${esc(_('Formação'))}</h2><ul>${d.formacao.map(f => `<li><strong>${esc(f.titulo)}</strong>${f.onde ? `<span>${esc(f.onde)}</span>` : ''}</li>`).join('')}</ul></section>` : ''}
+    ${formacao ? `<section class="formacao"><h2>${esc(_('Formação'))}</h2><ul>${d.formacao.map(f => `<li><strong>${esc(f.titulo)}</strong>${f.onde ? `<span>${esc(f.onde)}</span>` : ''}${f.orientador ? `<span>${_('Orientação: {nome}', { nome: esc(f.orientador) })}</span>` : ''}</li>`).join('')}</ul></section>` : ''}
   </div>`;
   }
 
@@ -682,8 +685,17 @@ ${cada(id => `.abas a[href="#${id}"]`)}{color:var(--texto);border-color:var(--ac
           <p class="item-titulo">${citacao(texto)}</p>
           ${it.detalhe ? `<p class="item-detalhe">${esc(capsParaTitulo(it.detalhe))}</p>` : ''}
           ${it.obs && it.obs.length <= 220 ? `<p class="item-obs">${esc(it.obs)}</p>` : ''}
+          ${orientacao(it)}
         </div>
       </li>`;
+  }
+
+  // "Orientação: Nome · Coorientação: Nome", na formação (quem orientou importa tanto quanto onde).
+  function orientacao(it) {
+    if (!it.orientador) return '';
+    const partes = [_('Orientação: {nome}', { nome: esc(it.orientador) })];
+    if (it.coorientador) partes.push(_('Coorientação: {nome}', { nome: esc(it.coorientador) }));
+    return `<p class="item-orientacao">${partes.join(' · ')}</p>`;
   }
 
   // Texto do item com o nome da pessoa em negrito (como no Lattes) e o link do DOI, se houver.
@@ -792,6 +804,7 @@ a.item-link{display:inline-block;margin-left:.15rem;padding:0 .5rem;border:1px s
 a.item-link:hover{border-color:var(--acento)}
 .item-detalhe{margin:.15rem 0 0;color:var(--suave);font-size:.93rem}
 .item-obs{margin:.25rem 0 0;color:var(--suave);font-size:.9rem;font-style:italic}
+.item-orientacao{margin:.25rem 0 0;color:var(--suave);font-size:.9rem}
 summary{padding:.7rem 0 .2rem;color:var(--acento-texto);font-size:.93rem;font-weight:600;cursor:pointer;list-style:none}
 summary::-webkit-details-marker{display:none}
 summary::after{content:" ↓"}

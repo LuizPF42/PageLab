@@ -204,11 +204,15 @@
     return pares(bloco).filter(p => p.linhas.length).map(p => {
       const [grau = '', inst = '', ...resto] = p.linhas;
       const tese = resto.find(l => /^Título:/i.test(l)) || '';
+      // "Orientador: Nome." / "Coorientadora: Nome." (o ícone do Lattes antes do nome já saiu)
+      const pessoa = re => semPonto((resto.find(l => re.test(l)) || '').replace(re, ''));
       return item({
         periodo: p.rotulo,
         titulo: semPonto(semCargaHoraria(grau)),
         detalhe: instituicao(inst),
         obs: semPonto(tese.replace(/^Título:\s*/i, '').replace(/,?\s*Ano de Obtenção:.*$/i, '')),
+        orientador: pessoa(/^Orientadora?:\s*/i),
+        coorientador: pessoa(/^Co-?orientadora?:\s*/i),
       });
     });
   }
