@@ -41,7 +41,7 @@ button { font: inherit; cursor: pointer; }
   gap: .75rem 2rem;
   align-items: center;
   justify-content: space-between;
-  max-width: var(--largura);
+  max-width: max(var(--largura), 1180px); /* as seis etapas e o PT/EN cabem numa linha mesmo nas telas estreitas */
   margin: 0 auto;
   padding: 1.25rem 1rem .25rem;
 }
@@ -50,12 +50,15 @@ button { font: inherit; cursor: pointer; }
 
 .etapas ol { display: flex; flex-wrap: wrap; gap: .25rem; list-style: none; margin: 0; padding: 0; }
 .etapas li {
-  display: flex; align-items: center; gap: .4rem;
-  padding: .25rem .65rem; border-radius: 99px;
-  font-size: .85rem; color: var(--suave);
+  display: flex; align-items: center; gap: .35rem;
+  padding: .2rem .55rem; border-radius: 99px;
+  font-size: .82rem; color: var(--suave);
 }
 .etapas li.atual { background: var(--acento); color: #fff; font-weight: 600; }
 .etapas li.em-breve { opacity: .55; }
+/* Etapa 0 (Atualizar): um leve destaque, para quem já tem site achar o caminho de volta. */
+.etapas li.destaque:not(.atual) { background: #ddf4ff; color: var(--link); }
+.etapas li.destaque:not(.atual):hover { background: #b6e3ff; color: var(--link); }
 .etapas .num {
   display: inline-grid; place-items: center;
   width: 1.35rem; height: 1.35rem; border-radius: 50%;

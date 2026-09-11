@@ -9,6 +9,14 @@
   I18n.registrar({
     // etapas e cabeçalho
     'Monte seu site pessoal': 'Build your personal site',
+    'Atualizar': 'Update',
+    'Já tem um site feito aqui? Atualize-o': 'Already have a site made here? Update it',
+    'Traga o <code>index.html</code> que está publicado no seu GitHub. O construtor recupera as suas escolhas, os textos e a foto, e você continua de onde parou.': 'Bring the <code>index.html</code> published on your GitHub. The builder recovers your choices, texts and photo, and you carry on from where you left off.',
+    'No GitHub, abra o repositório <code>seu-usuario.github.io</code>, clique em <code>index.html</code> e depois no botão de baixar (<em>Download raw file</em>).': 'On GitHub, open the <code>your-username.github.io</code> repository, click <code>index.html</code> and then the download button (<em>Download raw file</em>).',
+    'Traga o arquivo para cá.': 'Bring the file here.',
+    'Para trazer também as produções novas, vá a <strong>Lattes</strong> e importe a página atualizada do currículo: o que você já tinha escolhido e escrito continua.': 'To bring in new publications as well, go to <strong>Lattes</strong> and import the updated CV page: what you had already chosen and written stays.',
+    'Arraste o index.html aqui': 'Drag the index.html here',
+    'Quero começar um site novo': 'I want to start a new site',
     'Aparência': 'Appearance',
     'Lattes': 'Lattes',
     'Conteúdo': 'Content',
@@ -277,6 +285,7 @@
   const ALTURA_PREVIA = 1300;
 
   const ETAPAS = [
+    { id: 'atualizar', nome: 'Atualizar', pronta: true, destaque: true }, // etapa 0: reabrir um site já feito
     { id: 'aparencia', nome: 'Aparência', pronta: true },
     { id: 'lattes', nome: 'Lattes', pronta: true },
     { id: 'conteudo', nome: 'Conteúdo', pronta: true },
@@ -440,6 +449,7 @@
     document.body.classList.toggle('larga', estado.etapa === 'aparencia');
     document.body.classList.toggle('total', estado.etapa === 'revisao');
     app.innerHTML =
+      estado.etapa === 'atualizar' ? telaAtualizar() :
       estado.etapa === 'aparencia' ? telaAparencia() :
       estado.etapa === 'conteudo' ? telaConteudo() :
       estado.etapa === 'revisao' ? telaRevisao() :
@@ -450,7 +460,7 @@
   }
 
   function podeIr(id) {
-    if (id === 'aparencia' || id === 'lattes') return true;
+    if (id === 'atualizar' || id === 'aparencia' || id === 'lattes') return true;
     if (id === 'conteudo' || id === 'revisao' || id === 'publicar') return !!(estado.fonte || estado.semLattes);
     return false;
   }
@@ -458,8 +468,8 @@
   function renderEtapas() {
     document.getElementById('etapas').innerHTML = '<ol>' + ETAPAS.map((et, i) => {
       const atual = et.id === estado.etapa;
-      const conteudo = `<span class="num">${i + 1}</span>${_(et.nome)}${et.pronta ? '' : ` <small>${_('em breve')}</small>`}`;
-      return `<li class="${atual ? 'atual' : ''}${et.pronta ? '' : ' em-breve'}"${atual ? ' aria-current="step"' : ''}>${
+      const conteudo = `<span class="num">${i}</span>${_(et.nome)}${et.pronta ? '' : ` <small>${_('em breve')}</small>`}`;
+      return `<li class="${atual ? 'atual' : ''}${et.pronta ? '' : ' em-breve'}${et.destaque ? ' destaque' : ''}"${atual ? ' aria-current="step"' : ''}>${
         !atual && et.pronta && podeIr(et.id) ? `<button type="button" data-ir="${et.id}">${conteudo}</button>` : conteudo}</li>`;
     }).join('') + '</ol>';
   }
@@ -1225,6 +1235,28 @@
     });
   }
 
+  // Etapa 0: quem já publicou um site feito aqui traz o index.html e continua de onde parou.
+  function telaAtualizar() {
+    return `
+      <section class="cartao">
+        <h1>${_('Já tem um site feito aqui? Atualize-o')}</h1>
+        <p class="sub">${_('Traga o <code>index.html</code> que está publicado no seu GitHub. O construtor recupera as suas escolhas, os textos e a foto, e você continua de onde parou.')}</p>
+        <ol class="passos">
+          <li>${_('No GitHub, abra o repositório <code>seu-usuario.github.io</code>, clique em <code>index.html</code> e depois no botão de baixar (<em>Download raw file</em>).')}</li>
+          <li>${_('Traga o arquivo para cá.')}</li>
+          <li>${_('Para trazer também as produções novas, vá a <strong>Lattes</strong> e importe a página atualizada do currículo: o que você já tinha escolhido e escrito continua.')}</li>
+        </ol>
+        <label class="soltar" id="soltar">
+          <input type="file" accept=".html,.htm,text/html" class="invisivel" data-arquivo="lattes">
+          <strong>${_('Arraste o index.html aqui')}</strong>
+          <span>${_('ou clique para escolher')}</span>
+        </label>
+        <p class="erro" role="alert"${ui.erro ? '' : ' hidden'}>${esc(ui.erro)}</p>
+        <p class="privacidade">${_('O arquivo é lido no seu navegador e não sai do seu computador.')}</p>
+        <p class="alternativa"><button type="button" class="link" data-ir="aparencia">${_('Quero começar um site novo')}</button></p>
+      </section>`;
+  }
+
   function telaLattes() {
     return `
       <section class="cartao">
@@ -1596,8 +1628,6 @@
     }
   }
 
-  // Reduz a foto sem recortar: o recorte (redonda, quadrada, retangular) é feito pelo CSS do site,
-  // então dá para trocar o formato depois sem mandar a foto de novo.
   // Proporção original da foto (largura/altura), necessária para o zoom e o enquadramento.
   // Fotos guardadas antes desta medida são medidas na hora de mostrar.
   function medirFoto() {
@@ -1613,6 +1643,8 @@
     img.src = p.foto;
   }
 
+  // Reduz a foto sem recortar: o recorte (redonda, retangular) é feito pelo CSS do site,
+  // então dá para trocar o formato depois sem mandar a foto de novo.
   function lerFoto(arquivo) {
     return new Promise((ok, falha) => {
       const url = URL.createObjectURL(arquivo);
@@ -1880,7 +1912,8 @@
     if (e.key === 'Escape') { ui.editando = null; trocarItem(si, ii); }
   });
 
-  document.getElementById('etapas').addEventListener('click', e => {
+  // Ir para uma etapa: pelo cabeçalho ou por botões dentro das telas ("Quero começar um site novo").
+  document.addEventListener('click', e => {
     const b = e.target.closest('[data-ir]');
     if (b && podeIr(b.dataset.ir)) irPara(b.dataset.ir);
   });
@@ -2016,7 +2049,7 @@
     const zona = document.getElementById('soltar');
     if (zona) zona.classList.remove('arrastando');
     const arquivo = e.dataTransfer && e.dataTransfer.files[0];
-    if (arquivo && estado.etapa === 'lattes') importar(arquivo);
+    if (arquivo && (estado.etapa === 'lattes' || estado.etapa === 'atualizar')) importar(arquivo);
   });
 
   // ---------- editor do "Sobre você": texto com links, como num editor de documentos ----------
