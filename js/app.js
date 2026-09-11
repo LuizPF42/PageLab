@@ -133,8 +133,8 @@
     'Abrir a página de envio ↗': 'Open the upload page ↗',
     'Arraste o <code>index.html</code> para a página, desça até o fim e clique em <strong>Commit changes</strong>.':
       'Drag <code>index.html</code> onto the page, scroll to the bottom and click <strong>Commit changes</strong>.',
-    'No repositório recém-criado, se a página de envio não abrir, entre nele e clique em “uploading an existing file”.':
-      'If the upload page does not open in the newly created repository, open the repository and click “uploading an existing file”.',
+    'Se a página de envio não abrir, entre no repositório e clique em “uploading an existing file”.':
+      'If the upload page does not open, open the repository and click “uploading an existing file”.',
     'Pronto!': 'Done!',
     'Em um ou dois minutos o site aparece em {link}. Até lá, o endereço pode mostrar “404”: é o GitHub terminando de publicar.':
       'In a minute or two the site appears at {link}. Until then, the address may show “404”: that is GitHub finishing the publication.',
@@ -1127,9 +1127,9 @@
           <li class="passo">
             <span class="passo-num">4</span>
             <h2>${_('Envie o arquivo')}</h2>
-            <p>${link('https://github.com/{u}/{u}.github.io/upload/main', _('Abrir a página de envio ↗'), 'botao-secundario')}</p>
+            <p>${link('https://github.com/{u}/{u}.github.io/upload', _('Abrir a página de envio ↗'), 'botao-secundario')}</p>
             <p>${_('Arraste o <code>index.html</code> para a página, desça até o fim e clique em <strong>Commit changes</strong>.')}</p>
-            <p class="dica">${_('No repositório recém-criado, se a página de envio não abrir, entre nele e clique em “uploading an existing file”.')}</p>
+            <p class="dica">${_('Se a página de envio não abrir, entre no repositório e clique em “uploading an existing file”.')}</p>
           </li>
           <li class="passo">
             <span class="passo-num">5</span>
