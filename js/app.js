@@ -190,6 +190,15 @@
     'Software, project, award…': 'Software, project, award…',
     'The same sentence in English (optional).': 'The same sentence in English (optional).',
     'Ver em inglês': 'View in English',
+    // tradução automática
+    'Traduzir com IA': 'Translate with AI',
+    'Preencha primeiro o texto em português.': 'Fill in the Portuguese text first.',
+    'Na primeira vez, o construtor baixa o tradutor ({mb} MB) para o seu navegador. Depois ele fica guardado e traduzir é rápido. O seu texto não sai do computador. Baixar agora?': 'The first time, the builder downloads the translator ({mb} MB) into your browser. After that it stays cached and translating is fast. Your text never leaves your computer. Download now?',
+    'Traduzindo…': 'Translating…',
+    'Preparando o tradutor…': 'Preparing the translator…',
+    'Baixando o tradutor… {p}%': 'Downloading the translator… {p}%',
+    'Pronto. Revise: a tradução é automática.': 'Done. Please review: the translation is automatic.',
+    'Não deu para traduzir agora.': 'Could not translate right now.',
     'Ver em português': 'View in Portuguese',
     'Fora do Lattes': 'Outside Lattes',
     'Mover para cima': 'Move up',
@@ -1207,7 +1216,8 @@
           ${ambos ? `
           <label for="subtitulo-en" class="rotulo-en">${_('Em inglês')}</label>
           <input id="subtitulo-en" data-perfil="subtituloEn" value="${esc(p.subtituloEn || '')}" lang="en"
-            placeholder="${esc(_('Ex.: Professor at University X'))}">` : ''}
+            placeholder="${esc(_('Ex.: Professor at University X'))}">
+          ${botaoTraduzir('subtituloEn')}` : ''}
         </div>
       </section>
 
@@ -1231,6 +1241,7 @@
           aria-labelledby="rotulo-bio-en" spellcheck="true" lang="en">${htmlEditorBio(p.bioEn)}</div>
         <div class="rodape-campo">
           <span id="contador-en">${_('{n} caracteres', { n: Site.textoPuro(p.bioEn || '').length })}</span>
+          ${botaoTraduzir('bioEn')}
         </div>` : ''}
       </section>
 
@@ -1242,7 +1253,8 @@
         ${ambos ? `
         <label class="rotulo-en campo-en">${_('Em inglês')}
           <input data-perfil="interessesEn" value="${esc((p.interessesEn || []).join(', '))}" lang="en"
-            placeholder="${esc(_('Ex.: Law and Development, Regulation, Empirical methods'))}"></label>` : ''}
+            placeholder="${esc(_('Ex.: Law and Development, Regulation, Empirical methods'))}"></label>
+        <div class="rodape-campo">${botaoTraduzir('interessesEn')}</div>` : ''}
       </section>
 
       <section class="cartao">
@@ -1337,7 +1349,8 @@
         ${estado.aparencia.idioma === 'ambos' ? `
         ${livre ? `<label class="rotulo-en">${_('Tipo em inglês')} <input data-destaque-campo="categoriaEn" value="${esc(it.categoriaEn || '')}" lang="en" placeholder="${esc(_('Software, project, award…'))}"></label>` : ''}
         <label class="campo-largo rotulo-en">${_('Em inglês')}
-          <textarea data-destaque-campo="dTextoEn" rows="2" lang="en" placeholder="${esc(_('The same sentence in English (optional).'))}">${esc(it.dTextoEn || '')}</textarea></label>` : ''}
+          <textarea data-destaque-campo="dTextoEn" rows="2" lang="en" placeholder="${esc(_('The same sentence in English (optional).'))}">${esc(it.dTextoEn || '')}</textarea></label>
+        <div class="campo-largo">${botaoTraduzir('dTextoEn', chave)}</div>` : ''}
       </li>`;
   }
 
@@ -1452,6 +1465,53 @@
   }
 
   let timerAviso;
+  // ---------- tradução automática dos campos em inglês (modelo no navegador; ver traducao.js) ----------
+
+  function botaoTraduzir(alvo, item) {
+    return `<span class="traduzir"><button type="button" class="link" data-traduzir="${alvo}"${item ? ` data-item="${item}"` : ''}>${_('Traduzir com IA')}</button><span class="estado-traducao" role="status"></span></span>`;
+  }
+
+  async function traduzirCampo(b) {
+    const alvo = b.dataset.traduzir;
+    const status = b.nextElementSibling;
+    const mostrar = m => { if (status) status.textContent = m; };
+    let origem;
+    let aplicar;
+    if (alvo === 'subtituloEn') {
+      origem = estado.perfil.subtitulo || Site.subtituloPadrao(estado);
+      aplicar = t => { estado.perfil.subtituloEn = t; const i = document.getElementById('subtitulo-en'); if (i) i.value = t; };
+    } else if (alvo === 'bioEn') {
+      origem = estado.perfil.bio;
+      aplicar = t => { const ed = document.getElementById('bio-en'); if (ed) ed.innerHTML = htmlEditorBio(t); atualizarBio(); };
+    } else if (alvo === 'interessesEn') {
+      origem = (estado.perfil.interesses || []).slice();
+      aplicar = arr => { estado.perfil.interessesEn = arr; const i = app.querySelector('input[data-perfil="interessesEn"]'); if (i) i.value = arr.join(', '); };
+    } else if (alvo === 'dTextoEn') {
+      const [si, ii] = b.dataset.item.split(':').map(Number);
+      const it = estado.secoes[si].itens[ii];
+      origem = it.dTexto || '';
+      aplicar = t => { it.dTextoEn = t; const ta = app.querySelector(`[data-destaque="${si}:${ii}"] textarea[data-destaque-campo="dTextoEn"]`); if (ta) ta.value = t; };
+    } else return;
+
+    if (!origem || (Array.isArray(origem) && !origem.length)) { mostrar(_('Preencha primeiro o texto em português.')); return; }
+    if (!Traducao.jaBaixado() && !confirm(_('Na primeira vez, o construtor baixa o tradutor ({mb} MB) para o seu navegador. Depois ele fica guardado e traduzir é rápido. O seu texto não sai do computador. Baixar agora?', { mb: Traducao.TAMANHO_MB }))) return;
+
+    app.querySelectorAll('[data-traduzir]').forEach(x => { x.disabled = true; });
+    mostrar(Traducao.pronto() ? _('Traduzindo…') : _('Preparando o tradutor…'));
+    try {
+      const r = await Traducao.traduzir(origem, (f, etapa) => {
+        mostrar(etapa === 'baixando' ? _('Baixando o tradutor… {p}%', { p: Math.round(f * 100) }) : _('Traduzindo…'));
+      });
+      aplicar(r);
+      salvar();
+      mostrar(_('Pronto. Revise: a tradução é automática.'));
+    } catch (err) {
+      mostrar(err.amigavel ? err.message : _('Não deu para traduzir agora.'));
+      if (err.causa) console.error(err.causa);
+    }
+    app.querySelectorAll('[data-traduzir]').forEach(x => { x.disabled = false; });
+  }
+
   function avisar(msg) {
     const el = document.getElementById('aviso-barra');
     if (!el) return;
@@ -1507,6 +1567,8 @@
   // ---------- eventos ----------
 
   app.addEventListener('click', e => {
+    const bt = e.target.closest('[data-traduzir]');
+    if (bt) { traduzirCampo(bt); return; }
     const b = e.target.closest('[data-acao]');
     if (!b) return;
     const [si, ii] = (b.dataset.item || '').split(':').map(Number);

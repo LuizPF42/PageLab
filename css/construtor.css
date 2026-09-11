@@ -392,6 +392,9 @@ h3.rotulo-en { margin: 1.25rem 0 0; }
 h3.rotulo-en + .dica { margin-top: .15rem; }
 .campo-en { display: flex; flex-direction: column; gap: .3rem; margin-top: .6rem; }
 .editor-destaque label.rotulo-en { color: var(--suave); }
+.traduzir { display: inline-flex; flex-wrap: wrap; align-items: center; gap: .6rem; font-size: .85rem; color: var(--suave); }
+.campo-nome .traduzir { margin-top: .3rem; }
+.estado-traducao:empty { display: none; }
 #nome { font-size: 1.3rem; font-weight: 600; }
 
 .editor-bio {
