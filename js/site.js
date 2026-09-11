@@ -73,6 +73,11 @@
       if (s.id === 'AreasAtuacao' && interesses.length) continue; // já aparecem como interesses, no início
       const itens = s.itens.filter(i => i.manter);
       if (!itens.length) continue;
+      // Destaques livres (fora do Lattes: um software, um projeto, um site) só existem como cartões.
+      if (s.tipo === 'livre') {
+        itens.forEach(i => { if (i.destaque && (i.dTitulo || '').trim()) destaques.push(Object.assign({}, i, { categoria: (i.categoria || '').trim() })); });
+        continue;
+      }
       itens.forEach(i => { if (i.destaque) destaques.push(Object.assign({}, i, { categoria: tipoDe(s.titulo) })); });
       secoes.push({ titulo: TITULOS_CURTOS[s.titulo] || s.titulo, tipo: s.tipo, aba: abaDaSecao(s.id), itens });
     }
@@ -264,7 +269,11 @@ ${opcoes.dadosConstrutor ? `<script type="application/json" id="dados-do-constru
   }
 
   function rodape(d) {
-    return `<footer class="rodape">${d.atualizadoEm ? `Informações do Currículo Lattes, atualizado em ${esc(d.atualizadoEm)}.` : ''}</footer>`;
+    const partes = [
+      d.atualizadoEm ? `Informações do Currículo Lattes, atualizado em ${esc(d.atualizadoEm)}.` : '',
+      'Construído com <a href="https://github.com/LuizPF42/PageLab">PageLab</a>.',
+    ].filter(Boolean);
+    return `<footer class="rodape">${partes.join(' ')}</footer>`;
   }
 
   // Sem conteúdo em pelo menos duas abas, o site fica em página única mesmo.
@@ -552,6 +561,7 @@ details[open]>summary{display:none}
 .abas a{flex:none;margin-bottom:-1px;padding:.65rem 0;border-bottom:2px solid transparent;color:var(--suave);font-size:.95rem;font-weight:600;text-decoration:none}
 .abas a:hover{color:var(--texto)}
 .rodape{margin-top:4rem;padding-top:1.5rem;border-top:1px solid var(--borda);color:var(--suave);font-size:.85rem}
+.rodape a{color:inherit}
 .rodape:empty{display:none}
 
 /* estrutura "lateral": na coluna única, a lateral some como caixa, para a barra de abas grudar na página inteira */

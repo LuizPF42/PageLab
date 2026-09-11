@@ -7,6 +7,8 @@
 
   const CHAVE = 'construtor-site:v1';
   const MAX_DESTAQUES = 5;
+  // Sugestões de tipo para os destaques fora do Lattes (a pessoa pode escrever outro).
+  const TIPOS_LIVRES = ['Software', 'Projeto', 'Site', 'Prêmio', 'Curso', 'Podcast', 'Base de dados', 'Grupo de pesquisa'];
   const ITENS_VISIVEIS = 8;
   const LARGURA_PREVIA = 1000; // a prévia é desenhada nesta largura e reduzida para caber na coluna
   const ALTURA_PREVIA = 1300;
@@ -127,6 +129,9 @@
       });
     });
 
+    // Os destaques livres não vêm do Lattes: continuam como estão.
+    const livres = estado.secoes.find(s => s.tipo === 'livre');
+    if (livres) secoes.push(livres);
     renumerarDestaques(secoes);
 
     const p = estado.perfil;
@@ -154,7 +159,7 @@
     let itens = 0;
     let destaques = 0;
     for (const s of estado.secoes) for (const it of s.itens) {
-      if (it.manter) itens++;
+      if (it.manter && s.tipo !== 'livre') itens++;
       if (it.destaque) destaques++;
     }
     return { itens, destaques };
@@ -907,8 +912,9 @@
       </section>
 
       ${telaDestaques()}
+      <datalist id="tipos-livres">${TIPOS_LIVRES.map(t => `<option value="${t}">`).join('')}</datalist>
 
-      ${estado.secoes.map((s, si) => (si === primeiraProducao ? telaDicaDestaques() : '') + telaSecao(s, si)).join('')}
+      ${estado.secoes.map((s, si) => (s.tipo === 'livre' ? '' : (si === primeiraProducao ? telaDicaDestaques() : '') + telaSecao(s, si))).join('')}
 
       <div class="barra">
         <span>
@@ -947,27 +953,45 @@
         ${lista.length
           ? `<ol class="lista-destaques">${lista.map((x, n) => editorDestaque(x, n, lista.length)).join('')}</ol>`
           : `<p class="vazio">Nenhum destaque ainda. Marque com ★ até ${MAX_DESTAQUES} produções nas listas abaixo.</p>`}
+        <p class="rodape-campo">
+          <span>Algo que não está no Lattes? Um software, um site, um projeto, um prêmio.</span>
+          <button type="button" class="link" data-acao="novo-destaque-livre">+ Adicionar destaque livre</button>
+        </p>
       </section>`;
+  }
+
+  // Seção virtual que guarda os destaques fora do Lattes; fica no fim de estado.secoes.
+  function secaoLivres(criar) {
+    let s = estado.secoes.find(x => x.tipo === 'livre');
+    if (!s && criar) {
+      s = { id: 'Livres', titulo: 'Destaques livres', tipo: 'livre', itens: [] };
+      estado.secoes.push(s);
+    }
+    return s;
   }
 
   function editorDestaque({ si, ii, it }, n, total) {
     const c = Site.camposDestaque(it);
     const chave = `${si}:${ii}`;
-    const tipo = [Site.tipoDe(estado.secoes[si].titulo), it.periodo].filter(Boolean).join(' · ');
+    const livre = estado.secoes[si].tipo === 'livre';
+    const tipo = livre ? 'Fora do Lattes' : [Site.tipoDe(estado.secoes[si].titulo), it.periodo].filter(Boolean).join(' · ');
     return `
-      <li class="editor-destaque" data-destaque="${chave}">
+      <li class="editor-destaque${livre ? ' livre' : ''}" data-destaque="${chave}">
         <div class="editor-destaque-topo">
           <span class="editor-destaque-tipo">${n + 1}. ${esc(tipo)}</span>
           <span class="item-acoes">
             <button type="button" class="icone" data-acao="subir-destaque" data-item="${chave}"${n === 0 ? ' disabled' : ''} title="Mover para cima" aria-label="Mover para cima">↑</button>
             <button type="button" class="icone" data-acao="descer-destaque" data-item="${chave}"${n === total - 1 ? ' disabled' : ''} title="Mover para baixo" aria-label="Mover para baixo">↓</button>
-            <button type="button" class="icone" data-acao="destaque" data-item="${chave}" title="Tirar dos destaques" aria-label="Tirar dos destaques">✕</button>
+            <button type="button" class="icone" data-acao="destaque" data-item="${chave}" title="${livre ? 'Excluir' : 'Tirar dos destaques'}" aria-label="${livre ? 'Excluir este destaque' : 'Tirar dos destaques'}">✕</button>
           </span>
         </div>
-        <label class="campo-largo">Título <input data-destaque-campo="dTitulo" value="${esc(c.titulo)}" placeholder="Título da obra"></label>
-        <label>Onde saiu <input data-destaque-campo="dVeiculo" value="${esc(c.veiculo)}" placeholder="Revista, livro, evento…"></label>
+        ${livre ? `
+        <label>Tipo <input data-destaque-campo="categoria" value="${esc(it.categoria || '')}" placeholder="Software, projeto, prêmio…" list="tipos-livres"></label>
+        <label>Ano <input data-destaque-campo="periodo" value="${esc(it.periodo || '')}" placeholder="2025" inputmode="numeric" maxlength="11"></label>` : ''}
+        <label class="campo-largo">Título <input data-destaque-campo="dTitulo" value="${esc(c.titulo)}" placeholder="${livre ? 'Nome do software, do projeto…' : 'Título da obra'}"></label>
+        <label>${livre ? 'Onde' : 'Onde saiu'} <input data-destaque-campo="dVeiculo" value="${esc(c.veiculo)}" placeholder="${livre ? 'Instituição, grupo, parceria… (opcional)' : 'Revista, livro, evento…'}"></label>
         <label>Link <input type="url" data-destaque-campo="link" value="${esc(it.link || '')}" placeholder="https:// (opcional)"></label>
-        <label class="campo-largo">Sobre o trabalho
+        <label class="campo-largo">${livre ? 'Sobre' : 'Sobre o trabalho'}
           <textarea data-destaque-campo="dTexto" rows="2" placeholder="Em uma ou duas frases: do que trata e o que mostra.">${esc(c.texto)}</textarea></label>
       </li>`;
   }
@@ -1242,7 +1266,34 @@
         trocarSecao(secao);
         break;
 
+      case 'novo-destaque-livre': {
+        if (totais().destaques >= MAX_DESTAQUES) {
+          avisar(`Já são ${MAX_DESTAQUES} destaques. Tire um para acrescentar outro.`);
+          return;
+        }
+        const s = secaoLivres(true);
+        s.itens.push({
+          id: 'livre-' + Date.now().toString(36), periodo: '', titulo: '', categoria: '',
+          dTitulo: '', dVeiculo: '', dTexto: '', link: '', manter: true, destaque: true, ordem: 1e6,
+        });
+        renumerarDestaques();
+        salvar();
+        trocarDestaques();
+        atualizarContadores(estado.secoes.indexOf(s));
+        const novo = app.querySelector('.editor-destaque.livre:last-of-type input[data-destaque-campo="categoria"]');
+        if (novo) novo.focus();
+        break;
+      }
+
       case 'destaque': {
+        if (estado.secoes[si].tipo === 'livre') { // ✕ num destaque livre: some de vez
+          estado.secoes[si].itens.splice(ii, 1);
+          renumerarDestaques();
+          salvar();
+          trocarDestaques();
+          atualizarContadores(si);
+          break;
+        }
         const it = estado.secoes[si].itens[ii];
         if (!it.destaque && totais().destaques >= MAX_DESTAQUES) {
           avisar(`Já são ${MAX_DESTAQUES} destaques. Tire um para escolher outro.`);
@@ -1412,7 +1463,7 @@
     if (t.dataset.destaqueCampo) {
       const [si, ii] = t.closest('[data-destaque]').dataset.destaque.split(':').map(Number);
       const campo = t.dataset.destaqueCampo;
-      estado.secoes[si].itens[ii][campo] = campo === 'link' ? t.value.trim() : t.value;
+      estado.secoes[si].itens[ii][campo] = campo === 'link' || campo === 'periodo' || campo === 'categoria' ? t.value.trim() : t.value;
       salvar();
       if (campo === 'link') trocarItem(si, ii); // o link também aparece na lista
       return;
