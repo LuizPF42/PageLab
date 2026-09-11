@@ -51,7 +51,10 @@
     'Sua foto aparece na prévia ao lado.': 'Your photo appears in the preview beside this.',
     'Uma foto sua, de preferência quadrada ou em retrato.': 'A photo of you, ideally square or portrait.',
     'Tirar a foto': 'Remove the photo',
-    'Na revisão, dá para arrastar o canto da foto para mudar o tamanho.': 'In the review step, you can drag the corner of the photo to resize it.',
+    'Na revisão, dá para arrastar a foto para enquadrar e o canto dela para mudar o tamanho.': 'In the review step, you can drag the photo to reframe it and its corner to resize it.',
+    'Arraste a foto para enquadrar': 'Drag the photo to reframe it',
+    'Voltar ao tamanho e enquadramento padrão': 'Back to the default size and framing',
+    'Voltar ao tamanho e enquadramento padrão da foto': 'Back to the default size and framing of the photo',
     'Fontes': 'Fonts',
     'Seu Nome': 'Your Name',
     'Ou combine como quiser:': 'Or mix and match:',
@@ -554,7 +557,7 @@
                 ${formatoFoto(f.id)}<span>${esc(_(f.nome))}</span>
               </label>`).join('')}
             </div>
-            <p class="dica">${_('Na revisão, dá para arrastar o canto da foto para mudar o tamanho.')}</p>
+            <p class="dica">${_('Na revisão, dá para arrastar a foto para enquadrar e o canto dela para mudar o tamanho.')}</p>
           </fieldset>
 
           <fieldset class="grupo">
@@ -820,7 +823,7 @@
           <span class="ajuste">
             <label for="tamanho-foto">${_('Tamanho')}</label>
             <input type="range" id="tamanho-foto" data-foto-tamanho min="${Tema.FOTO_LARGURA[0]}" max="480" step="2" value="${ap.fotoLargura || 160}">
-            <button type="button" class="link" data-acao="foto-padrao" title="${esc(_('Voltar ao tamanho padrão'))}" aria-label="${esc(_('Voltar ao tamanho padrão da foto'))}">↺</button>
+            <button type="button" class="link" data-acao="foto-padrao" title="${esc(_('Voltar ao tamanho e enquadramento padrão'))}" aria-label="${esc(_('Voltar ao tamanho e enquadramento padrão da foto'))}">↺</button>
           </span>` : ''}
           <label class="ajuste">${_('Organização')}
             <select data-aparencia="layout">${Tema.LAYOUTS.map(l => `<option value="${l.id}"${ap.layout === l.id ? ' selected' : ''}>${esc(_(l.nome))}</option>`).join('')}</select>
@@ -908,12 +911,51 @@
       .alca-foto{position:absolute;z-index:10;width:18px;height:18px;margin:-9px 0 0 -9px;border:2px solid var(--acento);border-radius:5px;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.3);cursor:nwse-resize;touch-action:none}
       .foto{outline:2px dashed transparent;outline-offset:4px;transition:outline-color .15s}
       .foto:hover,.redimensionando-foto .foto{outline-color:var(--acento)}
-      .redimensionando-foto,.redimensionando-foto *{cursor:nwse-resize!important;user-select:none}`;
+      .redimensionando-foto,.redimensionando-foto *{cursor:nwse-resize!important;user-select:none}
+      .foto{cursor:move;touch-action:none}
+      .movendo-foto,.movendo-foto *{cursor:move!important;user-select:none}`;
     doc.head.appendChild(estilo);
     const alca = doc.createElement('span');
     alca.className = 'alca-foto';
     alca.title = _('Arraste para mudar o tamanho da foto');
     doc.body.appendChild(alca);
+    foto.title = _('Arraste a foto para enquadrar');
+
+    // Enquadrar: arrastar a foto move a imagem dentro do recorte. Precisa do tamanho original
+    // da imagem para saber quanto "sobra" em cada eixo com o recorte (background-size: cover).
+    const natural = { w: 0, h: 0 };
+    const imagem = new Image();
+    imagem.onload = () => { natural.w = imagem.naturalWidth; natural.h = imagem.naturalHeight; };
+    imagem.src = estado.perfil.foto;
+    let mover = null;
+    const limitar = v => Math.round(Math.min(100, Math.max(0, v)));
+    foto.addEventListener('pointerdown', e => {
+      if (e.button !== 0) return;
+      e.preventDefault();
+      try { foto.setPointerCapture(e.pointerId); } catch (err) { /* segue sem captura */ }
+      const r = foto.getBoundingClientRect();
+      const ap = estado.aparencia;
+      mover = { x: e.clientX, y: e.clientY, px: ap.fotoX != null ? ap.fotoX : 50, py: ap.fotoY != null ? ap.fotoY : 30, w: r.width, h: r.height };
+      doc.documentElement.classList.add('movendo-foto');
+    });
+    foto.addEventListener('pointermove', e => {
+      if (!mover || !natural.w) return;
+      const escala = Math.max(mover.w / natural.w, mover.h / natural.h);
+      const sobraX = natural.w * escala - mover.w;
+      const sobraY = natural.h * escala - mover.h;
+      const ap = estado.aparencia;
+      if (sobraX > 1) ap.fotoX = limitar(mover.px - ((e.clientX - mover.x) / sobraX) * 100);
+      if (sobraY > 1) ap.fotoY = limitar(mover.py - ((e.clientY - mover.y) / sobraY) * 100);
+      atualizarCores();
+    });
+    const soltarFoto = () => {
+      if (!mover) return;
+      mover = null;
+      doc.documentElement.classList.remove('movendo-foto');
+      salvar();
+    };
+    foto.addEventListener('pointerup', soltarFoto);
+    foto.addEventListener('pointercancel', soltarFoto);
 
     posicionarAlcaFoto = () => {
       const r = foto.getBoundingClientRect();
@@ -926,7 +968,7 @@
     janela.addEventListener('resize', posicionarAlcaFoto);
     janela.addEventListener('hashchange', posicionarAlcaFoto);
     doc.fonts.ready.then(posicionarAlcaFoto);
-    foto.decode().then(posicionarAlcaFoto, posicionarAlcaFoto);
+    setTimeout(posicionarAlcaFoto, 50); // a foto é um <div> com background: não há decode() para esperar
 
     let inicio = null;
     alca.addEventListener('pointerdown', e => {
@@ -1622,6 +1664,8 @@
       case 'foto-padrao':
         estado.aparencia.fotoLargura = null;
         estado.aparencia.fotoProporcao = null;
+        estado.aparencia.fotoX = null;
+        estado.aparencia.fotoY = null;
         salvar();
         atualizarCores();
         break;

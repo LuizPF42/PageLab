@@ -756,7 +756,7 @@ h2::before{content:"";flex:none;width:1rem;height:.22rem;border-radius:2px;backg
 .perfil{display:flex;align-items:center;gap:1.5rem;margin-bottom:2rem}
 /* Foto: --foto-largura e --foto-proporcao existem só se a pessoa ajustou o tamanho na revisão;
    senão valem os padrões de cada estrutura. Nunca passa da largura disponível. */
-.foto{flex:none;display:block;max-width:100%;height:auto;background:var(--foto-src) 50% 30%/cover no-repeat}
+.foto{flex:none;display:block;max-width:100%;height:auto;background:var(--foto-src) var(--foto-posicao,50% 30%)/cover no-repeat}
 .idioma-site{display:inline-flex;gap:.1rem;margin-bottom:.7rem;padding:.15rem;border:1px solid var(--borda);border-radius:999px;background:var(--superficie)}
 .idioma-site button{padding:.15rem .6rem;border:0;border-radius:999px;background:none;color:var(--suave);font:inherit;font-size:.76rem;font-weight:700;letter-spacing:.04em;cursor:pointer}
 .idioma-site button[aria-pressed="true"]{background:var(--acento);color:var(--sobre-acento)}

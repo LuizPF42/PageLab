@@ -203,6 +203,9 @@
       idioma: valido(IDIOMAS, ap.idioma) ? ap.idioma : PADRAO.idioma,
       fotoLargura: numero(ap.fotoLargura, FOTO_LARGURA),     // null: tamanho padrão da estrutura
       fotoProporcao: numero(ap.fotoProporcao, FOTO_PROPORCAO), // null: 3:2
+      // Enquadramento: ponto da imagem que fica no centro do recorte, em % (null: 50% 30%, rosto no alto).
+      fotoX: numero(ap.fotoX, [0, 100]),
+      fotoY: numero(ap.fotoY, [0, 100]),
     };
   }
 
@@ -256,6 +259,7 @@
       // Vazias quando a pessoa não ajustou: o CSS do site usa o tamanho padrão de cada estrutura.
       '--foto-largura': ap.fotoLargura ? ap.fotoLargura + 'px' : '',
       '--foto-proporcao': ap.fotoProporcao ? String(ap.fotoProporcao) : '',
+      '--foto-posicao': ap.fotoX != null || ap.fotoY != null ? `${ap.fotoX != null ? ap.fotoX : 50}% ${ap.fotoY != null ? ap.fotoY : 30}%` : '',
     };
   }
 
