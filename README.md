@@ -1,15 +1,12 @@
-<p align="center">
+<div align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="logo-escuro.png">
-    <img src="logo.png" alt="PageLab" width="180">
+    <img src="logo.png" alt="" width="128" height="128">
   </picture>
-</p>
-
-# PageLab
-
-Monte seu site pessoal a partir do Currículo Lattes e publique no GitHub Pages.
-
-**Use aqui: [luizpf42.github.io/PageLab](https://luizpf42.github.io/PageLab/)**
+  <h1>PageLab</h1>
+  <p>Monte seu site pessoal a partir do Currículo Lattes e publique no GitHub Pages.</p>
+  <p><strong><a href="https://luizpf42.github.io/PageLab/">luizpf42.github.io/PageLab</a></strong></p>
+</div>
 
 O construtor gera um único arquivo, `index.html`, com tudo dentro (textos, cores, fontes e foto). Para publicar, basta criar um repositório chamado `seu-usuario.github.io` e enviar esse arquivo.
 
