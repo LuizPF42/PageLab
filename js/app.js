@@ -208,27 +208,8 @@
     'Nenhum destaque ainda. Marque com ★ até {max} produções nas listas abaixo.': 'No highlights yet. Mark up to {max} works with ★ in the lists below.',
     'Algo que não está no Lattes? Um software, um site, um projeto, um prêmio.': 'Something that is not in Lattes? A piece of software, a website, a project, an award.',
     '+ Adicionar destaque livre': '+ Add a custom highlight',
-    // site em dois idiomas
-    'Em inglês': 'In English',
-    'Ex.: Professor at University X': 'E.g.: Professor at University X',
-    'A versão que o visitante vê ao escolher EN. Se ficar vazia, o site mostra o texto em português.': 'What visitors see when they choose EN. If left empty, the site shows the Portuguese text.',
-    'Ex.: Law and Development, Regulation, Empirical methods': 'E.g.: Law and Development, Regulation, Empirical methods',
-    'Tipo em inglês': 'Type in English',
-    'Software, project, award…': 'Software, project, award…',
-    'The same sentence in English (optional).': 'The same sentence in English (optional).',
-    'Ver em inglês': 'View in English',
-    // tradução automática
-    'Traduzir com IA': 'Translate with AI',
     'Orientação: {nome}': 'Advisor: {nome}',
     'Coorientação: {nome}': 'Co-advisor: {nome}',
-    'Preencha primeiro o texto em português.': 'Fill in the Portuguese text first.',
-    'Na primeira vez, o construtor baixa o tradutor ({mb} MB) para o seu navegador. Depois ele fica guardado e traduzir é rápido. O seu texto não sai do computador. Baixar agora?': 'The first time, the builder downloads the translator ({mb} MB) into your browser. After that it stays cached and translating is fast. Your text never leaves your computer. Download now?',
-    'Traduzindo…': 'Translating…',
-    'Preparando o tradutor…': 'Preparing the translator…',
-    'Baixando o tradutor… {p}%': 'Downloading the translator… {p}%',
-    'Pronto. Revise: a tradução é automática.': 'Done. Please review: the translation is automatic.',
-    'Não deu para traduzir agora.': 'Could not translate right now.',
-    'Ver em português': 'View in Portuguese',
     'Fora do Lattes': 'Outside Lattes',
     'Mover para cima': 'Move up',
     'Mover para baixo': 'Move down',
@@ -333,9 +314,7 @@
 
   const app = document.getElementById('app');
   // temaPrevia: a prévia mostra o site no claro ou no escuro (só faz diferença no modo automático).
-  // idiomaPrevia: idem para o idioma, quando o site sai em português e inglês. bioAtivo: qual editor
-  // de apresentação (pt ou en) recebeu o foco por último, para os links e o menu de contexto.
-  const ui = { erro: '', editando: null, expandidas: new Set(), largura: 1280, temaPrevia: 'claro', idiomaPrevia: 'pt', bioAtivo: 'bio' };
+  const ui = { erro: '', editando: null, expandidas: new Set(), largura: 1280, temaPrevia: 'claro', bioAtivo: 'bio' };
   let estado = carregar() || novoEstado();
 
   // ---------- estado ----------
@@ -346,8 +325,7 @@
       aparencia: Tema.normalizar({}),
       fonte: null,
       semLattes: false,
-      // Os campos *En são a versão em inglês, usados quando o site sai nos dois idiomas.
-      perfil: { nome: '', subtitulo: '', subtituloEn: '', bio: '', bioEn: '', bioOriginal: '', foto: '', fotoProporcaoNatural: 0, links: {}, interesses: [], interessesEn: [], interessesEditados: false },
+      perfil: { nome: '', subtitulo: '', bio: '', bioOriginal: '', foto: '', fotoProporcaoNatural: 0, links: {}, interesses: [], interessesEditados: false },
       secoes: [],
       avisos: [],
       publicacao: { usuario: '' },
@@ -533,7 +511,6 @@
 
   function telaAparencia() {
     const ap = estado.aparencia;
-    const idiomasSite = Tema.IDIOMAS || I18n.IDIOMAS;
     return `
       <div class="aparencia">
         <section class="cartao controles">
@@ -635,17 +612,6 @@
             </div>
           </fieldset>
 
-          <fieldset class="grupo">
-            <legend>${_('Idioma do site')}</legend>
-            <div class="opcoes-layout opcoes-escuro">
-              ${idiomasSite.map(i => `
-              <label class="opcao-layout">
-                <input type="radio" name="idioma" value="${i.id}" data-aparencia="idioma" class="invisivel"${(ap.idioma || 'pt') === i.id ? ' checked' : ''}>
-                <strong>${esc(i.nome)}</strong>
-                ${i.descricao ? `<span>${esc(_(i.descricao))}</span>` : ''}
-              </label>`).join('')}
-            </div>
-          </fieldset>
         </section>
 
         <div class="previa">
@@ -742,24 +708,18 @@
     if (estiloFoto) estiloFoto.textContent = Site.cssFoto({ foto: estado.perfil.foto, fotoProporcao: estado.perfil.fotoProporcaoNatural }, estado.aparencia);
     doc.documentElement.dataset.tema = ui.temaPrevia;
     // O script do botão PT/EN não roda na prévia (iframe sem scripts): o construtor faz o papel dele.
-    doc.documentElement.dataset.idioma = ui.idiomaPrevia;
-    doc.querySelectorAll('.idioma-site button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.idioma === ui.idiomaPrevia)));
     posicionarAlcaFoto();
   }
 
-  // Conteúdo do site para a prévia e para o arquivo final: um idioma, ou os dois quando o site sai em ambos.
+  // Conteúdo do site para a prévia e para o arquivo final.
   function conteudoSite() {
-    const ap = estado.aparencia;
-    const um = id => (temConteudo() ? Site.dados(estado, id) : Site.exemplo(estado.perfil, id));
-    return ap.idioma === 'ambos' ? { pt: um('pt'), en: um('en') } : um(ap.idioma);
+    return temConteudo() ? Site.dados(estado) : Site.exemplo(estado.perfil);
   }
 
-  // Botões que alternam a prévia: claro/escuro (só no modo automático) e PT/EN (só no site em ambos).
+  // Botão que alterna a prévia entre claro e escuro (só aparece no modo automático).
   function botaoTema() {
     const escuro = ui.temaPrevia === 'escuro';
-    const en = ui.idiomaPrevia === 'en';
-    return `<button type="button" class="botao-tema" data-acao="tema-previa" aria-pressed="${escuro}"${estado.aparencia.escuro === 'automatico' ? '' : ' hidden'}>${escuro ? _('☀ Ver no claro') : _('☾ Ver no escuro')}</button>` +
-      `<button type="button" class="botao-tema" data-acao="idioma-previa" aria-pressed="${en}"${estado.aparencia.idioma === 'ambos' ? '' : ' hidden'}>${en ? _('Ver em português') : _('Ver em inglês')}</button>`;
+    return `<button type="button" class="botao-tema" data-acao="tema-previa" aria-pressed="${escuro}"${estado.aparencia.escuro === 'automatico' ? '' : ' hidden'}>${escuro ? _('☀ Ver no claro') : _('☾ Ver no escuro')}</button>`;
   }
 
   function atualizarBotaoTema() {
@@ -768,12 +728,6 @@
       b.hidden = estado.aparencia.escuro !== 'automatico';
       b.setAttribute('aria-pressed', String(escuro));
       b.textContent = escuro ? _('☀ Ver no claro') : _('☾ Ver no escuro');
-    });
-    app.querySelectorAll('[data-acao="idioma-previa"]').forEach(b => {
-      const en = ui.idiomaPrevia === 'en';
-      b.hidden = estado.aparencia.idioma !== 'ambos';
-      b.setAttribute('aria-pressed', String(en));
-      b.textContent = en ? _('Ver em português') : _('Ver em inglês');
     });
   }
 
@@ -824,7 +778,6 @@
 
   function telaRevisao() {
     const ap = estado.aparencia;
-    const idiomasSite = Tema.IDIOMAS || I18n.IDIOMAS;
     return `
       <div class="revisao-barra">
         <div class="dispositivos" role="group" aria-label="${esc(_('Tamanho da tela'))}">
@@ -873,9 +826,6 @@
           </label>
           <label class="ajuste">${_('Modo escuro')}
             <select data-aparencia="escuro">${Tema.ESCURO.map(e => `<option value="${e.id}"${ap.escuro === e.id ? ' selected' : ''}>${esc(_(e.nome))}</option>`).join('')}</select>
-          </label>
-          <label class="ajuste">${_('Idioma')}
-            <select data-aparencia="idioma">${idiomasSite.map(i => `<option value="${i.id}"${(ap.idioma || 'pt') === i.id ? ' selected' : ''}>${esc(i.nome)}</option>`).join('')}</select>
           </label>
         </div>
       </div>
@@ -1178,8 +1128,8 @@
       aparencia: estado.aparencia,
       fonte: estado.fonte,
       perfil: {
-        nome: p.nome, subtitulo: p.subtitulo, subtituloEn: p.subtituloEn, bio: p.bio, bioEn: p.bioEn, links: p.links,
-        interesses: p.interesses, interessesEn: p.interessesEn, interessesEditados: p.interessesEditados,
+        nome: p.nome, subtitulo: p.subtitulo, bio: p.bio, links: p.links,
+        interesses: p.interesses, interessesEditados: p.interessesEditados,
       },
       publicacao: { usuario: usuarioAtual() },
       secoes: estado.secoes
@@ -1263,12 +1213,9 @@
       perfil: Object.assign(base.perfil, {
         nome: String(p.nome || ''),
         subtitulo: String(p.subtitulo || ''),
-        subtituloEn: String(p.subtituloEn || ''),
         bio: String(p.bio || ''),
-        bioEn: String(p.bioEn || ''),
         links: Object.assign({}, p.links),
         interesses: lista(p.interesses),
-        interessesEn: lista(p.interessesEn),
         interessesEditados: !!p.interessesEditados,
         foto: /^data:image\/(png|jpe?g|webp|gif);base64,/.test(src) ? src : '',
       }),
@@ -1330,7 +1277,6 @@
   function telaConteudo() {
     const p = estado.perfil;
     const f = estado.fonte;
-    const ambos = estado.aparencia.idioma === 'ambos'; // campos em inglês ao lado dos em português
     const primeiraProducao = estado.secoes.findIndex(s => s.tipo === 'producao');
     return `
       ${f ? `<p class="origem">${f.atualizadoEm ? _('Dados do Lattes atualizado em {data}.', { data: esc(f.atualizadoEm) }) : _('Dados do Lattes.')}
@@ -1345,11 +1291,6 @@
           <label for="subtitulo">${_('Linha abaixo do nome')}</label>
           <input id="subtitulo" data-perfil="subtitulo" value="${esc(p.subtitulo)}"
             placeholder="${esc(Site.subtituloPadrao(estado) || _('Ex.: Professora na Universidade X'))}">
-          ${ambos ? `
-          <label for="subtitulo-en" class="rotulo-en">${_('Em inglês')}</label>
-          <input id="subtitulo-en" data-perfil="subtituloEn" value="${esc(p.subtituloEn || '')}" lang="en"
-            placeholder="${esc(_('Ex.: Professor at University X'))}">
-          ${botaoTraduzir('subtituloEn')}` : ''}
         </div>
       </section>
 
@@ -1366,15 +1307,6 @@
             <button type="button" class="link" data-acao="restaurar-bio" id="restaurar-bio"${podeRestaurarBio() ? '' : ' hidden'}>${_('Voltar ao texto do Lattes')}</button>
           </span>
         </div>
-        ${ambos ? `
-        <h3 id="rotulo-bio-en" class="rotulo-en">${_('Em inglês')}</h3>
-        <p class="dica">${_('A versão que o visitante vê ao escolher EN. Se ficar vazia, o site mostra o texto em português.')}</p>
-        <div id="bio-en" class="editor-bio" contenteditable="true" role="textbox" aria-multiline="true"
-          aria-labelledby="rotulo-bio-en" spellcheck="true" lang="en">${htmlEditorBio(p.bioEn)}</div>
-        <div class="rodape-campo">
-          <span id="contador-en">${_('{n} caracteres', { n: Site.textoPuro(p.bioEn || '').length })}</span>
-          ${botaoTraduzir('bioEn')}
-        </div>` : ''}
       </section>
 
       <section class="cartao">
@@ -1382,11 +1314,6 @@
         <p class="dica">${_('Três a seis temas, separados por vírgula. Aparecem no início do site, ao lado da sua formação.')}${f ? ' ' + _('Vieram das áreas de atuação do seu Lattes.') : ''}</p>
         <input data-perfil="interesses" aria-labelledby="rotulo-interesses" value="${esc((p.interesses || []).join(', '))}"
           placeholder="${esc(_('Ex.: Direito e Desenvolvimento, Regulação, Métodos empíricos'))}">
-        ${ambos ? `
-        <label class="rotulo-en campo-en">${_('Em inglês')}
-          <input data-perfil="interessesEn" value="${esc((p.interessesEn || []).join(', '))}" lang="en"
-            placeholder="${esc(_('Ex.: Law and Development, Regulation, Empirical methods'))}"></label>
-        <div class="rodape-campo">${botaoTraduzir('interessesEn')}</div>` : ''}
       </section>
 
       <section class="cartao">
@@ -1478,11 +1405,6 @@
         <label>${_('Link')} <input type="url" data-destaque-campo="link" value="${esc(it.link || '')}" placeholder="${esc(_('https:// (opcional)'))}"></label>
         <label class="campo-largo">${livre ? _('Sobre') : _('Sobre o trabalho')}
           <textarea data-destaque-campo="dTexto" rows="2" placeholder="${esc(_('Em uma ou duas frases: do que trata e o que mostra.'))}">${esc(c.texto)}</textarea></label>
-        ${estado.aparencia.idioma === 'ambos' ? `
-        ${livre ? `<label class="rotulo-en">${_('Tipo em inglês')} <input data-destaque-campo="categoriaEn" value="${esc(it.categoriaEn || '')}" lang="en" placeholder="${esc(_('Software, project, award…'))}"></label>` : ''}
-        <label class="campo-largo rotulo-en">${_('Em inglês')}
-          <textarea data-destaque-campo="dTextoEn" rows="2" lang="en" placeholder="${esc(_('The same sentence in English (optional).'))}">${esc(it.dTextoEn || '')}</textarea></label>
-        <div class="campo-largo">${botaoTraduzir('dTextoEn', chave)}</div>` : ''}
       </li>`;
   }
 
@@ -1606,53 +1528,6 @@
   }
 
   let timerAviso;
-  // ---------- tradução automática dos campos em inglês (modelo no navegador; ver traducao.js) ----------
-
-  function botaoTraduzir(alvo, item) {
-    return `<span class="traduzir"><button type="button" class="link" data-traduzir="${alvo}"${item ? ` data-item="${item}"` : ''}>${_('Traduzir com IA')}</button><span class="estado-traducao" role="status"></span></span>`;
-  }
-
-  async function traduzirCampo(b) {
-    const alvo = b.dataset.traduzir;
-    const status = b.nextElementSibling;
-    const mostrar = m => { if (status) status.textContent = m; };
-    let origem;
-    let aplicar;
-    if (alvo === 'subtituloEn') {
-      origem = estado.perfil.subtitulo || Site.subtituloPadrao(estado);
-      aplicar = t => { estado.perfil.subtituloEn = t; const i = document.getElementById('subtitulo-en'); if (i) i.value = t; };
-    } else if (alvo === 'bioEn') {
-      origem = estado.perfil.bio;
-      aplicar = t => { const ed = document.getElementById('bio-en'); if (ed) ed.innerHTML = htmlEditorBio(t); atualizarBio(); };
-    } else if (alvo === 'interessesEn') {
-      origem = (estado.perfil.interesses || []).slice();
-      aplicar = arr => { estado.perfil.interessesEn = arr; const i = app.querySelector('input[data-perfil="interessesEn"]'); if (i) i.value = arr.join(', '); };
-    } else if (alvo === 'dTextoEn') {
-      const [si, ii] = b.dataset.item.split(':').map(Number);
-      const it = estado.secoes[si].itens[ii];
-      origem = it.dTexto || '';
-      aplicar = t => { it.dTextoEn = t; const ta = app.querySelector(`[data-destaque="${si}:${ii}"] textarea[data-destaque-campo="dTextoEn"]`); if (ta) ta.value = t; };
-    } else return;
-
-    if (!origem || (Array.isArray(origem) && !origem.length)) { mostrar(_('Preencha primeiro o texto em português.')); return; }
-    if (!Traducao.jaBaixado() && !confirm(_('Na primeira vez, o construtor baixa o tradutor ({mb} MB) para o seu navegador. Depois ele fica guardado e traduzir é rápido. O seu texto não sai do computador. Baixar agora?', { mb: Traducao.TAMANHO_MB }))) return;
-
-    app.querySelectorAll('[data-traduzir]').forEach(x => { x.disabled = true; });
-    mostrar(Traducao.pronto() ? _('Traduzindo…') : _('Preparando o tradutor…'));
-    try {
-      const r = await Traducao.traduzir(origem, (f, etapa) => {
-        mostrar(etapa === 'baixando' ? _('Baixando o tradutor… {p}%', { p: Math.round(f * 100) }) : _('Traduzindo…'));
-      });
-      aplicar(r);
-      salvar();
-      mostrar(_('Pronto. Revise: a tradução é automática.'));
-    } catch (err) {
-      mostrar(err.amigavel ? err.message : _('Não deu para traduzir agora.'));
-      if (err.causa) console.error(err.causa);
-    }
-    app.querySelectorAll('[data-traduzir]').forEach(x => { x.disabled = false; });
-  }
-
   function avisar(msg) {
     const el = document.getElementById('aviso-barra');
     if (!el) return;
@@ -1723,8 +1598,6 @@
   // ---------- eventos ----------
 
   app.addEventListener('click', e => {
-    const bt = e.target.closest('[data-traduzir]');
-    if (bt) { traduzirCampo(bt); return; }
     const b = e.target.closest('[data-acao]');
     if (!b) return;
     const [si, ii] = (b.dataset.item || '').split(':').map(Number);
@@ -1756,12 +1629,6 @@
 
       case 'tema-previa':
         ui.temaPrevia = ui.temaPrevia === 'escuro' ? 'claro' : 'escuro';
-        atualizarCores();
-        atualizarBotaoTema();
-        break;
-
-      case 'idioma-previa':
-        ui.idiomaPrevia = ui.idiomaPrevia === 'en' ? 'pt' : 'en';
         atualizarCores();
         atualizarBotaoTema();
         break;
@@ -1994,8 +1861,8 @@
       ap.fonteTexto = c.texto;
     } else ap[campo] = t.value;
     salvar();
-    // Organização, estrutura, foto e idioma mudam o HTML; cor e fonte só mudam variáveis CSS.
-    if (campo === 'layout' || campo === 'estrutura' || campo === 'foto' || campo === 'referencias' || campo === 'idioma') montarPrevia();
+    // Organização, estrutura e foto mudam o HTML; cor e fonte só mudam variáveis CSS.
+    if (campo === 'layout' || campo === 'estrutura' || campo === 'foto' || campo === 'referencias') montarPrevia();
     atualizarAparencia();
   }
 
@@ -2067,9 +1934,9 @@
       if (campo === 'link') trocarItem(si, ii); // o link também aparece na lista
       return;
     }
-    if (t.dataset.perfil === 'interesses' || t.dataset.perfil === 'interessesEn') {
-      estado.perfil[t.dataset.perfil] = t.value.split(/\s*,\s*/).map(s => s.trim()).filter(Boolean);
-      if (t.dataset.perfil === 'interesses') estado.perfil.interessesEditados = true;
+    if (t.dataset.perfil === 'interesses') {
+      estado.perfil.interesses = t.value.split(/\s*,\s*/).map(s => s.trim()).filter(Boolean);
+      estado.perfil.interessesEditados = true;
       salvar();
       return;
     }
@@ -2143,18 +2010,12 @@
     return partes.join('').replace(/\u00a0/g, ' ') /* espaço rígido que o editor às vezes insere */.replace(/\n{3,}/g, '\n\n').trim();
   }
 
-  // Guarda o que está nos dois editores (o em inglês só existe no site em ambos os idiomas).
   function atualizarBio() {
     const pt = document.getElementById('bio');
     if (!pt) return;
     estado.perfil.bio = serializarBio(pt);
     document.getElementById('contador').textContent = _('{n} caracteres', { n: Site.textoPuro(estado.perfil.bio).length });
     document.getElementById('restaurar-bio').hidden = !podeRestaurarBio();
-    const en = document.getElementById('bio-en');
-    if (en) {
-      estado.perfil.bioEn = serializarBio(en);
-      document.getElementById('contador-en').textContent = _('{n} caracteres', { n: Site.textoPuro(estado.perfil.bioEn).length });
-    }
     salvar();
   }
 

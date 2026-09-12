@@ -20,9 +20,11 @@ O construtor gera um único arquivo, `index.html`, com tudo dentro (textos, core
 
 O progresso fica salvo no navegador. Para editar depois, reabra o `index.html` gerado no construtor.
 
-O construtor está em português e em inglês (botões PT / EN no cabeçalho). O site gerado pode sair em português, em inglês ou **nos dois idiomas**: nesse caso, o visitante alterna com um botão PT/EN, o site começa no idioma do navegador dele, e a etapa Conteúdo ganha os campos em inglês (apresentação, linha abaixo do nome, interesses e textos dos destaques). O que ficar vazio em inglês cai no português.
+O construtor está em português e em inglês (botões PT / EN no cabeçalho). **O site gerado sai em português.**
 
-Cada campo em inglês tem o botão "Traduzir com IA": a tradução roda **dentro do navegador** (Transformers.js com o modelo Opus-MT `Xenova/opus-mt-ROMANCE-en`, ~108 MB baixados uma vez e guardados no cache). O modelo roda num Web Worker (a tela não trava), siglas são preservadas, nomes de instituição são traduzidos por regras ("Universidade Federal de Minas Gerais" → "Federal University of Minas Gerais"; ~45 nomes oficiais num dicionário), e os links da apresentação são mantidos. O texto não sai do computador; o resultado entra no campo para revisão. É o único ponto do construtor que acessa a internet (jsDelivr e Hugging Face), e só quando a pessoa clica. Os textos são escritos em português no código; as traduções ficam em blocos `I18n.registrar` no início de cada módulo (`js/i18n.js` explica o mecanismo).
+> **Site em inglês: estacionado.** O PageLab já gerou site em inglês e nos dois idiomas, com tradução por IA rodando dentro do navegador. Isso foi retirado em 2026-09-12 e está guardado em [`parked/`](parked/), com o código, o motivo e os números medidos em 214 currículos reais. Em resumo: rótulo e estrutura traduzem bem por regras, mas o conteúdo do Lattes não, e meia tradução é pior que nenhuma. Quem quiser retomar começa pelo [`parked/README.md`](parked/README.md).
+
+Os textos da interface são escritos em português no código; as traduções ficam em blocos `I18n.registrar` no início de cada módulo (`js/i18n.js` explica o mecanismo).
 
 ## Por que não lançar produções livremente?
 

@@ -36,7 +36,8 @@
   const IGNORADAS = /^(Endereco|EducacaoPopularizacaoCTA|PotencialInovacao)$/;
 
   // Em orientações e bancas, o subtítulo sozinho ("Mestrado") não diz nada; junta com o grupo.
-  // O terceiro campo é a tradução do prefixo, para o site em inglês.
+  // O terceiro campo é a tradução do prefixo, usada na interface do construtor em inglês
+  // (a tela de revisão mostra estes títulos). O site gerado sai só em português.
   const GRUPOS = [
     [/^Orientações e supervisões em andamento/i, 'Orientações em andamento', 'Ongoing advising'],
     [/^Orientações e supervisões concluídas/i, 'Orientações concluídas', 'Completed advising'],
@@ -45,7 +46,7 @@
   ];
 
   // Subtítulos que o Lattes usa nesses grupos. Os títulos compostos ("Bancas: Mestrado") são os
-  // que o site exibe; um subtítulo fora desta lista fica em português no site em inglês.
+  // que aparecem nas listas; um subtítulo fora desta lista fica em português na interface em inglês.
   const SUBTITULOS = {
     // orientações
     'Tese de doutorado': 'Doctoral dissertation',

@@ -5,10 +5,10 @@
 (function (raiz, fabrica) {
   const Tema = raiz.Tema || (typeof require === 'function' ? require('./tema.js') : null);
   const I18n = raiz.I18n || (typeof require === 'function' ? require('./i18n.js') : null);
-  const api = fabrica(Tema, I18n, raiz);
+  const api = fabrica(Tema, I18n);
   if (typeof module === 'object' && module.exports) module.exports = api;
   else raiz.Site = api;
-})(typeof self !== 'undefined' ? self : this, function (Tema, I18n, raiz) {
+})(typeof self !== 'undefined' ? self : this, function (Tema, I18n) {
   'use strict';
 
   const _ = I18n._;
@@ -64,6 +64,9 @@
     'Participação em bancas de comissões julgadoras': 'Comissões julgadoras',
   };
 
+  // O site gerado sai só em português, mas a interface do construtor continua em PT/EN e mostra
+  // estes rótulos na tela de revisão (títulos de seção e tipo de cada destaque). O resto das
+  // traduções do site saiu para parked/ quando o site em inglês foi estacionado.
   I18n.registrar({
     // títulos curtos das seções
     'Formação': 'Education',
@@ -125,68 +128,11 @@
     'Resumo expandido': 'Extended abstract',
     'Resumo': 'Abstract',
     'Apresentação': 'Talk',
-    // abas e blocos do início
-    'Início': 'Home',
-    'Trajetória': 'Background',
-    'Pesquisa': 'Research',
-    'Produção': 'Publications',
-    'Orientações': 'Advising',
-    'Destaques': 'Highlights',
-    'Interesses': 'Interests',
-    'Seções do site': 'Site sections',
-    // links do perfil (nomes próprios ficam iguais)
-    'E-mail': 'Email',
-    'Lattes': 'Lattes',
-    'ORCID': 'ORCID',
-    'Google Acadêmico': 'Google Scholar',
-    'LinkedIn': 'LinkedIn',
-    // cartões, listas e rodapé
-    'Foto de {nome}': 'Photo of {nome}',
-    'Ler a publicação': 'Read the paper',
-    'Baixar o PDF': 'Download the PDF',
-    'Acessar': 'Open',
+    // juntadores de coautoria, mostrados também na tela de revisão do construtor
     'com {coautores}': 'with {coautores}',
     '{a} e {b}': '{a} and {b}',
     'e mais {n}': 'and {n} more',
     'e mais outros': 'and others',
-    'Ver todos os {n}': 'See all {n}',
-    'Informações do Currículo Lattes, atualizado em {data}.': 'Data from the Lattes CV, updated on {data}.',
-    'Construído com {pagelab}.': 'Built with {pagelab}.',
-    'Orientação: {nome}': 'Advisor: {nome}',
-    'Coorientação: {nome}': 'Co-advisor: {nome}',
-    // conteúdo de exemplo da prévia
-    'Seu Nome': 'Your Name',
-    'Seu cargo · Sua instituição': 'Your role · Your institution',
-    'Aqui entra um texto curto sobre você: o que pesquisa, onde trabalha, o que te interessa. Na etapa de conteúdo, ele vem do resumo do seu Lattes, e você reescreve como quiser.':
-      'A short text about you goes here: what you research, where you work, what interests you. In the content step it comes from your Lattes summary, and you rewrite it as you like.',
-    'Um tema de pesquisa': 'A research topic',
-    'Outro tema': 'Another topic',
-    'Mais um': 'One more',
-    'SOBRENOME, Nome': 'SURNAME, Name',
-    'COAUTORA, Ana': 'COAUTHOR, Ana',
-    'Doutorado em Área do Conhecimento': 'PhD in Field of Knowledge',
-    'Mestrado em Área do Conhecimento': "Master's in Field of Knowledge",
-    'Universidade Federal': 'Federal University',
-    'Universidade Estadual': 'State University',
-    'Título da tese': 'Dissertation title',
-    'Título do seu artigo mais importante': 'Title of your most important article',
-    'Nome da Revista': 'Journal Name',
-    'Uma ou duas frases sobre o trabalho: do que trata e o que ele mostra.': 'One or two sentences about the work: what it is about and what it shows.',
-    'Um livro que você quer mostrar': 'A book you want to show',
-    'Editora': 'Publisher',
-    'Nome do projeto de pesquisa que você coordena': 'Name of the research project you lead',
-    'Coordenação': 'Coordinator',
-    // projetos: descrição, integrantes e financiadores
-    'Continuar lendo': 'Keep reading',
-    'Integrantes': 'Team',
-    'Financiamento': 'Funding',
-    'coordenador': 'coordinator',
-    'coordenadora': 'coordinator',
-    'Coordenador': 'Coordinator',
-    'Coordenadora': 'Coordinator',
-    'Integrante': 'Member',
-    '2024 - Atual': '2024 - Present',
-    'Título de um artigo publicado número {n}': 'Title of a published article number {n}',
   });
 
   const LINKS = [['email', 'E-mail'], ['lattes', 'Lattes'], ['orcid', 'ORCID'], ['scholar', 'Google Acadêmico'], ['linkedin', 'LinkedIn']];
@@ -225,43 +171,38 @@
 
   // ---------- estado do construtor -> dados do site ----------
 
-  // `idioma` "en" usa os campos em inglês que a pessoa preencheu (bioEn, subtituloEn, interessesEn,
-  // dTextoEn, categoriaEn); o que estiver vazio cai no português, para o site nunca ficar com buraco.
-  function dados(estado, idioma = 'pt') {
+  function dados(estado) {
     const p = estado.perfil;
-    const en = idioma === 'en';
     const lista = v => (v || []).map(i => String(i).trim()).filter(Boolean);
-    const interessesPt = lista(p.interesses);
-    const interesses = en && lista(p.interessesEn).length ? lista(p.interessesEn) : interessesPt;
+    const interesses = lista(p.interesses);
     const secoes = [];
     const destaques = [];
     for (const s of estado.secoes) {
-      if (s.id === 'AreasAtuacao' && interessesPt.length) continue; // já aparecem como interesses, no início
+      if (s.id === 'AreasAtuacao' && interesses.length) continue; // já aparecem como interesses, no início
       const itens = s.itens.filter(i => i.manter);
       if (!itens.length) continue;
-      const cartao = i => Object.assign({}, i, en ? { dTexto: i.dTextoEn || i.dTexto } : {});
       // Destaques livres (fora do Lattes: um software, um projeto, um site) só existem como cartões.
-      // A categoria é texto da pessoa, e por isso não se traduz (categoriaLivre).
+      // A categoria é texto da pessoa (categoriaLivre), e não um rótulo do construtor.
       if (s.tipo === 'livre') {
         itens.forEach(i => {
           if (!i.destaque || !(i.dTitulo || '').trim()) return;
-          destaques.push(Object.assign(cartao(i), { categoria: ((en && i.categoriaEn) || i.categoria || '').trim(), categoriaLivre: true }));
+          destaques.push(Object.assign({}, i, { categoria: (i.categoria || '').trim(), categoriaLivre: true }));
         });
         continue;
       }
-      itens.forEach(i => { if (i.destaque) destaques.push(Object.assign(cartao(i), { categoria: tipoDe(s.titulo) })); });
+      itens.forEach(i => { if (i.destaque) destaques.push(Object.assign({}, i, { categoria: tipoDe(s.titulo) })); });
       secoes.push({ titulo: TITULOS_CURTOS[s.titulo] || s.titulo, tipo: s.tipo, aba: abaDaSecao(s.id), itens });
     }
     // Na ordem que a pessoa escolheu; sem ordem definida, os mais recentes primeiro.
     destaques.sort((a, b) => ordemDe(a) - ordemDe(b) || (b.periodo || '').localeCompare(a.periodo || ''));
     return {
       nome: p.nome,
-      subtitulo: (en && p.subtituloEn) || p.subtitulo || subtituloPadrao(estado),
+      subtitulo: p.subtitulo || subtituloPadrao(estado),
       foto: p.foto,
       fotoProporcao: p.fotoProporcaoNatural || 0, // largura/altura da imagem original
-      bio: (en && p.bioEn) || p.bio,
+      bio: p.bio,
       interesses,
-      formacao: resumoFormacao(estado.secoes, idioma),
+      formacao: resumoFormacao(estado.secoes),
       links: LINKS.filter(([id]) => p.links && p.links[id]).map(([id, rotulo]) => ({
         rotulo,
         url: id === 'email' ? 'mailto:' + p.links[id].trim() : urlSegura(p.links[id]),
@@ -274,96 +215,27 @@
 
   // Os títulos acadêmicos que a pessoa manteve, resumidos para o início do site:
   // "Doutorado em Direito" / "Universidade X, 2019–2023". Até três, sem ensino médio ou cursos curtos.
-  // Em inglês, só o começo do título é traduzido ("Doutorado em Direito" -> "PhD in Direito").
-  const GRAUS_EN = [
-    [/^Doutorado em andamento em\s+/i, 'PhD (in progress) in '],
-    [/^Mestrado em andamento em\s+/i, "Master's (in progress) in "],
-    [/^Pós-Doutorado(\s+em\s+)?/i, 'Postdoctoral research in '],
-    [/^Doutorado em\s+/i, 'PhD in '],
-    [/^Mestrado profissional em\s+/i, "Professional master's in "],
-    [/^Mestrado em\s+/i, "Master's in "],
-    [/^Livre-docência em\s+/i, 'Habilitation in '],
-    [/^Especialização em\s+/i, 'Specialization in '],
-    [/^Aperfeiçoamento em\s+/i, 'Advanced training in '],
-    [/^Graduação em andamento em\s+/i, "Bachelor's (in progress) in "],
-    [/^Graduação em\s+/i, "Bachelor's in "],
-    // Cursos interrompidos: o Lattes escreve "Graduação interrompida em 2015 em Direito".
-    [/^Doutorado interrompido em \d{4} em\s+/i, 'PhD (interrupted) in '],
-    [/^Mestrado interrompido em \d{4} em\s+/i, "Master's (interrupted) in "],
-    [/^Graduação interrompida em \d{4} em\s+/i, "Bachelor's (interrupted) in "],
-    [/^Especialização interrompida em \d{4} em\s+/i, 'Specialization (interrupted) in '],
-  ];
-
-  // A área do título é o ponto fraco da tradução: o vocabulário é aberto (toda área que existe no
-  // Brasil) e as regras de traducao.js, feitas para nome de instituição, conhecem só as comuns.
-  // Por isso vale a tradução inteira ou nada: "Doutorado em Zootecnia" fica em português, em vez
-  // de virar meia frase que parece defeito. Traduzir o resto é trabalho do modelo, sob revisão.
-  function areaEmIngles(area) {
-    let T = raiz.Traducao;
-    if (!T && typeof require === 'function') { try { T = require('./traducao.js'); } catch (e) { T = null; } }
-    if (!T || !T.areaEmInglesInteira || !area) return area;
-    return T.areaEmInglesInteira(area) || area;
-  }
-
-  function resumoFormacao(secoes, idioma = 'pt') {
+  function resumoFormacao(secoes) {
     const s = (secoes || []).find(x => x.id === 'FormacaoAcademicaTitulacao');
     if (!s) return [];
-    const grau = t => {
-      if (idioma !== 'en') return t;
-      const g = GRAUS_EN.find(([re]) => re.test(t));
-      if (!g) return t;
-      const area = t.replace(g[0], '');
-      return (g[1] + areaEmIngles(area)).replace(/in $/, '').trim();
-    };
     return s.itens
       .filter(i => i.manter && i.titulo && !/^Ensino (M[ée]dio|Fundamental)|^Curso t[ée]cnico|^Aperfei/i.test(i.titulo))
       .slice(0, 3)
       .map(i => ({
-        titulo: grau(capsParaTitulo(i.titulo.replace(/\s*\(.*?\)\s*$/, ''))),
+        titulo: capsParaTitulo(i.titulo.replace(/\s*\(.*?\)\s*$/, '')),
         orientador: i.orientador || '',
-        onde: [local(i.detalhe, idioma), (i.periodo || '').replace(/\s*-\s*/, '–')].filter(Boolean).join(', '),
+        onde: [local(i.detalhe), (i.periodo || '').replace(/\s*-\s*/, '–')].filter(Boolean).join(', '),
       }));
   }
 
   // O Lattes guarda a instituição como "Nome, SIGLA, País" (o país só quando é fora do Brasil).
-  // A sigla não diz nada a quem lê o site, então sai; o nome e o país ficam, traduzidos no inglês.
-  const PAISES_EN = {
-    'Estados Unidos': 'United States', 'França': 'France', 'Alemanha': 'Germany',
-    'Holanda': 'Netherlands', 'Países Baixos': 'Netherlands', 'Grécia': 'Greece',
-    'Inglaterra': 'England', 'Grã-Bretanha': 'Great Britain', 'Reino Unido': 'United Kingdom',
-    'Itália': 'Italy', 'Hungria': 'Hungary', 'Colômbia': 'Colombia', 'Canadá': 'Canada',
-    'Austrália': 'Australia', 'Áustria': 'Austria', 'Austria': 'Austria',
-    'Suíça': 'Switzerland', 'Suiça': 'Switzerland', 'Finlândia': 'Finland', 'Japão': 'Japan',
-    'México': 'Mexico', 'Bélgica': 'Belgium', 'Espanha': 'Spain', 'Brasil': 'Brazil',
-    'Dinamarca': 'Denmark', 'Suécia': 'Sweden', 'Noruega': 'Norway', 'Irlanda': 'Ireland',
-    'Israel': 'Israel', 'China': 'China', 'Índia': 'India', 'África do Sul': 'South Africa',
-  };
-
+  // A sigla não diz nada a quem lê o site, então sai; o nome e o país ficam.
   // Uma sigla é uma parte só de maiúsculas, números e pontuação: "USP", "YLS", "PARIS 1".
   const SIGLA = /^[A-ZÀ-Ú0-9][A-ZÀ-Ú0-9\s/.-]*$/;
 
-  function local(detalhe, idioma) {
+  function local(detalhe) {
     const partes = String(detalhe || '').split(',').map(p => p.trim()).filter(Boolean);
-    if (!partes.length) return '';
-    const en = idioma === 'en';
-    const saida = [en ? instituicaoEmIngles(partes[0]) : partes[0]];
-    for (const p of partes.slice(1)) {
-      if (SIGLA.test(p)) continue;
-      saida.push(en ? PAISES_EN[p] || p : p);
-    }
-    return saida.join(', ');
-  }
-
-  // As regras de tradução de nome de instituição moram em traducao.js, que é carregado depois
-  // deste arquivo: a busca tem de ser na hora de usar, não na hora de definir o módulo.
-  function instituicaoEmIngles(nome) {
-    let T = raiz.Traducao;
-    if (!T && typeof require === 'function') { try { T = require('./traducao.js'); } catch (e) { T = null; } }
-    if (!T || !T.instituicaoEmIngles) return nome;
-    const en = T.instituicaoEmIngles(nome);
-    // A tradução por regras às vezes deixa um conectivo solto na frente ("e Capodistríaca National
-    // University of Atenas"). Aí o original é melhor que o remendo.
-    return /^\p{Ll}/u.test(en) ? nome : en;
+    return partes.filter((p, i) => i === 0 || !SIGLA.test(p)).join(', ');
   }
 
   // Sugestão de interesses: as áreas de atuação do Lattes, já reduzidas ao termo mais específico.
@@ -392,13 +264,10 @@
     return it ? [it.titulo, (it.detalhe || '').split(',')[0]].filter(Boolean).join(' · ') : '';
   }
 
-  // Conteúdo de exemplo para a prévia, antes de a pessoa trazer o Lattes.
-  // `idioma` é o do site gerado (a aparência, ou só o id): os textos são escritos aqui, antes de html();
-  // sem ele, vale o idioma atual do construtor. Títulos de seção, categorias e rótulos de link ficam
-  // como chaves em português: html() traduz na hora de escrever.
-  function exemplo(perfil, idioma) {
-    const id = idioma && typeof idioma === 'object' ? idioma.idioma : idioma;
-    return I18n.com(id || I18n.idioma(), () => {
+  // Conteúdo de exemplo para a prévia, antes de a pessoa trazer o Lattes. O site sai em português,
+  // qualquer que seja o idioma da interface do construtor.
+  function exemplo(perfil) {
+    return I18n.com('pt', () => {
       const autoria = _('SOBRENOME, Nome');
       const coautora = _('COAUTORA, Ana');
       const doutorado = _('Doutorado em Área do Conhecimento');
@@ -409,14 +278,13 @@
       const revista = _('Nome da Revista');
       const livro = _('Um livro que você quer mostrar');
       const editora = _('Editora');
-      const en = I18n.idioma() === 'en';
-      const interesses = (en && perfil.interessesEn && perfil.interessesEn.length) ? perfil.interessesEn : perfil.interesses;
+      const interesses = perfil.interesses;
       return {
         nome: perfil.nome || _('Seu Nome'),
-        subtitulo: (en && perfil.subtituloEn) || perfil.subtitulo || _('Seu cargo · Sua instituição'),
+        subtitulo: perfil.subtitulo || _('Seu cargo · Sua instituição'),
         foto: perfil.foto,
         fotoProporcao: perfil.fotoProporcaoNatural || 0,
-        bio: (en && perfil.bioEn) || perfil.bio || _('Aqui entra um texto curto sobre você: o que pesquisa, onde trabalha, o que te interessa. Na etapa de conteúdo, ele vem do resumo do seu Lattes, e você reescreve como quiser.'),
+        bio: perfil.bio || _('Aqui entra um texto curto sobre você: o que pesquisa, onde trabalha, o que te interessa. Na etapa de conteúdo, ele vem do resumo do seu Lattes, e você reescreve como quiser.'),
         links: [{ rotulo: 'E-mail', url: '#' }, { rotulo: 'Lattes', url: '#' }, { rotulo: 'ORCID', url: '#' }],
         interesses: interesses && interesses.length ? interesses : [_('Um tema de pesquisa'), _('Outro tema'), _('Mais um')],
         formacao: [
@@ -459,67 +327,51 @@
 
   // ---------- dados do site -> HTML ----------
 
-  // Toda a geração roda com o idioma do site ativo: os _() daqui para baixo seguem `ap.idioma`,
-  // e não o idioma do construtor.
-  // `d` é o conteúdo de um idioma (dados() ou exemplo()) ou um mapa { pt, en }. Com ap.idioma "ambos",
-  // o site sai com as duas versões e um botão PT/EN; senão, só a versão do idioma escolhido.
+  // O site gerado sai em português: os _() daqui para baixo rodam sempre em pt, e não no idioma
+  // da interface do construtor. (O site em inglês foi estacionado; ver parked/README.md.)
   function html(d, aparencia, opcoes = {}) {
     const ap = Tema.normalizar(aparencia);
-    const mapa = d && (d.pt || d.en) ? d : null;
-    if (ap.idioma === 'ambos') {
-      const pt = mapa ? mapa.pt || mapa.en : d;
-      const en = mapa ? mapa.en || mapa.pt : d;
-      return I18n.com('pt', () => gerar(pt, ap, opcoes, [['pt', pt], ['en', en]]));
-    }
-    const um = mapa ? mapa[ap.idioma] || mapa.pt || mapa.en : d;
-    return I18n.com(ap.idioma, () => gerar(um, ap, opcoes, [[ap.idioma, um]]));
+    return I18n.com('pt', () => gerar(d, ap, opcoes));
   }
 
-  // Um site inteiro (cabeçalho, corpo, rodapé) no idioma ativo. `seletor` é o botão PT/EN, quando há.
-  function corpoSite(d, ap, opcoes, seletor) {
+  function corpoSite(d, ap, opcoes) {
     const abas = ap.layout === 'abas' ? montarAbas(d, ap.estrutura, ap.referencias === 'completas') : null;
     const alvo = opcoes.previa ? ' target="_self"' : ''; // na prévia, os outros links abrem fora dela
     const nav = abas ? `<nav class="abas" aria-label="${esc(_('Seções do site'))}">${abas.map(a => `<a href="#${a.id}"${alvo}>${esc(a.nome)}</a>`).join('')}</nav>` : '';
     const conteudo = abas
       ? abas.map(a => `<div class="aba aba-${a.id}">${a.html}</div>`).join('')
-      : (ap.estrutura === 'topo' ? apresentacao(d, seletor) : inicio(d)) + d.secoes.map(s => secao(s, ap.referencias === 'completas', d.nome)).join('');
+      : (ap.estrutura === 'topo' ? apresentacao(d) : inicio(d)) + d.secoes.map(s => secao(s, ap.referencias === 'completas', d.nome)).join('');
     const classes = ['site', `estrutura-${ap.estrutura}`, `foto-${ap.foto}`, abas ? 'com-abas' : ''].join(' ');
 
     let corpo;
     if (ap.estrutura === 'topo') {
       corpo = `
   <header class="barra-topo"><div class="barra-topo-conteudo">
-    <a class="marca" href="#${abas ? abas[0].id : ''}"${alvo}>${esc(d.nome)}</a>${nav}${seletor}
+    <a class="marca" href="#${abas ? abas[0].id : ''}"${alvo}>${esc(d.nome)}</a>${nav}
   </div></header>
   <div class="pagina"><main class="principal">${conteudo}</main>${rodape(d)}</div>`;
     } else if (ap.estrutura === 'central') {
       corpo = `
-  <div class="pagina">${perfil(d, seletor)}${nav}<main class="principal">${conteudo}</main>${rodape(d)}</div>`;
+  <div class="pagina">${perfil(d)}${nav}<main class="principal">${conteudo}</main>${rodape(d)}</div>`;
     } else {
       corpo = `
   <div class="pagina">
-    <aside class="lateral">${perfil(d, seletor)}${nav}</aside>
+    <aside class="lateral">${perfil(d)}${nav}</aside>
     <main class="principal">${conteudo}</main>${rodape(d)}
   </div>`;
     }
     return { corpo, abas, classes };
   }
 
-  function gerar(d, ap, opcoes, versoes) {
+  function gerar(d, ap, opcoes) {
     // Prévia: fontes vindas da pasta fonts/ do construtor. Arquivo final: fontes embutidas (fontesCss).
     const fontes = opcoes.previa ? `<style>${Tema.cssFontes(opcoes.baseFontes)}</style>` : (opcoes.fontesCss ? `<style>${opcoes.fontesCss}</style>` : '');
-    const ambos = versoes.length > 1;
-    const seletor = ambos
-      ? `<nav class="idioma-site" aria-label="Idioma / Language">${versoes.map(([id]) =>
-        `<button type="button" data-idioma="${id}" lang="${I18n.lang(id)}" aria-pressed="${id === 'pt'}">${id.toUpperCase()}</button>`).join('')}</nav>`
-      : '';
-    const partes = versoes.map(([id, dv]) => [id, I18n.com(id, () => corpoSite(dv, ap, opcoes, seletor))]);
-    const abas = partes[0][1].abas;
-    // A foto entra uma vez só, como variável CSS: as versões em dois idiomas compartilham a mesma imagem.
+    const c = corpoSite(d, ap, opcoes);
+    const abas = c.abas;
     const foto = d.foto ? `<style id="foto">${cssFoto(d, ap)}</style>` : '';
 
     return `<!doctype html>
-<html lang="${I18n.lang(versoes[0][0])}">
+<html lang="pt-BR">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -533,27 +385,16 @@ ${opcoes.previa ? '<base target="_blank">' : ''}
 ${fontes}
 <style id="tema">${Tema.css(ap)}</style>
 ${foto}
-<style>${CSS}${abas ? cssAbas(abas) : ''}${ambos ? CSS_IDIOMAS : ''}${opcoes.previa ? 'html{scrollbar-width:thin}' : ''}</style>
+<style>${CSS}${abas ? cssAbas(abas) : ''}${opcoes.previa ? 'html{scrollbar-width:thin}' : ''}</style>
 </head>
 <body>
 ${abas ? abas.map(a => `<span class="alvo" id="${a.id}"></span>`).join('') : ''}
-${partes.map(([id, c]) => `<div class="${c.classes}${ambos ? ` versao versao-${id}` : ''}" lang="${I18n.lang(id)}">${c.corpo}
-</div>`).join('\n')}
-${ambos ? SCRIPT_IDIOMAS : ''}
+<div class="${c.classes}">${c.corpo}
+</div>
 ${opcoes.dadosConstrutor ? `<script type="application/json" id="dados-do-construtor">${JSON.stringify(opcoes.dadosConstrutor).replace(/</g, '\\u003c')}</script>` : ''}
 </body>
 </html>`;
   }
-
-  // Site em dois idiomas: sem JavaScript, fica o português; com ele, começa no idioma do navegador
-  // do visitante e lembra a escolha do botão (no próprio navegador dele, sem enviar nada).
-  const CSS_IDIOMAS = `
-html[data-idioma="en"] .versao-pt{display:none}
-html:not([data-idioma="en"]) .versao-en{display:none}`;
-  const SCRIPT_IDIOMAS = `<script>(function(){var h=document.documentElement,k='pagelab-idioma',s=null;try{s=localStorage.getItem(k)}catch(e){}
-function ap(x){h.setAttribute('data-idioma',x);h.lang=x==='en'?'en':'pt-BR';var b=document.querySelectorAll('.idioma-site button');for(var i=0;i<b.length;i++)b[i].setAttribute('aria-pressed',String(b[i].getAttribute('data-idioma')===x))}
-ap(s==='en'||s==='pt'?s:(/^pt/i.test(navigator.language||'')?'pt':'en'));
-document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('.idioma-site button');if(!b)return;var x=b.getAttribute('data-idioma');try{localStorage.setItem(k,x)}catch(e2){}ap(x)})})()</script>`;
 
   // A foto (uma vez só, como variável) e, se a pessoa ajustou o zoom, o tamanho da imagem dentro do quadro.
   // Zoom 1 equivale a "cover": a largura da imagem em % do quadro é max(100, proporção da foto / proporção do quadro).
@@ -578,12 +419,11 @@ document.addEventListener('click',function(e){var b=e.target.closest&&e.target.c
     return 'data:image/svg+xml,' + encodeURIComponent(svg);
   }
 
-  function perfil(d, seletor = '') {
+  function perfil(d) {
     return `
     <header class="perfil">
       ${d.foto ? `<div class="foto" role="img" aria-label="${_('Foto de {nome}', { nome: esc(d.nome) })}"></div>` : ''}
       <div class="perfil-texto">
-        ${seletor}
         <h1>${esc(d.nome)}</h1>
         ${d.subtitulo ? `<p class="subtitulo">${esc(d.subtitulo)}</p>` : ''}
         ${d.links.length ? `<ul class="links">${d.links.map(l => `<li><a href="${esc(l.url)}">${esc(_(l.rotulo))}</a></li>`).join('')}</ul>` : ''}
@@ -592,8 +432,7 @@ document.addEventListener('click',function(e){var b=e.target.closest&&e.target.c
   }
 
   // Estrutura "menu no topo": perfil à esquerda e o texto à direita, separados por uma linha.
-  function apresentacao(d, seletor) {
-    // No menu no topo, o botão PT/EN fica na barra, não no perfil.
+  function apresentacao(d) {
     return `<div class="apresentacao">${perfil(d)}<div class="apresentacao-texto">${inicio(d)}</div></div>`;
   }
 
@@ -896,10 +735,6 @@ h2::before{content:"";flex:none;width:1rem;height:.22rem;border-radius:2px;backg
 /* Foto: --foto-largura e --foto-proporcao existem só se a pessoa ajustou o tamanho na revisão;
    senão valem os padrões de cada estrutura. Nunca passa da largura disponível. */
 .foto{flex:none;display:block;max-width:100%;height:auto;background:var(--foto-src) var(--foto-posicao,50% 30%)/var(--foto-tamanho,cover) no-repeat var(--superficie)}
-.idioma-site{display:inline-flex;gap:.1rem;margin-bottom:.7rem;padding:.15rem;border:1px solid var(--borda);border-radius:999px;background:var(--superficie)}
-.idioma-site button{padding:.15rem .6rem;border:0;border-radius:999px;background:none;color:var(--suave);font:inherit;font-size:.76rem;font-weight:700;letter-spacing:.04em;cursor:pointer}
-.idioma-site button[aria-pressed="true"]{background:var(--acento);color:var(--sobre-acento)}
-.barra-topo .idioma-site{margin:0 0 0 1rem}
 .foto-redonda .foto{width:var(--foto-largura,120px);aspect-ratio:1;border-radius:50%;border:4px solid var(--fundo);box-shadow:0 0 0 2px var(--acento)}
 .foto-retangular .foto{width:var(--foto-largura,200px);aspect-ratio:var(--foto-proporcao,1.5);border-radius:6px}
 .subtitulo{margin:.45rem 0 0;color:var(--suave);font-size:1.05rem}
