@@ -5,10 +5,10 @@
 (function (raiz, fabrica) {
   const Tema = raiz.Tema || (typeof require === 'function' ? require('./tema.js') : null);
   const I18n = raiz.I18n || (typeof require === 'function' ? require('./i18n.js') : null);
-  const api = fabrica(Tema, I18n);
+  const api = fabrica(Tema, I18n, raiz);
   if (typeof module === 'object' && module.exports) module.exports = api;
   else raiz.Site = api;
-})(typeof self !== 'undefined' ? self : this, function (Tema, I18n) {
+})(typeof self !== 'undefined' ? self : this, function (Tema, I18n, raiz) {
   'use strict';
 
   const _ = I18n._;
@@ -27,6 +27,7 @@
     'Projetos de extensão': 'Projetos de extensão',
     'Projetos de ensino': 'Projetos de ensino',
     'Outros Projetos': 'Outros projetos',
+    'Projetos de desenvolvimento': 'Projetos de desenvolvimento',
     'Áreas de atuação': 'Áreas de atuação',
     'Idiomas': 'Idiomas',
     'Prêmios e títulos': 'Prêmios e títulos',
@@ -74,6 +75,14 @@
     'Projetos de extensão': 'Outreach projects',
     'Projetos de ensino': 'Teaching projects',
     'Outros projetos': 'Other projects',
+    'Projetos de desenvolvimento': 'Development projects',
+    // categorias de produção que só aparecem em alguns currículos
+    'Outras produções artísticas/culturais': 'Other artistic/cultural works',
+    'Programas de computador sem registro': 'Unregistered software',
+    'Produtos tecnológicos': 'Technological products',
+    'Artes Visuais': 'Visual arts',
+    'Artes Cênicas': 'Performing arts',
+    'Demais trabalhos': 'Other works',
     'Áreas de atuação': 'Fields',
     'Idiomas': 'Languages',
     'Prêmios e títulos': 'Awards',
@@ -294,9 +303,49 @@
       .map(i => ({
         titulo: grau(capsParaTitulo(i.titulo.replace(/\s*\(.*?\)\s*$/, ''))),
         orientador: i.orientador || '',
-        // "Fundação Getúlio Vargas, FGV" -> "Fundação Getúlio Vargas"; períodos "2019 - 2021" -> "2019–2021"
-        onde: [(i.detalhe || '').replace(/,\s*[A-ZÀ-Ú][A-ZÀ-Ú0-9\/.-]*\s*$/, '').trim(), (i.periodo || '').replace(/\s*-\s*/, '–')].filter(Boolean).join(', '),
+        onde: [local(i.detalhe, idioma), (i.periodo || '').replace(/\s*-\s*/, '–')].filter(Boolean).join(', '),
       }));
+  }
+
+  // O Lattes guarda a instituição como "Nome, SIGLA, País" (o país só quando é fora do Brasil).
+  // A sigla não diz nada a quem lê o site, então sai; o nome e o país ficam, traduzidos no inglês.
+  const PAISES_EN = {
+    'Estados Unidos': 'United States', 'França': 'France', 'Alemanha': 'Germany',
+    'Holanda': 'Netherlands', 'Países Baixos': 'Netherlands', 'Grécia': 'Greece',
+    'Inglaterra': 'England', 'Grã-Bretanha': 'Great Britain', 'Reino Unido': 'United Kingdom',
+    'Itália': 'Italy', 'Hungria': 'Hungary', 'Colômbia': 'Colombia', 'Canadá': 'Canada',
+    'Austrália': 'Australia', 'Áustria': 'Austria', 'Austria': 'Austria',
+    'Suíça': 'Switzerland', 'Suiça': 'Switzerland', 'Finlândia': 'Finland', 'Japão': 'Japan',
+    'México': 'Mexico', 'Bélgica': 'Belgium', 'Espanha': 'Spain', 'Brasil': 'Brazil',
+    'Dinamarca': 'Denmark', 'Suécia': 'Sweden', 'Noruega': 'Norway', 'Irlanda': 'Ireland',
+    'Israel': 'Israel', 'China': 'China', 'Índia': 'India', 'África do Sul': 'South Africa',
+  };
+
+  // Uma sigla é uma parte só de maiúsculas, números e pontuação: "USP", "YLS", "PARIS 1".
+  const SIGLA = /^[A-ZÀ-Ú0-9][A-ZÀ-Ú0-9\s/.-]*$/;
+
+  function local(detalhe, idioma) {
+    const partes = String(detalhe || '').split(',').map(p => p.trim()).filter(Boolean);
+    if (!partes.length) return '';
+    const en = idioma === 'en';
+    const saida = [en ? instituicaoEmIngles(partes[0]) : partes[0]];
+    for (const p of partes.slice(1)) {
+      if (SIGLA.test(p)) continue;
+      saida.push(en ? PAISES_EN[p] || p : p);
+    }
+    return saida.join(', ');
+  }
+
+  // As regras de tradução de nome de instituição moram em traducao.js, que é carregado depois
+  // deste arquivo: a busca tem de ser na hora de usar, não na hora de definir o módulo.
+  function instituicaoEmIngles(nome) {
+    let T = raiz.Traducao;
+    if (!T && typeof require === 'function') { try { T = require('./traducao.js'); } catch (e) { T = null; } }
+    if (!T || !T.instituicaoEmIngles) return nome;
+    const en = T.instituicaoEmIngles(nome);
+    // A tradução por regras às vezes deixa um conectivo solto na frente ("e Capodistríaca National
+    // University of Atenas"). Aí o original é melhor que o remendo.
+    return /^\p{Ll}/u.test(en) ? nome : en;
   }
 
   // Sugestão de interesses: as áreas de atuação do Lattes, já reduzidas ao termo mais específico.

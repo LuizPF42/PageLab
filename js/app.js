@@ -327,6 +327,9 @@
   // Seções que já entram marcadas; as demais ficam para a pessoa escolher.
   const SECOES_LIGADAS = /^(FormacaoAcademicaTitulacao|FormacaoAcademicaPosDoutorado|AtuacaoProfissional|ProjetosPesquisa|PremiosTitulos)$/;
   const PRODUCOES_LIGADAS = /artigo|livro|cap[ií]tulo/i;
+  // Ensino médio e fundamental vêm na formação acadêmica do Lattes, mas não dizem nada num site
+  // de pesquisa: entram desmarcados (quem quiser, marca).
+  const BASICO = /^Ensino (M[éo]dio|Fundamental)\b/i;
 
   const app = document.getElementById('app');
   // temaPrevia: a prévia mostra o site no claro ou no escuro (só faz diferença no modo automático).
@@ -414,7 +417,7 @@
           // As produções que o autor marcou como relevantes no Lattes já vêm como destaque.
           const destaque = !reimportacao && s.tipo === 'producao' && it.relevante && destaques < MAX_DESTAQUES;
           if (destaque) destaques++;
-          return Object.assign({}, it, { manter: ligada || destaque, destaque });
+          return Object.assign({}, it, { manter: (ligada && !BASICO.test(it.titulo)) || destaque, destaque });
         }),
       });
     });

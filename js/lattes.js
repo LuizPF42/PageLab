@@ -51,6 +51,7 @@
     'Tese de doutorado': 'Doctoral dissertation',
     'Dissertação de mestrado': "Master's thesis",
     'Monografia de conclusão de curso de aperfeiçoamento/especialização': 'Specialization monograph',
+    'Monografias de conclusão de curso de aperfeiçoamento/especialização': 'Specialization monographs',
     'Trabalho de conclusão de curso de graduação': 'Undergraduate thesis',
     'Iniciação científica': 'Undergraduate research',
     'Supervisão de pós-doutorado': 'Postdoctoral supervision',
@@ -223,7 +224,7 @@
       const pessoa = re => semPonto((resto.find(l => re.test(l)) || '').replace(re, ''));
       return item({
         periodo: p.rotulo,
-        titulo: semPonto(semCargaHoraria(grau)),
+        titulo: semPonto(semGrauRepetido(semCargaHoraria(grau))),
         detalhe: instituicao(inst),
         obs: semPonto(tese.replace(/^Título:\s*/i, '').replace(/,?\s*Ano de Obtenção:.*$/i, '')),
         orientador: pessoa(/^Orientadora?:\s*/i),
@@ -336,6 +337,12 @@
     return semPonto(limpa(s));
   }
 
+  // "Mestrado em Mestrado em Direito" -> "Mestrado em Direito": há quem repita o grau no nome do
+  // curso, no próprio Lattes.
+  function semGrauRepetido(s) {
+    return String(s || '').replace(/^(Graduação|Mestrado(?: profissional)?|Doutorado|Especialização|Aperfeiçoamento) em \1 em /i, '$1 em ');
+  }
+
   function semCargaHoraria(s) {
     return s.replace(/\s*\(Carga horária:[^)]*\)\.?/i, '');
   }
@@ -354,7 +361,7 @@
         cat = { titulo: sub ? tituloCategoria(sub, grupo) : grupo || tituloSecao, itens: [] };
         cats.push(cat);
       }
-      const it = producao(el);
+      const it = producao(el, cat.titulo);
       if (it) cat.itens.push(it);
     }
     return cats.filter(c => c.itens.length);
@@ -365,7 +372,7 @@
     return sub;
   }
 
-  function producao(el) {
+  function producao(el, categoria) {
     const c = el.cloneNode(true);
     const relevante = !!c.querySelector('img[src*="ico_relevante"]'); // marcado pelo autor no Lattes
     const anoEl = c.querySelector('.informacao-artigo[data-tipo-ordenacao="ano"]');
@@ -385,7 +392,31 @@
       link: doiEl ? doiEl.getAttribute('href') : '',
       negrito,
       relevante,
-    }, separarCitacao(limpa(c.textContent), negrito, cvuri)));
+    }, (/^Orientações/.test(categoria || '') && separarOrientacao(texto)) || separarCitacao(limpa(c.textContent), negrito, cvuri)));
+  }
+
+  // Orientação não é referência bibliográfica. O Lattes escreve
+  // "Orientando. Título do trabalho. [Início: ]2022. Dissertação (Mestrado em X) - Instituição.
+  // Orientador: Você." — e a separação de referência põe "2022. Dissertação (…)" como título da
+  // obra, que é o que o site mostraria em destaque. Aqui o título do trabalho é o título, e quem
+  // foi orientado vai para o detalhe. O papel (orientador ou coorientador) já está no título da
+  // seção, então sai. Se o texto não tiver esse formato, devolve null e vale a regra antiga.
+  function separarOrientacao(texto) {
+    const ano = texto.match(/\.\s+(?:Início:\s*)?(?:19|20)\d{2}\.\s/);
+    if (!ano) return null;
+    const antes = texto.slice(0, ano.index);
+    const resto = texto.slice(ano.index + ano[0].length);
+    // O nome do orientando acaba no primeiro ponto que não seja de inicial abreviada ("J. F. Silva").
+    const corte = [...antes.matchAll(/\.\s+/g)].find(m => !/(?:^|\s)\p{L}\.$/u.test(antes.slice(0, m.index + 1)));
+    const pessoa = semPonto(corte ? antes.slice(0, corte.index) : antes);
+    const trabalho = corte ? semPonto(antes.slice(corte.index + corte[0].length)) : '';
+    if (pessoa.length < 3) return null;
+    const onde = semPonto(resto.replace(/[,.]?\s*(?:Co-?)?[Oo]rientador[ao]?:.*$/, '').replace(/\(\s*(?:Co-?)?[Oo]rientador[ao]?\s*\)\.?\s*$/, '').replace(/[\s,.]+$/, ''));
+    // Quem não preencheu o título do trabalho no Lattes fica com o nome de quem foi orientado:
+    // é o que o registro tem. Melhor isso que a referência bibliográfica pôr "Início: 2024" ali.
+    return trabalho.length >= 5
+      ? { titulo: trabalho, detalhe: [pessoa, onde].filter(Boolean).join(' · '), autores: '', obra: '', veiculo: '' }
+      : { titulo: pessoa, detalhe: onde, autores: '', obra: '', veiculo: '' };
   }
 
   // Separa a referência do Lattes em autores, título da obra e veículo (revista, livro, evento),
@@ -549,8 +580,13 @@
     return limpa(s).replace(/\s*\.$/, '');
   }
 
+  // "Escola de Governo, EC, Brasil. Ano de Obtenção: 1999" -> "Escola de Governo, EC".
+  // Quando o Lattes não tem onde pôr um campo, ele sobra aqui: ano de obtenção, ano de
+  // finalização, orientador. O ano já está no período do item, e o orientador tem campo próprio.
+  // "Brasil" sai porque é o caso comum: só o exterior merece o país.
+  const ROTULOS_NA_INSTITUICAO = /[,.]?\s*(?:Ano de \p{L}+|Coorientador[ao]?|Orientador[ao]?|Bolsista[^:]{0,30}|Título|Palavras-chave)\s*:.*$/iu;
   function instituicao(s) {
-    return semPonto(s).replace(/,\s*Brasil$/, '');
+    return semPonto(String(s || '').replace(ROTULOS_NA_INSTITUICAO, '')).replace(/,\s*Brasil$/, '');
   }
 
   function hash(s) {
