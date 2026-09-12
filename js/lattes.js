@@ -20,6 +20,7 @@
     webarchive: 'O Safari salvou a página como “Arquivo da Web”. Salve de novo escolhendo o formato “Código-fonte da página”.',
     mhtml: 'A página foi salva como “arquivo único” (.mhtml). Salve de novo escolhendo “Página da Web, completa”.',
     'nao-lattes': 'Não reconheci este arquivo como uma página do Currículo Lattes. Confira se você salvou a página do currículo já aberto, com seu nome e suas produções.',
+    stela: 'Esse arquivo é um currículo exportado pela Plataforma Stela Experta. O construtor precisa da página pública do Currículo Lattes: abra o currículo em lattes.cnpq.br e salve essa página pelo navegador.',
   };
 
   I18n.registrar({
@@ -27,6 +28,7 @@
     [MENSAGENS.webarchive]: 'Safari saved the page as a “Web Archive”. Save it again choosing the “Page Source” format.',
     [MENSAGENS.mhtml]: 'The page was saved as a “single file” (.mhtml). Save it again choosing “Webpage, complete”.',
     [MENSAGENS['nao-lattes']]: 'This file does not look like a Lattes CV page. Check that you saved the CV page while it was open, showing your name and your publications.',
+    [MENSAGENS.stela]: 'This file is a CV exported by the Stela Experta platform. The builder needs the public Lattes CV page: open the CV at lattes.cnpq.br and save that page from your browser.',
     'Não consegui ler a seção “{titulo}”.': 'Could not read the “{titulo}” section.',
   });
 
@@ -79,8 +81,10 @@
 
   // ---------- arquivo -> texto ----------
 
-  // A página do Lattes vem em windows-1252; alguns navegadores regravam em UTF-8.
-  // Por isso o charset é lido do próprio arquivo.
+  // A página do Lattes vem em windows-1252, mas navegadores e outras ferramentas a regravam em
+  // UTF-8 sem trocar o <meta> do CNPq. Por isso quem decide são os bytes, não o charset declarado:
+  // texto latino-1 raramente forma UTF-8 válido, então UTF-8 válido é UTF-8 de verdade.
+  // Sem isso, os acentos viram "DescriÃ§Ã£o" e as buscas por rótulo ("Descrição:") não acham nada.
   function decodificar(buffer) {
     const bytes = new Uint8Array(buffer);
     const inicio = String.fromCharCode.apply(null, bytes.subarray(0, 4096));
@@ -88,16 +92,20 @@
     if (inicio.startsWith('bplist')) throw erro('webarchive');
     if (/^\s*(From:|MIME-Version:)/i.test(inicio) || /multipart\/related/i.test(inicio.slice(0, 800))) throw erro('mhtml');
 
-    let charset = 'windows-1252';
-    if (bytes[0] === 0xef && bytes[1] === 0xbb && bytes[2] === 0xbf) charset = 'utf-8';
-    else {
-      const m = inicio.match(/<meta[^>]+charset=["']?\s*([\w-]+)/i);
-      if (m) charset = m[1];
-    }
+    if (bytes[0] === 0xef && bytes[1] === 0xbb && bytes[2] === 0xbf) return decodificarCom(bytes, 'utf-8');
+    const comoUtf8 = decodificarCom(bytes, 'utf-8', true);
+    if (comoUtf8 != null) return comoUtf8;
+    const declarado = (inicio.match(/<meta[^>]+charset=["']?\s*([\w-]+)/i) || [])[1] || '';
+    return decodificarCom(bytes, /^utf-?8$/i.test(declarado) ? '' : declarado) || decodificarCom(bytes, 'windows-1252');
+  }
+
+  // `estrito` devolve null quando os bytes não formam texto válido no charset (em vez de trocar
+  // os bytes ruins por "�"), que é como se testa se o arquivo é realmente UTF-8.
+  function decodificarCom(bytes, charset, estrito) {
     try {
-      return new TextDecoder(charset).decode(bytes);
+      return new TextDecoder(charset || 'windows-1252', { fatal: !!estrito }).decode(bytes);
     } catch (e) {
-      return new TextDecoder('windows-1252').decode(bytes);
+      return estrito ? null : new TextDecoder('windows-1252').decode(bytes);
     }
   }
 
@@ -106,12 +114,19 @@
     return ler(new P().parseFromString(html, 'text/html'));
   }
 
+  // A Plataforma Stela Experta exporta currículos com outra marcação (usada por universidades).
+  // Não é a página pública do Lattes, então vale dizer isso em vez de "não reconheci o arquivo".
+  function geradoPorStela(doc) {
+    const meta = doc.querySelector('meta[http-equiv="generator" i], meta[name="generator" i]');
+    return /stela/i.test((meta && meta.getAttribute('content')) || '');
+  }
+
   // ---------- documento -> dados ----------
 
   function ler(doc) {
     const nomeEl = doc.querySelector('.infpessoa .nome');
     const blocos = [...doc.querySelectorAll('.title-wrapper')];
-    if (!nomeEl || !blocos.length) throw erro('nao-lattes');
+    if (!nomeEl || !blocos.length) throw erro(geradoPorStela(doc) ? 'stela' : 'nao-lattes');
 
     doc.querySelectorAll('.tooltip-oasis, .icons-aviso, script, style, noscript').forEach(n => n.remove());
 
@@ -244,9 +259,9 @@
       }
     });
 
-    // Vínculo sem cargo preenchido no Lattes: usa a descrição, se houver.
+    // Vínculo sem cargo preenchido no Lattes (ou preenchido com "-"): usa a descrição, se houver.
     for (const it of itens) {
-      if (it.titulo) continue;
+      if (/[\p{L}\d]/u.test(it.titulo)) continue;
       it.titulo = it.obs || 'Vínculo institucional';
       if (it.titulo === it.obs) it.obs = '';
     }
@@ -275,17 +290,44 @@
     return itens;
   }
 
+  // Projetos e linhas de pesquisa: descrição, integrantes ("Nome - Papel / Nome - Papel") e
+  // financiadores ("Agência - Auxílio financeiro / ..."), guardados como vêm, um por linha do Lattes.
   function complementar(it, linhas, nome) {
     for (const l of linhas) {
       const texto = l.match(/^(?:(?:Descrição|Objetivo):\s*)+(.*)$/i);
-      if (texto && !it.obs) { it.obs = semPonto(texto[1]); continue; }
+      if (texto && !it.descricao) { it.descricao = descricaoLimpa(texto[1], it); continue; }
       const integrantes = l.match(/^Integrantes:\s*(.*)$/i);
       if (integrantes) {
-        // Guarda só o papel da própria pessoa no projeto, não a lista de integrantes.
-        const eu = integrantes[1].split('/').map(limpa).find(s => s.startsWith(nome + ' - '));
-        if (eu) it.detalhe = semPonto(eu.slice(nome.length + 3));
+        const pessoas = integrantes[1].split(/\s\/\s/).map(semPonto).filter(Boolean);
+        it.integrantes = pessoas.join(' / ');
+        // O papel da própria pessoa vira o detalhe do item ("Coordenador").
+        const eu = pessoas.find(s => s.startsWith(nome + ' - '));
+        if (eu) it.detalhe = eu.slice(nome.length + 3);
+        continue;
       }
+      const financiadores = l.match(/^Financiador(?:\(es\))?:\s*(.*)$/i);
+      if (financiadores) it.financiadores = financiadores[1].split(/\s\/\s/).map(semPonto).filter(Boolean).join(' / ');
     }
+  }
+
+  // Em alguns currículos a pessoa colou no campo Descrição o bloco inteiro do projeto
+  // ("2021 - Atual <título> Descrição: o projeto busca…"), ou os rótulos seguintes do Lattes
+  // ficaram grudados no fim. Aqui sobra só a descrição, sem repetir o título nem os rótulos.
+  const ROTULOS_SEGUINTES = /\s(?:Situação|Natureza|Integrantes|Financiador\(es\)|Alunos envolvidos):\s/;
+  function descricaoLimpa(texto, it) {
+    const fuga = s => String(s || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    // A repetição só sai quando há prova de bloco colado: um segundo rótulo "Descrição:" depois do
+    // título, ou o período do projeto abrindo o texto. Sem isso, uma descrição que começa com o
+    // nome do projeto ("Observatório X é um projeto que…") seria decapitada.
+    // O período colado no texto pode não ser o do item ("2020 - Atual" num projeto de 2020 - 2021),
+    // por isso aqui vale qualquer período.
+    const periodo = '(?:(?:19|20)\\d{2}\\s*-\\s*(?:Atual|(?:19|20)\\d{2})\\s*)?';
+    const bloco = new RegExp(`^${periodo}(?:${fuga(it.titulo)}\\s*)?[^\\p{L}\\d]*(?:Descrição|Objetivo):\\s*`, 'iu');
+    const soPeriodo = new RegExp(`^${fuga(it.periodo)}\\s*(?:${fuga(it.titulo)}\\s*)?`, 'i');
+    let t = texto;
+    if (bloco.test(t)) t = t.replace(bloco, '');
+    else if (it.periodo) t = t.replace(soPeriodo, '');
+    return semPonto(t.split(ROTULOS_SEGUINTES)[0]);
   }
 
   function tituloGenerico(s) {
@@ -483,8 +525,19 @@
     return out.map(limpa).filter(Boolean);
   }
 
+  const ENTIDADES = { quot: '"', amp: '&', apos: "'", '#39': "'", '#039': "'" };
+
+  // Normaliza o texto do Lattes. Duas correções vêm de currículos reais:
+  // - entidades escritas duas vezes na origem ("&amp;quot;" chega aqui como "&quot;");
+  // - travessões e apóstrofos curvos que a base do Lattes guardou como "?". Só os casos sem
+  //   ambiguidade: um "?" entre espaços nunca é pergunta, e "?s" depois de letra é apóstrofo.
+  //   Aspas curvas perdidas do mesmo jeito ficam como estão: não há como saber se abrem ou fecham.
   function limpa(s) {
-    return String(s || '').replace(/\u00a0/g, ' ').replace(/\s+/g, ' ').trim();
+    return String(s || '')
+      .replace(/&(quot|amp|apos|#0?39);/g, (m, e) => ENTIDADES[e] || m)
+      .replace(/\u00a0/g, ' ').replace(/\s+/g, ' ').trim()
+      .replace(/ \? /g, ' \u2013 ')
+      .replace(/(\p{L})\?s\b/gu, "$1's");
   }
 
   // "SILVA FILHO, Ana C.. Título. REVISTA , v. 1" -> "SILVA FILHO, Ana C. Título. REVISTA, v. 1"

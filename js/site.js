@@ -167,6 +167,15 @@
     'Editora': 'Publisher',
     'Nome do projeto de pesquisa que você coordena': 'Name of the research project you lead',
     'Coordenação': 'Coordinator',
+    // projetos: descrição, integrantes e financiadores
+    'Continuar lendo': 'Keep reading',
+    'Integrantes': 'Team',
+    'Financiamento': 'Funding',
+    'coordenador': 'coordinator',
+    'coordenadora': 'coordinator',
+    'Coordenador': 'Coordinator',
+    'Coordenadora': 'Coordinator',
+    'Integrante': 'Member',
     '2024 - Atual': '2024 - Present',
     'Título de um artigo publicado número {n}': 'Title of a published article number {n}',
   });
@@ -406,7 +415,7 @@
     const nav = abas ? `<nav class="abas" aria-label="${esc(_('Seções do site'))}">${abas.map(a => `<a href="#${a.id}"${alvo}>${esc(a.nome)}</a>`).join('')}</nav>` : '';
     const conteudo = abas
       ? abas.map(a => `<div class="aba aba-${a.id}">${a.html}</div>`).join('')
-      : (ap.estrutura === 'topo' ? apresentacao(d, seletor) : inicio(d)) + d.secoes.map(s => secao(s, ap.referencias === 'completas')).join('');
+      : (ap.estrutura === 'topo' ? apresentacao(d, seletor) : inicio(d)) + d.secoes.map(s => secao(s, ap.referencias === 'completas', d.nome)).join('');
     const classes = ['site', `estrutura-${ap.estrutura}`, `foto-${ap.foto}`, abas ? 'com-abas' : ''].join(' ');
 
     let corpo;
@@ -536,7 +545,7 @@ document.addEventListener('click',function(e){var b=e.target.closest&&e.target.c
     if (htmlInicio.trim()) abas.push({ id: 'inicio', nome: _('Início'), html: htmlInicio });
     for (const a of ABAS) {
       const secoes = d.secoes.filter(s => s.aba === a.id);
-      if (secoes.length) abas.push({ id: a.id, nome: _(a.nome), html: secoes.map(s => secao(s, completas)).join('') });
+      if (secoes.length) abas.push({ id: a.id, nome: _(a.nome), html: secoes.map(s => secao(s, completas, d.nome)).join('') });
     }
     return abas.length >= 2 ? abas : null;
   }
@@ -665,9 +674,9 @@ ${cada(id => `.abas a[href="#${id}"]`)}{color:var(--texto);border-color:var(--ac
     }).join('');
   }
 
-  function secao(s, completas) {
+  function secao(s, completas, nome) {
     const modo = s.tipo !== 'producao' ? 'lista' : completas ? 'completa' : 'simples';
-    const lista = itens => itens.map(it => item(it, modo)).join('');
+    const lista = itens => itens.map(it => item(it, modo, nome)).join('');
     const primeiros = s.itens.slice(0, VISIVEIS);
     const resto = s.itens.slice(VISIVEIS);
     return `
@@ -680,7 +689,7 @@ ${cada(id => `.abas a[href="#${id}"]`)}{color:var(--texto);border-color:var(--ac
 
   // modo "simples": produção como título e, embaixo, veículo e coautores (texto arrumado, sem a
   // referência crua do Lattes). "completa": a referência ABNT. "lista": formação, atuação etc.
-  function item(it, modo) {
+  function item(it, modo, nome) {
     if (modo === 'simples' && it.obra) {
       const c = camposDestaque(it);
       const detalhe = [c.veiculo, c.coautores && _('com {coautores}', { coautores: c.coautores })].filter(Boolean).join(' · ');
@@ -699,11 +708,58 @@ ${cada(id => `.abas a[href="#${id}"]`)}{color:var(--texto);border-color:var(--ac
         <span class="quando">${esc(it.periodo || '')}</span>
         <div>
           <p class="item-titulo">${citacao(texto)}</p>
-          ${it.detalhe ? `<p class="item-detalhe">${esc(capsParaTitulo(it.detalhe))}</p>` : ''}
+          ${it.detalhe ? `<p class="item-detalhe">${esc(it.integrantes ? _(it.detalhe) : capsParaTitulo(it.detalhe))}</p>` : ''}
           ${it.obs && it.obs.length <= 220 ? `<p class="item-obs">${esc(it.obs)}</p>` : ''}
           ${orientacao(it)}
+          ${descricao(it.descricao)}
+          ${integrantes(it.integrantes, nome)}
+          ${financiamento(it.financiadores)}
         </div>
       </li>`;
+  }
+
+  // Descrição do projeto por inteiro. Se for longa, o começo fica à vista e o resto abre num
+  // "Continuar lendo" (details/summary, sem JavaScript), cortado no fim de uma frase.
+  const DESCRICAO_VISIVEL = 400;
+  function descricao(texto) {
+    if (!texto) return '';
+    if (texto.length <= DESCRICAO_VISIVEL + 150) return `<p class="item-descricao">${esc(texto)}</p>`;
+    let corte = -1;
+    const fimDeFrase = /[.!?;](?=\s)/g;
+    let m;
+    while ((m = fimDeFrase.exec(texto)) && m.index < DESCRICAO_VISIVEL) corte = m.index + 1;
+    if (corte < 150) corte = texto.lastIndexOf(' ', DESCRICAO_VISIVEL);
+    const inicio = texto.slice(0, corte).trim();
+    const resto = texto.slice(corte).trim();
+    return `<p class="item-descricao">${esc(inicio)}</p><details class="item-mais"><summary>${esc(_('Continuar lendo'))}</summary><p class="item-descricao">${esc(resto)}</p></details>`;
+  }
+
+  // "Integrantes: Fulana (coordenadora), Você, Beltrano". O papel "Integrante" fica implícito;
+  // o nome da própria pessoa vai em negrito, como no Lattes.
+  function integrantes(texto, nome) {
+    if (!texto) return '';
+    const eu = chave(nome);
+    const pessoas = texto.split(/\s\/\s/).map(p => {
+      const sep = p.lastIndexOf(' - ');
+      const pessoa = sep > 0 ? p.slice(0, sep).trim() : p.trim();
+      const papel = sep > 0 ? p.slice(sep + 3).trim() : '';
+      let html = eu && chave(pessoa) === eu ? `<strong>${esc(pessoa)}</strong>` : esc(pessoa);
+      if (papel && !/^integrante$/i.test(papel)) html += ` (${esc(_(papel.toLowerCase()))})`;
+      return html;
+    });
+    return `<p class="item-equipe">${esc(_('Integrantes'))}: ${pessoas.join(', ')}</p>`;
+  }
+
+  // "Financiamento: FAPESP, Fundação Ford" (sem a modalidade "Auxílio financeiro"/"Bolsa").
+  function financiamento(texto) {
+    if (!texto) return '';
+    const nomes = texto.split(/\s\/\s/).map(f => { const sep = f.lastIndexOf(' - '); return (sep > 0 ? f.slice(0, sep) : f).trim(); }).filter(Boolean);
+    return nomes.length ? `<p class="item-equipe">${esc(_('Financiamento'))}: ${esc(nomes.join(', '))}</p>` : '';
+  }
+
+  // Nome comparável: minúsculas, sem acentos nem espaços repetidos.
+  function chave(nome) {
+    return String(nome || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
   }
 
   // "Orientação: Nome · Coorientação: Nome", na formação (quem orientou importa tanto quanto onde).
@@ -821,6 +877,9 @@ a.item-link:hover{border-color:var(--acento)}
 .item-detalhe{margin:.15rem 0 0;color:var(--suave);font-size:.93rem}
 .item-obs{margin:.25rem 0 0;color:var(--suave);font-size:.9rem;font-style:italic}
 .item-orientacao{margin:.25rem 0 0;color:var(--suave);font-size:.9rem}
+.item-descricao{margin:.4rem 0 0;font-size:.93rem}
+.item-equipe{margin:.3rem 0 0;color:var(--suave);font-size:.88rem}
+.item-mais summary{padding:.1rem 0 0;font-size:.88rem}
 summary{padding:.7rem 0 .2rem;color:var(--acento-texto);font-size:.93rem;font-weight:600;cursor:pointer;list-style:none}
 summary::-webkit-details-marker{display:none}
 summary::after{content:" ↓"}

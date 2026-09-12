@@ -46,6 +46,11 @@
     // tipos de destaque livre
     'Software': 'Software',
     'Projeto': 'Project',
+    // projetos na revisão
+    'Descrição': 'Description',
+    '(pode encurtar ou apagar; o site mostra o texto inteiro)': '(you can shorten or delete it; the site shows the full text)',
+    'Integrantes': 'Team',
+    'Financiamento': 'Funding',
     'Site': 'Website',
     'Prêmio': 'Award',
     'Curso': 'Course',
@@ -1521,6 +1526,11 @@
     const conteudo = editando ? `
       <div class="editor">
         <textarea data-editor="${chave}" rows="3" aria-label="${esc(_('Texto do item'))}">${esc(it.titulo)}</textarea>
+        ${'descricao' in it || /^(Projetos|OutrosProjetos|LinhaPesquisa)/.test(s.id || '') ? `
+        <label class="editor-link">
+          <span>${_('Descrição')} <em>${_('(pode encurtar ou apagar; o site mostra o texto inteiro)')}</em></span>
+          <textarea data-editor-descricao="${chave}" rows="5">${esc(it.descricao || '')}</textarea>
+        </label>` : ''}
         <label class="editor-link">
           <span>${_('Link')} <em>${_('(opcional: página do artigo, PDF, vídeo…)')}</em></span>
           <input type="url" data-editor-link="${chave}" value="${esc(it.link || '')}" placeholder="https://">
@@ -1535,6 +1545,9 @@
           <span class="titulo">${esc(it.titulo)}</span>
           ${it.detalhe ? `<span class="detalhe">${esc(it.detalhe)}</span>` : ''}
           ${it.obs ? `<span class="obs">${esc(resumir(it.obs, 160))}</span>` : ''}
+          ${it.descricao ? `<span class="obs">${esc(resumir(it.descricao, 220))}</span>` : ''}
+          ${it.integrantes ? `<span class="detalhe">${esc(_('Integrantes'))}: ${esc(resumir(nomesDe(it.integrantes), 200))}</span>` : ''}
+          ${it.financiadores ? `<span class="detalhe">${esc(_('Financiamento'))}: ${esc(resumir(nomesDe(it.financiadores), 120))}</span>` : ''}
           ${it.orientador ? `<span class="obs">${esc(_('Orientação: {nome}', { nome: it.orientador }))}${it.coorientador ? ` · ${esc(_('Coorientação: {nome}', { nome: it.coorientador }))}` : ''}</span>` : ''}
         </label>
         ${it.link || s.tipo === 'producao' ? `
@@ -1926,6 +1939,8 @@
     const texto = ta ? ta.value.replace(/\s+/g, ' ').trim() : '';
     if (texto) it.titulo = texto;
     if (campoLink) it.link = campoLink.value.trim();
+    const campoDescricao = app.querySelector(`[data-editor-descricao="${si}:${ii}"]`);
+    if (campoDescricao) it.descricao = campoDescricao.value.replace(/\s+/g, ' ').trim();
     ui.editando = null;
     salvar();
     trocarItem(si, ii);
@@ -1943,10 +1958,10 @@
       mudarLargura(ui.largura + passo);
       return;
     }
-    const campo = e.target.closest('[data-editor], [data-editor-link]');
+    const campo = e.target.closest('[data-editor], [data-editor-link], [data-editor-descricao]');
     if (!campo) return;
-    const [si, ii] = (campo.dataset.editor || campo.dataset.editorLink).split(':').map(Number);
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); salvarEdicao(si, ii); }
+    const [si, ii] = (campo.dataset.editor || campo.dataset.editorLink || campo.dataset.editorDescricao).split(':').map(Number);
+    if (e.key === 'Enter' && !e.shiftKey && !campo.dataset.editorDescricao) { e.preventDefault(); salvarEdicao(si, ii); }
     if (e.key === 'Escape') { ui.editando = null; trocarItem(si, ii); }
   });
 
@@ -2317,6 +2332,16 @@
 
   function esc(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+
+  // "Nome - Papel / Nome - Papel" (integrantes ou financiadores do Lattes) -> "Nome (papel), Nome".
+  function nomesDe(texto) {
+    return texto.split(/\s\/\s/).map(p => {
+      const sep = p.lastIndexOf(' - ');
+      if (sep < 0) return p.trim();
+      const papel = p.slice(sep + 3).trim();
+      return p.slice(0, sep).trim() + (/^(Integrante|Auxílio financeiro|Bolsa|Outra|Cooperação)$/i.test(papel) ? '' : ` (${papel.toLowerCase()})`);
+    }).join(', ');
   }
 
   function resumir(s, n) {
