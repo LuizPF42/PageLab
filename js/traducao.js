@@ -252,6 +252,14 @@ self.onmessage = async e => {
     ['Reconstrução', 'Reconstruction'], ['Cooperação', 'Cooperation'], ['Integração', 'Integration'], ['Governança', 'Governance'],
     ['Gestão', 'Management'], ['Políticas', 'Policies'], ['Política', 'Politics'], ['Sociedade', 'Society'], ['Instituições', 'Institutions'],
     ['Tribunais', 'Courts'], ['Processo', 'Procedure'], ['Faculdades', 'Colleges'], ['Universidades', 'Universities'], ['Conflitos', 'Conflicts'], ['Acesso', 'Access'], ['Solução', 'Resolution'], ['Meios', 'Means'],
+    // Palavras comuns em nome de curso que faltavam (medidas nos currículos reais).
+    ['Ciências Contábeis', 'Accounting'], ['Ciências Humanas e Sociais', 'Human and Social Sciences'],
+    ['Governo', 'Government'], ['Estado', 'State'], ['Teoria', 'Theory'], ['Teorias', 'Theories'],
+    ['Humanidades', 'Humanities'], ['Criminologia', 'Criminology'], ['Contabilidade', 'Accounting'],
+    ['Controladoria', 'Controllership'], ['Inglês', 'English'], ['Negócios', 'Business'],
+    ['Projetos', 'Projects'], ['Projeto', 'Project'], ['Organizações', 'Organizations'],
+    ['Setor', 'Sector'], ['Contratos', 'Contracts'], ['Relações', 'Relations'], ['Mercado', 'Market'],
+    ['Mercados', 'Markets'], ['Trabalhos', 'Works'], ['Ciências Contabeis', 'Accounting'],
   ];
   // Adjetivos que, em português, vêm depois do substantivo ("Direito Tributário" -> "Tax Law").
   const ADJ_DEPOIS = [
@@ -270,6 +278,8 @@ self.onmessage = async e => {
     [/^hist[óo]ric[oa]s?$/i, 'Historical'], [/^superior(es)?$/i, 'Higher'], [/^coletiv[oa]s?$/i, 'Collective'], [/^gera(l|is)$/i, 'General'],
     [/^metropolitan[oa]s?$/i, 'Metropolitan'], [/^unid[oa]s?$/i, 'United'], [/^universit[áa]ri[oa]s?$/i, 'University'], [/^acad[êe]mic[oa]s?$/i, 'Academic'],
     [/^alternativ[oa]s?$/i, 'Alternative'], [/^avançad[oa]s?$/i, 'Advanced'], [/^interdisciplinar(es)?$/i, 'Interdisciplinary'],
+    [/^cont[áa]be(l|is)$/i, 'Accounting'], [/^contratua(l|is)$/i, 'Contract'], [/^lingu[íi]stic[oa]s?$/i, 'Linguistic'],
+    [/^liter[áa]ri[oa]s?$/i, 'Literary'], [/^societ[áa]ri[oa]s?$/i, 'Corporate'], [/^previdenci[áa]ri[oa]s?$/i, 'Social Security'],
   ];
   const CONECTIVOS_EN = { e: 'and', em: 'in', de: 'of', da: 'of', do: 'of', dos: 'of', das: 'of', para: 'for', sobre: 'on', com: 'with', no: 'in', na: 'in', à: 'to', a: 'to' };
   const RE_CONECTIVO = /^(de|da|do|dos|das)$/i;
@@ -297,16 +307,30 @@ self.onmessage = async e => {
   // termo a termo: compostos e áreas do dicionário, adjetivos pospostos passam para antes do substantivo,
   // o resto (nomes próprios) fica como está.
   function traduzirTermosArea(s) {
+    return termosArea(s).texto;
+  }
+
+  // Área traduzida por inteiro, ou null quando alguma palavra ficou sem regra. Meia tradução
+  // ("Management of Social Projetos and Organizações") parece defeito; o português inteiro parece
+  // outra língua. Quem chama decide, e o vocabulário de áreas é aberto demais para fingir que não.
+  function areaEmInglesInteira(s) {
+    const r = termosArea(s);
+    return r.desconhecidas.length ? null : r.texto;
+  }
+
+  function termosArea(s) {
+    const desconhecidas = [];
     const tokens = juntarCompostos(s).split(/ +/).filter(Boolean).map(t => {
       // A pontuação colada ("Economia,") fica de fora da busca e volta no fim.
       const fim = (t.match(/[,;:]+$/) || [''])[0];
       const pt = t.slice(0, t.length - fim.length).replace(new RegExp(NBSP, 'g'), ' ');
       const area = AREAS.find(([p]) => p === pt) || AREAS.find(([p]) => p.toLowerCase() === pt.toLowerCase());
       if (area) return { en: area[1] + fim };
-      if (LUGARES.includes(pt)) return { en: pt + fim, proprio: true };
+      if (LUGARES.includes(pt)) return { en: pt + fim, proprio: true }; // nome de lugar fica como está
       const adj = adjetivoDepois(pt);
       if (adj) return { en: adj + fim, adj: true };
       if (CONECTIVOS_EN[pt.toLowerCase()]) return { en: CONECTIVOS_EN[pt.toLowerCase()] + fim, conectivo: true };
+      if (/\p{L}/u.test(pt)) desconhecidas.push(pt);
       return { en: pt + fim, proprio: true };
     });
     const saida = [];
@@ -326,7 +350,7 @@ self.onmessage = async e => {
         i = j - 1;
       } else saida.push(t.en);
     }
-    return saida.join(' ').replace(/\s{2,}/g, ' ').trim();
+    return { texto: saida.join(' ').replace(/\s{2,}/g, ' ').trim(), desconhecidas };
   }
 
   const ehArea = c => c.split(/ +/).some(p => AREAS.some(([pt]) => pt.toLowerCase() === p.replace(new RegExp(NBSP, 'g'), ' ').toLowerCase()) || adjetivoDepois(p));
@@ -556,5 +580,5 @@ self.onmessage = async e => {
     return Array.isArray(entrada) ? traduzirTermos(entrada) : traduzirTexto(entrada);
   }
 
-  return { traduzir, carregar, pronto, jaBaixado, TAMANHO_MB, MODELO, frases, recolocarLinks, proteger, devolver, instituicaoEmIngles };
+  return { traduzir, carregar, pronto, jaBaixado, TAMANHO_MB, MODELO, frases, recolocarLinks, proteger, devolver, instituicaoEmIngles, areaEmInglesInteira };
 });

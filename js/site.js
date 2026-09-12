@@ -287,7 +287,23 @@
     [/^Aperfeiçoamento em\s+/i, 'Advanced training in '],
     [/^Graduação em andamento em\s+/i, "Bachelor's (in progress) in "],
     [/^Graduação em\s+/i, "Bachelor's in "],
+    // Cursos interrompidos: o Lattes escreve "Graduação interrompida em 2015 em Direito".
+    [/^Doutorado interrompido em \d{4} em\s+/i, 'PhD (interrupted) in '],
+    [/^Mestrado interrompido em \d{4} em\s+/i, "Master's (interrupted) in "],
+    [/^Graduação interrompida em \d{4} em\s+/i, "Bachelor's (interrupted) in "],
+    [/^Especialização interrompida em \d{4} em\s+/i, 'Specialization (interrupted) in '],
   ];
+
+  // A área do título é o ponto fraco da tradução: o vocabulário é aberto (toda área que existe no
+  // Brasil) e as regras de traducao.js, feitas para nome de instituição, conhecem só as comuns.
+  // Por isso vale a tradução inteira ou nada: "Doutorado em Zootecnia" fica em português, em vez
+  // de virar meia frase que parece defeito. Traduzir o resto é trabalho do modelo, sob revisão.
+  function areaEmIngles(area) {
+    let T = raiz.Traducao;
+    if (!T && typeof require === 'function') { try { T = require('./traducao.js'); } catch (e) { T = null; } }
+    if (!T || !T.areaEmInglesInteira || !area) return area;
+    return T.areaEmInglesInteira(area) || area;
+  }
 
   function resumoFormacao(secoes, idioma = 'pt') {
     const s = (secoes || []).find(x => x.id === 'FormacaoAcademicaTitulacao');
@@ -295,7 +311,9 @@
     const grau = t => {
       if (idioma !== 'en') return t;
       const g = GRAUS_EN.find(([re]) => re.test(t));
-      return g ? t.replace(g[0], g[1]).replace(/in $/, '').trim() : t;
+      if (!g) return t;
+      const area = t.replace(g[0], '');
+      return (g[1] + areaEmIngles(area)).replace(/in $/, '').trim();
     };
     return s.itens
       .filter(i => i.manter && i.titulo && !/^Ensino (M[ée]dio|Fundamental)|^Curso t[ée]cnico|^Aperfei/i.test(i.titulo))
