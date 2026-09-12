@@ -144,6 +144,11 @@
     'Em um ou dois minutos o site aparece em {link}. Até lá, o endereço pode mostrar “404”: é o GitHub terminando de publicar.':
       'In a minute or two the site appears at {link}. Until then, the address may show “404”: that is GitHub finishing the publication.',
     'Para atualizar depois': 'To update it later',
+    'Traga o Lattes atualizado': 'Bring the updated Lattes CV',
+    'Seu site voltou com as suas escolhas, os textos e a foto. Agora importe a página atualizada do currículo para entrar o que é novo: o que você já escolheu, escreveu e destacou continua.':
+      'Your site is back with your choices, texts and photo. Now import the updated CV page to bring in what is new: what you had already chosen, written and highlighted stays.',
+    'Na tela seguinte, importe a página atualizada do currículo para trazer as produções novas. O que você já tinha escolhido e escrito continua.':
+      'On the next screen, import the updated CV page to bring in new works. What you had already chosen and written stays.',
     'Neste navegador, tudo fica salvo: volte aqui, ajuste, baixe de novo e repita o passo 4. O arquivo novo substitui o antigo.':
       'In this browser, everything is saved: come back here, adjust, download again and repeat step 4. The new file replaces the old one.',
     'Em outro computador, traga o <code>index.html</code> do seu site na etapa Lattes: ele guarda as suas escolhas para você continuar de onde parou.':
@@ -155,7 +160,7 @@
     'Pronto: index.html baixado ({kb} KB). Confira se o nome ficou index.html.': 'Done: index.html downloaded ({kb} KB). Check that the name is still index.html.',
     'Não consegui gerar o arquivo.': 'Could not generate the file.',
     'Não consegui ler as escolhas guardadas neste index.html.': 'Could not read the choices stored in this index.html.',
-    'Site reaberto a partir do index.html, que guarda só o que estava publicado. Para ver de novo todas as produções do Lattes, use “Usar outro arquivo” e traga a página do Lattes: suas escolhas continuam.':
+    'Site reaberto a partir do index.html, que guarda só o que estava publicado. Para ver de novo todas as produções do Lattes, use “Usar outro arquivo” e traga a página atualizada do currículo: suas escolhas continuam.':
       'Site reopened from index.html, which keeps only what was published. To see all your Lattes works again, use “Use another file” and bring the Lattes page: your choices are kept.',
     // lattes
     'Traga seu currículo Lattes': 'Bring your Lattes CV',
@@ -1206,7 +1211,9 @@
     const base = novoEstado();
     const lista = v => (Array.isArray(v) ? v.map(String) : []);
     estado = Object.assign(base, {
-      etapa: 'conteudo',
+      // A aparência (etapa 1) veio dentro do arquivo, então o que falta é o que pode ter mudado:
+      // as produções novas do Lattes (etapa 2). Quem fez o site sem Lattes vai direto ao conteúdo.
+      etapa: dados.fonte ? 'lattes' : 'conteudo',
       aparencia: Tema.normalizar(dados.aparencia),
       fonte: dados.fonte || null,
       semLattes: !dados.fonte,
@@ -1224,7 +1231,7 @@
       publicacao: Object.assign(base.publicacao, dados.publicacao),
       reaberto: true,
       // Guardado em português; a tela traduz na hora de mostrar.
-      avisos: dados.fonte ? ['Site reaberto a partir do index.html, que guarda só o que estava publicado. Para ver de novo todas as produções do Lattes, use “Usar outro arquivo” e traga a página do Lattes: suas escolhas continuam.'] : [],
+      avisos: dados.fonte ? ['Site reaberto a partir do index.html, que guarda só o que estava publicado. Para ver de novo todas as produções do Lattes, use “Usar outro arquivo” e traga a página atualizada do currículo: suas escolhas continuam.'] : [],
     });
   }
 
@@ -1237,7 +1244,7 @@
         <ol class="passos">
           <li>${_('No GitHub, abra o repositório <code>seu-usuario.github.io</code>, clique em <code>index.html</code> e depois no botão de baixar (<em>Download raw file</em>).')}</li>
           <li>${_('Traga o arquivo para cá.')}</li>
-          <li>${_('Para trazer também as produções novas, vá a <strong>Lattes</strong> e importe a página atualizada do currículo: o que você já tinha escolhido e escrito continua.')}</li>
+          <li>${_('Na tela seguinte, importe a página atualizada do currículo para trazer as produções novas. O que você já tinha escolhido e escrito continua.')}</li>
         </ol>
         <label class="soltar" id="soltar">
           <input type="file" accept=".html,.htm,text/html" class="invisivel" data-arquivo="lattes">
@@ -1253,8 +1260,10 @@
   function telaLattes() {
     return `
       <section class="cartao">
-        <h1>${_('Traga seu currículo Lattes')}</h1>
-        <p class="sub">${_('O construtor lê a página pública do seu currículo e monta a base do site. Na próxima tela, você escolhe o que entra.')}</p>
+        <h1>${estado.reaberto && estado.fonte ? _('Traga o Lattes atualizado') : _('Traga seu currículo Lattes')}</h1>
+        <p class="sub">${estado.reaberto && estado.fonte
+          ? _('Seu site voltou com as suas escolhas, os textos e a foto. Agora importe a página atualizada do currículo para entrar o que é novo: o que você já escolheu, escreveu e destacou continua.')
+          : _('O construtor lê a página pública do seu currículo e monta a base do site. Na próxima tela, você escolhe o que entra.')}</p>
         <ol class="passos">
           <li>${_('Abra seu currículo na {busca} e resolva o “Não sou um robô”.', { busca: `<a href="https://buscatextual.cnpq.br/buscatextual/busca.do" target="_blank" rel="noopener">${_('busca do Lattes')}</a>` })}</li>
           <li>${_('Com o currículo aberto, aperte <kbd>Ctrl</kbd> + <kbd>S</kbd> (no Mac, <kbd>⌘</kbd> + <kbd>S</kbd>) e salve. No Safari, escolha o formato <em>Código-fonte da página</em>.')}</li>
