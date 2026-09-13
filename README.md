@@ -29,7 +29,7 @@ O mesmo currículo, com outras escolhas de fundo, cor, fonte e estrutura:
   </tr>
 </table>
 
-<sub>O currículo de demonstração é uma homenagem a César Lattes (1924–2005), o físico que dá nome à Plataforma Lattes, no formato de um currículo de hoje, com o Lattes atualizado no dia em que ele morreu. Os dados são públicos: a trajetória vem da Wikipédia e as publicações foram conferidas no Crossref. O texto em primeira pessoa só reescreve esses fatos, e o avatar é um desenho, não uma foto dele.</sub>
+*Currículo artificial, gerado em homenagem a César Lattes (1924–2005), o físico que dá nome à Plataforma.*
 
 ## O que você precisa
 
