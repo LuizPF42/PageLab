@@ -5,10 +5,18 @@
 //   npm install
 //   node gerar.js
 //
-// O currículo dos prints é fictício e está escrito aqui embaixo (pessoa, instituição,
-// coautores, revistas e trabalhos são inventados; o avatar é um desenho). Ele entra no
-// construtor pelo mesmo caminho da etapa 0: um index.html com as escolhas embutidas.
-// Cada print sai com um visual diferente, para mostrar as possibilidades.
+// O currículo dos prints é uma homenagem a César Lattes (1924–2005), o físico que dá nome
+// à Plataforma Lattes, montado no formato de um currículo de hoje. Só entram fatos públicos,
+// conferidos em 2026-09-13: a trajetória nos artigos da Wikipédia em português e em inglês
+// (só o que os dois confirmam) e as publicações, com os DOIs, no Crossref. Onde as fontes
+// divergem (a volta ao Brasil, os anos na USP, o número de indicações ao Nobel), o item ficou
+// de fora. O texto de apresentação vai em primeira pessoa, como num site pessoal, mas só
+// reescreve esses mesmos fatos. O Lattes aparece atualizado em 08/03/2005, o dia em que ele
+// morreu, como homenagem. Não há foto: o avatar é um desenho que só lembra a figura, com um
+// rastro de méson pi decaindo em múon ao fundo.
+//
+// Ele entra no construtor pelo mesmo caminho da etapa 0: um index.html com as escolhas
+// embutidas. Cada print sai com um visual diferente, para mostrar as possibilidades.
 // Usa o Chrome (ou Edge) que já está instalado no computador: não baixa navegador nenhum.
 
 const path = require('path');
@@ -30,31 +38,42 @@ const NAVEGADOR = [
   '/usr/bin/chromium',
 ].find(p => p && fs.existsSync(p));
 
-// ---------- o currículo fictício ----------
+// ---------- o currículo de demonstração ----------
 
-const NOME = 'Marina Quaresma Sá';
-const EU = 'SÁ, M. Q.';
-const UNIVERSIDADE = 'Universidade Federal da Costa Verde, UFCV, Brasil';
+const NOME = 'César Lattes';
+const EU = 'LATTES, C. M. G.';
+const CBPF = 'https://www.gov.br/cbpf';
 
 // Um visual por print. O que não estiver aqui fica no padrão do construtor.
 const ESTILOS = {
-  classico: { fundo: 'creme', acento: '#9f1239', fonteTitulo: 'source-serif', fonteTexto: 'source-serif', estrutura: 'lateral', foto: 'redonda' },
-  elegante: { fundo: 'branco', acento: '#166534', fonteTitulo: 'playfair', fonteTexto: 'inter', estrutura: 'central', foto: 'retangular', fotoProporcao: 1, fotoLargura: 180 },
+  classico: { fundo: 'creme', acento: '#8a4b16', fonteTitulo: 'source-serif', fonteTexto: 'source-serif', estrutura: 'lateral', foto: 'redonda' },
+  datilografado: { fundo: 'branco', acento: '#374151', fonteTitulo: 'inconsolata', fonteTexto: 'inconsolata', estrutura: 'central', foto: 'retangular', fotoProporcao: 0.8, fotoLargura: 170, alinhamento: 'esquerda' },
   moderno: { fundo: 'cinza', acento: '#2563eb', fonteTitulo: 'inter', fonteTexto: 'inter', estrutura: 'topo', foto: 'redonda', alinhamento: 'esquerda' },
   escuro: { fundo: 'cinza', acento: '#6d28d9', fonteTitulo: 'plex-mono', fonteTexto: 'plex-sans', estrutura: 'lateral', foto: 'redonda', escuro: 'sempre' },
   amigavel: { fundo: 'branco', acento: '#c2410c', fonteTitulo: 'nunito', fonteTexto: 'nunito', estrutura: 'central', foto: 'redonda' },
 };
 
-// Avatar desenhado (sem rosto), no lugar de uma foto.
+// Avatar desenhado, sem rosto: cabelo penteado para trás, testa alta, camisa branca de gola
+// aberta, tons de foto antiga. Ao fundo, o rastro pontilhado de um píon que decai em múon.
 const AVATAR = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
-  <rect width="512" height="512" fill="#e8d5bd"/>
-  <path d="M84 512 C84 402 152 368 256 368 C360 368 428 402 428 512 Z" fill="#2f5d62"/>
-  <rect x="222" y="292" width="68" height="96" rx="30" fill="#b57d58"/>
-  <ellipse cx="256" cy="236" rx="124" ry="138" fill="#2a1a12"/>
-  <ellipse cx="256" cy="228" rx="82" ry="98" fill="#c9906a"/>
-  <path d="M174 226 C168 128 208 92 256 92 C304 92 344 128 338 226 C332 172 302 148 256 148 C210 148 180 172 174 226 Z" fill="#2a1a12"/>
-  <circle cx="176" cy="264" r="7" fill="#d9a441"/>
-  <circle cx="336" cy="264" r="7" fill="#d9a441"/>
+  <rect width="512" height="512" fill="#dccdb0"/>
+  <g fill="none" stroke="#9c8762" stroke-width="5" stroke-linecap="round" stroke-dasharray="0.5 11">
+    <path d="M28 300 L118 196 L66 58"/>
+    <path d="M492 238 L424 150 L478 34"/>
+  </g>
+  <circle cx="118" cy="196" r="7" fill="#9c8762"/>
+  <circle cx="424" cy="150" r="7" fill="#9c8762"/>
+  <g transform="translate(256 512) scale(1.1) translate(-256 -512)">
+    <path d="M62 512 C74 414 146 376 256 372 C366 376 438 414 450 512 Z" fill="#f4f0e6"/>
+    <rect x="222" y="292" width="68" height="104" rx="30" fill="#d9b08c"/>
+    <path d="M222 380 L256 446 L290 380 Z" fill="#d9b08c"/>
+    <path d="M256 446 L206 350 L178 404 Z M256 446 L306 350 L334 404 Z" fill="#fbf8f1" stroke="#c9bda3" stroke-width="3" stroke-linejoin="round"/>
+    <ellipse cx="172" cy="236" rx="15" ry="24" fill="#d9b08c"/>
+    <ellipse cx="340" cy="236" rx="15" ry="24" fill="#d9b08c"/>
+    <ellipse cx="256" cy="224" rx="84" ry="106" fill="#e4bf9a"/>
+    <path d="M176 196 C160 122 198 74 256 72 C314 74 352 122 336 196 C332 160 312 146 292 148 C272 134 240 134 220 148 C200 146 180 160 176 196 Z" fill="#2b2118"/>
+    <path d="M212 110 C236 96 276 96 300 110" fill="none" stroke="#4a3a2c" stroke-width="4" stroke-linecap="round"/>
+  </g>
 </svg>`;
 
 function lista(campos) {
@@ -71,80 +90,68 @@ function producao(id, ano, autores, obra, veiculo, extras) {
 }
 
 function dadosExemplo(aparencia) {
-  const revistaA = 'Revista Brasileira de Ecologia Costeira';
-  const revistaB = 'Journal of Tropical Estuaries';
-  const revistaC = 'Ciência & Mar';
   return {
     construtor: 'site-pessoal',
     versao: 1,
     aparencia,
-    fonte: { tipo: 'lattes', id: '0000000000000000', atualizadoEm: '05/09/2026' },
+    // 08/03/2005: o dia em que ele morreu, como homenagem.
+    fonte: { tipo: 'lattes', id: '0000000000000000', atualizadoEm: '08/03/2005' },
     perfil: {
       nome: NOME,
-      subtitulo: 'Professora adjunta · Universidade Federal da Costa Verde',
-      bio: 'Sou bióloga e estudo manguezais: como eles armazenam carbono, como respondem à subida do mar e o que muda quando a cidade chega perto. Coordeno o [Laboratório de Ecologia Costeira](https://labec.exemplo.br) na Universidade Federal da Costa Verde, onde dou aulas de ecologia de ecossistemas e métodos de campo. Trabalho com séries longas de dados, sensoriamento remoto e, cada vez mais, com as comunidades que vivem do mangue.',
-      links: { email: 'marina.sa@exemplo.br', lattes: 'http://lattes.cnpq.br/0000000000000000', orcid: 'https://orcid.org/0000-0000-0000-0000' },
-      interesses: ['Ecologia de manguezais', 'Carbono azul', 'Restauração costeira', 'Sensoriamento remoto'],
+      subtitulo: 'Físico · Professor emérito da Unicamp',
+      bio: `Físico experimental. Em 1947, no H. H. Wills Physics Laboratory da Universidade de Bristol, participei da descoberta do méson pi (píon), registrado em emulsões nucleares expostas aos raios cósmicos, inclusive no alto do Monte Chacaltaya, na Bolívia. No ano seguinte, com Eugene Gardner, detectei a produção artificial de píons no cíclotron de Berkeley. Fui um dos fundadores do [Centro Brasileiro de Pesquisas Físicas](${CBPF}) e ajudei a criar o CNPq, que deu meu nome à Plataforma Lattes. De 1967 a 1986, fui professor titular do Instituto de Física Gleb Wataghin, na Unicamp.`,
+      links: { lattes: 'https://lattes.cnpq.br/' },
+      interesses: ['Raios cósmicos', 'Física de partículas', 'Emulsões nucleares', 'Física de altas energias'],
       interessesEditados: true,
     },
     publicacao: { usuario: '' },
     secoes: [
       { id: 'FormacaoAcademicaTitulacao', titulo: 'Formação acadêmica/titulação', tipo: 'lista', itens: [
-        lista({ id: 'f1', periodo: '2012 - 2016', titulo: 'Doutorado em Ecologia', detalhe: UNIVERSIDADE, obs: 'Título: Estoques de carbono em manguezais sob pressão urbana', orientador: 'Teresa Bulhões Andrade', coorientador: '' }),
-        lista({ id: 'f2', periodo: '2010 - 2012', titulo: 'Mestrado em Oceanografia', detalhe: 'Universidade Estadual do Litoral Sul, UELS, Brasil', obs: 'Título: Dinâmica sedimentar em estuários tropicais', orientador: 'Rogério Pontes Falcão', coorientador: '' }),
-        lista({ id: 'f3', periodo: '2005 - 2009', titulo: 'Graduação em Ciências Biológicas', detalhe: 'Universidade Estadual do Litoral Sul, UELS, Brasil' }),
+        lista({ id: 'f1', periodo: '1986', titulo: 'Doutor honoris causa', detalhe: 'Universidade Estadual de Campinas, UNICAMP, Brasil' }),
+        lista({ id: 'f2', periodo: '1965', titulo: 'Doutor honoris causa', detalhe: 'Universidade de São Paulo, USP, Brasil' }),
+        lista({ id: 'f3', periodo: '1943', titulo: 'Graduação em Física', detalhe: 'Universidade de São Paulo, USP, Brasil' }),
       ] },
       { id: 'AtuacaoProfissional', titulo: 'Atuação Profissional', tipo: 'lista', itens: [
-        lista({ id: 'at1', periodo: '2019 - Atual', titulo: 'Professora adjunta', detalhe: UNIVERSIDADE, obs: 'Departamento de Ecologia. Coordenadora do Laboratório de Ecologia Costeira' }),
-        lista({ id: 'at2', periodo: '2016 - 2019', titulo: 'Pesquisadora de pós-doutorado', detalhe: 'Instituto Nacional de Estudos do Mar, INEM, Brasil' }),
+        lista({ id: 'at1', periodo: '1967 - 1986', titulo: 'Professor titular', detalhe: 'Universidade Estadual de Campinas, UNICAMP, Brasil', obs: 'Instituto de Física Gleb Wataghin, que ajudei a fundar. Dirigi o departamento de raios cósmicos. Professor emérito desde 1986' }),
+        lista({ id: 'at2', periodo: '1955 - 1957', titulo: 'Pesquisador visitante', detalhe: 'University of Chicago, Estados Unidos' }),
+        lista({ id: 'at3', periodo: '1949', titulo: 'Cofundador e diretor científico', detalhe: 'Centro Brasileiro de Pesquisas Físicas, CBPF, Brasil' }),
+        lista({ id: 'at4', periodo: '1948', titulo: 'Pesquisador', detalhe: 'University of California, Berkeley, Estados Unidos', obs: 'Com Eugene Gardner, no cíclotron de 184 polegadas' }),
+        lista({ id: 'at5', periodo: '1946 - 1947', titulo: 'Pesquisador', detalhe: 'University of Bristol, Reino Unido', obs: 'H. H. Wills Physics Laboratory, no grupo de Cecil Powell' }),
       ] },
       { id: 'ProjetosPesquisa', titulo: 'Projetos de pesquisa', tipo: 'lista', itens: [
-        lista({ id: 'pj1', periodo: '2023 - Atual', titulo: 'MangueAzul: estoques de carbono em manguezais urbanos do Sudeste', detalhe: 'Coordenadora',
-          descricao: 'Quantifica o carbono armazenado em manguezais próximos a cidades e acompanha, ano a ano, o que muda com a expansão urbana. Combina coleta em campo, sensoriamento remoto e modelagem.',
-          integrantes: `${NOME} - Coordenadora / Teresa Bulhões Andrade - Integrante / Caio Ferraz Lins - Integrante`,
-          financiadores: 'Fundação Estadual de Amparo à Pesquisa - Auxílio financeiro / CNPq - Bolsa' }),
-        lista({ id: 'pj2', periodo: '2020 - 2023', titulo: 'Restauração de manguezais com comunidades pesqueiras da Baía das Garças', detalhe: 'Integrante',
-          descricao: 'Replantio de áreas degradadas junto com colônias de pescadores, com acompanhamento da sobrevivência das mudas e da volta da fauna.',
-          integrantes: `Joana Prado Nascimento - Coordenadora / ${NOME} - Integrante` }),
+        lista({ id: 'pj1', periodo: '', titulo: 'Câmaras de emulsão no Monte Chacaltaya', detalhe: 'Coordenador',
+          descricao: 'Câmaras de emulsão nuclear expostas a mais de 5 mil metros de altitude, nos Andes bolivianos, para observar eventos nucleares de energia extremamente alta produzidos por raios cósmicos. Em 1969, o grupo determinou a massa das chamadas bolas de fogo, formadas nessas colisões.' }),
       ] },
       { id: 'ProducoesCientificas:Artigos completos publicados em periódicos', titulo: 'Artigos completos publicados em periódicos', tipo: 'producao', itens: [
-        producao('a1', 2025, `${EU}; LINS, C. F.; ANDRADE, T. B.`, 'Carbono azul em manguezais urbanos: vinte anos de dados no Sudeste do Brasil', `${revistaA}, v. 18, p. 112-130`,
-          { link: 'https://doi.org/10.0000/exemplo.2025.1', relevante: true, destaque: true, ordem: 0,
-            dTexto: 'Manguezais cercados pela cidade continuam armazenando carbono, mas perdem a capacidade de se recuperar depois de tempestades.' }),
-        producao('a2', 2024, `${EU}; OKADA, R. M.`, 'Mapping mangrove loss with open satellite imagery: a workflow for coastal managers', `${revistaB}, v. 9, n. 2, p. 77-94`,
-          { link: 'https://doi.org/10.0000/exemplo.2024.2', relevante: true, destaque: true, ordem: 1,
-            dTexto: 'Um passo a passo, com código aberto, para acompanhar a perda de mangue com imagens de satélite gratuitas.' }),
-        producao('a3', 2023, `FALCÃO, R. P.; ${EU}`, 'Sedimentação e subida do nível do mar em estuários tropicais: o que os testemunhos contam', `${revistaC}, v. 41, p. 5-21`, { link: 'https://doi.org/10.0000/exemplo.2023.3' }),
-        producao('a4', 2022, `${EU}; NASCIMENTO, J. P.; LINS, C. F.`, 'Restauração de manguezais com comunidades pesqueiras: lições de três anos de campo', `${revistaA}, v. 15, p. 201-219`, { link: 'https://doi.org/10.0000/exemplo.2022.4' }),
-        producao('a5', 2020, `${EU}; ANDRADE, T. B.`, 'Blue carbon stocks along an urbanization gradient in southeastern Brazil', 'Wetlands and Carbon, v. 4, p. 33-48', { link: 'https://doi.org/10.0000/exemplo.2020.5' }),
-        producao('a6', 2018, EU, 'Raízes, sedimento e maré: um modelo simples para o crescimento de Rhizophora mangle', `${revistaC}, v. 36, p. 88-101`),
+        producao('a1', 1947, `${EU}; MUIRHEAD, H.; OCCHIALINI, G. P. S.; POWELL, C. F.`, 'Processes involving charged mesons', 'Nature, v. 159, n. 4047, p. 694-697',
+          { link: 'https://doi.org/10.1038/159694a0', relevante: true, destaque: true, ordem: 0,
+            dTexto: 'O artigo que anunciou o méson pi: rastros em emulsões fotográficas de uma partícula que decai em outra, o múon.' }),
+        producao('a2', 1947, `${EU}; OCCHIALINI, G. P. S.; POWELL, C. F.`, 'Observations on the tracks of slow mesons in photographic emulsions', 'Nature, v. 160, n. 4066, p. 453-456',
+          { link: 'https://doi.org/10.1038/160453a0' }),
+        producao('a3', 1948, `GARDNER, E.; ${EU}`, 'Production of mesons by the 184-inch Berkeley cyclotron', 'Science, v. 107, n. 2776, p. 270-271',
+          { link: 'https://doi.org/10.1126/science.107.2776.270', relevante: true, destaque: true, ordem: 1,
+            dTexto: 'A primeira detecção de píons produzidos em laboratório, bombardeando carbono com partículas alfa.' }),
+        producao('a4', 1948, `${EU}; OCCHIALINI, G. P. S.; POWELL, C. F.`, 'A determination of the ratio of the masses of pi- and mu-mesons by the method of grain-counting', 'Proceedings of the Physical Society, v. 61, n. 2, p. 173-183',
+          { link: 'https://doi.org/10.1088/0959-5309/61/2/308' }),
+        producao('a5', 1963, `${EU}; ORSINI, C. Q.; PACCA, I. G.; CRUZ, M. T.; OKUNO, E.; FUJIMOTO, Y.; YOKOI, K.`, 'Observation on extremely-high energy nuclear events with emulsion chambers exposed on Mt. Chacaltaya', 'Il Nuovo Cimento, v. 28, n. 3, p. 614-620',
+          { link: 'https://doi.org/10.1007/BF02828877' }),
+        producao('a6', 1980, `${EU}; FUJIMOTO, Y.; HASEGAWA, S.`, 'Hadronic interactions of high energy cosmic-ray observed by emulsion chambers', 'Physics Reports, v. 65, n. 3, p. 151-229',
+          { link: 'https://doi.org/10.1016/0370-1573(80)90165-9', relevante: true, destaque: true, ordem: 2,
+            dTexto: 'Um balanço dos eventos de altíssima energia registrados nas câmaras de emulsão, escrito com colegas japoneses.' }),
       ] },
-      { id: 'ProducoesCientificas:Livros publicados/organizados ou edições', titulo: 'Livros publicados/organizados ou edições', tipo: 'producao', itens: [
-        producao('l1', 2021, `${EU}; ANDRADE, T. B. (Org.)`, 'Manguezais do Brasil: ecologia, ameaças e restauração', 'São Paulo: Editora Maré',
-          { relevante: true, destaque: true, ordem: 2, veiculo: 'Editora Maré', dTexto: 'Doze capítulos, de ecologia básica a restauração, escritos para quem trabalha no litoral: gestores, professores e comunidades.' }),
-      ] },
-      { id: 'ProducoesCientificas:Capítulos de livros publicados', titulo: 'Capítulos de livros publicados', tipo: 'producao', itens: [
-        producao('c1', 2023, EU, 'O mangue como infraestrutura: serviços ecossistêmicos em cidades costeiras', 'In: OKADA, R. M. (Org.). Cidades e o mar. Rio de Janeiro: Editora Maré, p. 45-70', { veiculo: 'Cidades e o mar' }),
-        producao('c2', 2019, `${EU}; FALCÃO, R. P.`, 'Métodos de campo para estoques de carbono em manguezais', 'In: Manual de ecologia costeira. Recife: Editora Universitária, p. 120-150', { veiculo: 'Manual de ecologia costeira' }),
-      ] },
-      { id: 'ProducoesCientificas:Apresentações de Trabalho', titulo: 'Apresentações de Trabalho', tipo: 'producao', itens: [
-        producao('ap1', 2024, EU, 'Carbono azul e política climática: o que os dados dizem', 'Congresso Brasileiro de Oceanografia (Conferência)', { veiculo: 'Congresso Brasileiro de Oceanografia' }),
-        producao('ap2', 2022, `${EU}; LINS, C. F.`, 'Vinte anos de mangue na Baía das Garças', 'Encontro de Ecologia Costeira (Comunicação)', { veiculo: 'Encontro de Ecologia Costeira' }),
-      ] },
-      { id: 'OrientacoesEmAndamento:Orientações em andamento: Tese de doutorado', titulo: 'Orientações em andamento: Tese de doutorado', tipo: 'producao', itens: [
-        producao('od1', 2024, 'LINS, Caio Ferraz', 'Recuperação de manguezais urbanos depois de eventos extremos', `Tese (Doutorado em Ecologia), ${UNIVERSIDADE.split(',')[0]}`),
-      ] },
-      { id: 'OrientacoesConcluidas:Orientações concluídas: Dissertação de mestrado', titulo: 'Orientações concluídas: Dissertação de mestrado', tipo: 'producao', itens: [
-        producao('o1', 2022, 'LINS, Caio Ferraz', 'Estoques de carbono em manguezais da Baía das Garças', `Dissertação (Mestrado em Ecologia), ${UNIVERSIDADE.split(',')[0]}`),
-        producao('o2', 2021, 'MOURA, Letícia Sobral', 'Cobertura de mangue por imagens de satélite: um comparativo de métodos', `Dissertação (Mestrado em Ecologia), ${UNIVERSIDADE.split(',')[0]}`),
-      ] },
-      { id: 'PremioTitulo', titulo: 'Prêmios e títulos', tipo: 'lista', itens: [
-        lista({ id: 'pr1', periodo: '2023', titulo: 'Prêmio Pesquisadora do Ano, Sociedade de Ecologia Costeira' }),
+      { id: 'PremiosTitulos', titulo: 'Prêmios e títulos', tipo: 'lista', itens: [
+        lista({ id: 'pr1', periodo: '1987', titulo: 'Prêmio em Física, Academia de Ciências do Terceiro Mundo (TWAS)' }),
+        lista({ id: 'pr2', periodo: '1986', titulo: 'Professor emérito, Universidade Estadual de Campinas' }),
+        lista({ id: 'pr3', periodo: '1978', titulo: 'Prêmio Bernardo Houssay, Organização dos Estados Americanos' }),
+        lista({ id: 'pr5', periodo: '1951', titulo: 'Prêmio Einstein, Academia Brasileira de Ciências' }),
       ] },
       { id: 'Livres', titulo: 'Destaques livres', tipo: 'livre', itens: [
-        { id: 'livre-1', periodo: '', titulo: '', categoria: 'Software', dTitulo: 'MangueMap', dVeiculo: '',
-          dTexto: 'Ferramenta livre para mapear a cobertura de manguezais a partir de imagens de satélite abertas, com relatórios anuais por município.',
-          link: 'https://github.com/exemplo/manguemap', manter: true, destaque: true, ordem: 3 },
+        { id: 'livre-1', periodo: '', titulo: '', categoria: 'Homenagem', dTitulo: 'Plataforma Lattes', dVeiculo: '',
+          dTexto: 'O sistema de currículos do CNPq leva o meu nome, pelo papel que tive na criação do conselho. É de lá que vêm os dados deste site.',
+          link: 'https://lattes.cnpq.br/', manter: true, destaque: true, ordem: 3 },
+        { id: 'livre-2', periodo: '', titulo: '', categoria: 'Instituição', dTitulo: 'Centro Brasileiro de Pesquisas Físicas', dVeiculo: '',
+          dTexto: 'Cofundado em 1949, no Rio de Janeiro, quando eu tinha 25 anos.',
+          link: CBPF, manter: true, destaque: true, ordem: 4 },
       ] },
     ],
     ocultos: [],
@@ -217,7 +224,7 @@ async function main() {
   const svg = await page.$('svg');
   const foto = 'data:image/png;base64,' + Buffer.from(await svg.screenshot({ type: 'png' })).toString('base64');
 
-  // Traz o currículo fictício para o construtor pelo caminho da etapa 0, com o visual pedido.
+  // Traz o currículo de demonstração para o construtor pelo caminho da etapa 0, com o visual pedido.
   const reabrir = async nome => {
     const aparencia = ESTILOS[nome];
     const arquivo = arquivoExemplo(temp, nome, aparencia, foto);
@@ -277,7 +284,7 @@ async function main() {
   await ir('atualizar');
   await print('atualizar', 'cartao');
 
-  // ----- o currículo fictício, num visual por print -----
+  // ----- o currículo de demonstração, num visual por print -----
   await reabrir('classico');
   await page.click('[data-acao="voltar-conteudo"]');
   await page.waitForSelector('#nome');
@@ -286,11 +293,11 @@ async function main() {
   await print('conteudo');
   await printSite(await baixarSite('classico'), 'site');
 
-  await reabrir('elegante');
+  await reabrir('datilografado');
   await ir('revisao');
   await esperarPrevia();
   await print('revisao');
-  await printSite(await baixarSite('elegante'), 'galeria-1');
+  await printSite(await baixarSite('datilografado'), 'galeria-1');
 
   await reabrir('moderno');
   await printSite(await baixarSite('moderno'), 'galeria-2');

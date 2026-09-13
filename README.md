@@ -23,13 +23,13 @@ O mesmo currículo, com outras escolhas de fundo, cor, fonte e estrutura:
 
 <table>
   <tr>
-    <td><img src="prints/galeria-1.png" alt="Visual centralizado, com foto quadrada e títulos em Playfair Display"></td>
+    <td><img src="prints/galeria-1.png" alt="Visual centralizado e datilografado, com foto retangular"></td>
     <td><img src="prints/galeria-2.png" alt="Visual com menu no topo, fundo cinza e cor azul"></td>
     <td><img src="prints/galeria-3.png" alt="Visual escuro, com fonte monoespaçada nos títulos"></td>
   </tr>
 </table>
 
-<sub>O currículo dos prints é inventado, e o avatar é um desenho.</sub>
+<sub>O currículo de demonstração é uma homenagem a César Lattes (1924–2005), o físico que dá nome à Plataforma Lattes, no formato de um currículo de hoje, com o Lattes atualizado no dia em que ele morreu. Os dados são públicos: a trajetória vem da Wikipédia e as publicações foram conferidas no Crossref. O texto em primeira pessoa só reescreve esses fatos, e o avatar é um desenho, não uma foto dele.</sub>
 
 ## O que você precisa
 
@@ -127,7 +127,7 @@ O construtor está em português e em inglês (botões PT / EN no cabeçalho). O
 
 ### Refazer os prints
 
-Os prints deste README saem de um roteiro em Puppeteer que percorre as etapas no Chrome já instalado no computador, com um currículo fictício escrito no próprio roteiro: a pessoa, a instituição, os coautores e os trabalhos são inventados, e o avatar é um desenho. Cada print sai com um visual diferente. Com o construtor servido em `127.0.0.1:8765`:
+Os prints deste README saem de um roteiro em Puppeteer que percorre as etapas no Chrome já instalado no computador, com o currículo de demonstração escrito no próprio roteiro, onde estão também as fontes de cada dado. Cada print sai com um visual diferente. Com o construtor servido em `127.0.0.1:8765`:
 
 ```
 cd prints
