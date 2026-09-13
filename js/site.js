@@ -224,6 +224,7 @@
       .map(i => ({
         titulo: capsParaTitulo(i.titulo.replace(/\s*\(.*?\)\s*$/, '')),
         orientador: i.orientador || '',
+        bolsa: i.bolsa ? local(i.bolsa) : '',
         onde: [local(i.detalhe), (i.periodo || '').replace(/\s*-\s*/, '–')].filter(Boolean).join(', '),
       }));
   }
@@ -231,7 +232,9 @@
   // O Lattes guarda a instituição como "Nome, SIGLA, País" (o país só quando é fora do Brasil).
   // A sigla não diz nada a quem lê o site, então sai; o nome e o país ficam.
   // Uma sigla é uma parte só de maiúsculas, números e pontuação: "USP", "YLS", "PARIS 1".
-  const SIGLA = /^[A-ZÀ-Ú0-9][A-ZÀ-Ú0-9\s/.-]*$/;
+  // Exceção: o CNPq escreve o próprio nome com "q" minúsculo (também aparece como agência de
+  // bolsa, então essa exceção importa tanto para a instituição quanto para o financiamento).
+  const SIGLA = /^(?:[A-ZÀ-Ú0-9][A-ZÀ-Ú0-9\s/.-]*|CNPq)$/;
 
   function local(detalhe) {
     const partes = String(detalhe || '').split(',').map(p => p.trim()).filter(Boolean);
@@ -480,7 +483,7 @@ ${cada(id => `.abas a[href="#${id}"]`)}{color:var(--texto);border-color:var(--ac
     return `
   <div class="resumo-perfil">
     ${interesses ? `<section class="interesses"><h2>${esc(_('Interesses'))}</h2><ul>${d.interesses.map(i => `<li>${esc(i)}</li>`).join('')}</ul></section>` : ''}
-    ${formacao ? `<section class="formacao"><h2>${esc(_('Formação'))}</h2><ul>${d.formacao.map(f => `<li><strong>${esc(f.titulo)}</strong>${f.onde ? `<span>${esc(f.onde)}</span>` : ''}${f.orientador ? `<span>${_('Orientação: {nome}', { nome: esc(f.orientador) })}</span>` : ''}</li>`).join('')}</ul></section>` : ''}
+    ${formacao ? `<section class="formacao"><h2>${esc(_('Formação'))}</h2><ul>${d.formacao.map(f => `<li><strong>${esc(f.titulo)}</strong>${f.onde ? `<span>${esc(f.onde)}</span>` : ''}${f.orientador ? `<span>${_('Orientação: {nome}', { nome: esc(f.orientador) })}</span>` : ''}${f.bolsa ? `<span>${_('Bolsista: {nome}', { nome: esc(f.bolsa) })}</span>` : ''}</li>`).join('')}</ul></section>` : ''}
   </div>`;
   }
 
@@ -668,11 +671,15 @@ ${cada(id => `.abas a[href="#${id}"]`)}{color:var(--texto);border-color:var(--ac
     return String(nome || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
   }
 
-  // "Orientação: Nome · Coorientação: Nome", na formação (quem orientou importa tanto quanto onde).
+  // "Orientação: Nome · Coorientação: Nome · Bolsista: Agência", na formação (quem orientou e
+  // quem financiou importam tanto quanto onde: bolsa de mestrado, doutorado ou pós-doutorado é
+  // um dado especialmente relevante na ciência brasileira).
   function orientacao(it) {
-    if (!it.orientador) return '';
-    const partes = [_('Orientação: {nome}', { nome: esc(it.orientador) })];
+    if (!it.orientador && !it.bolsa) return '';
+    const partes = [];
+    if (it.orientador) partes.push(_('Orientação: {nome}', { nome: esc(it.orientador) }));
     if (it.coorientador) partes.push(_('Coorientação: {nome}', { nome: esc(it.coorientador) }));
+    if (it.bolsa) partes.push(_('Bolsista: {nome}', { nome: esc(it.bolsa) }));
     return `<p class="item-orientacao">${partes.join(' · ')}</p>`;
   }
 

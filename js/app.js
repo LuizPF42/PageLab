@@ -215,6 +215,7 @@
     '+ Adicionar destaque livre': '+ Add a custom highlight',
     'Orientação: {nome}': 'Advisor: {nome}',
     'Coorientação: {nome}': 'Co-advisor: {nome}',
+    'Bolsista: {nome}': 'Fellowship: {nome}',
     'Fora do Lattes': 'Outside Lattes',
     'Mover para cima': 'Move up',
     'Mover para baixo': 'Move down',
@@ -1483,6 +1484,7 @@
           ${it.integrantes ? `<span class="detalhe">${esc(_('Integrantes'))}: ${esc(resumir(nomesDe(it.integrantes), 200))}</span>` : ''}
           ${it.financiadores ? `<span class="detalhe">${esc(_('Financiamento'))}: ${esc(resumir(nomesDe(it.financiadores), 120))}</span>` : ''}
           ${it.orientador ? `<span class="obs">${esc(_('Orientação: {nome}', { nome: it.orientador }))}${it.coorientador ? ` · ${esc(_('Coorientação: {nome}', { nome: it.coorientador }))}` : ''}</span>` : ''}
+          ${it.bolsa ? `<span class="obs">${esc(_('Bolsista: {nome}', { nome: it.bolsa }))}</span>` : ''}
         </label>
         ${it.link || s.tipo === 'producao' ? `
         <button type="button" class="item-link${it.link ? '' : ' vazio'}" data-acao="editar" data-foco="link" data-item="${chave}"

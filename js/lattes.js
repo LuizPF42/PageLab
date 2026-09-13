@@ -223,6 +223,9 @@
       const tese = resto.find(l => /^Título:/i.test(l)) || '';
       // "Orientador: Nome." / "Coorientadora: Nome." (o ícone do Lattes antes do nome já saiu)
       const pessoa = re => semPonto((resto.find(l => re.test(l)) || '').replace(re, ''));
+      // "Bolsista do(a): Fundação X, SIGLA, Brasil." — bolsa de mestrado, doutorado ou
+      // pós-doutorado, especialmente relevante na ciência brasileira (financiamento público).
+      const bolsa = (resto.find(l => /^Bolsista do\(a\):\s*/i.test(l)) || '').replace(/^Bolsista do\(a\):\s*/i, '');
       return item({
         periodo: p.rotulo,
         titulo: semPonto(semGrauRepetido(semCargaHoraria(grau))),
@@ -230,6 +233,7 @@
         obs: semPonto(tese.replace(/^Título:\s*/i, '').replace(/,?\s*Ano de Obtenção:.*$/i, '')),
         orientador: pessoa(/^Orientadora?:\s*/i),
         coorientador: pessoa(/^Co-?orientadora?:\s*/i),
+        bolsa: instituicao(bolsa),
       });
     });
   }
