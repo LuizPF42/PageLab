@@ -93,7 +93,7 @@
     'e mais outros': 'and others',
     'Ver todos os {n}': 'See all {n}',
     'Informações do Currículo Lattes, atualizado em {data}.': 'Data from the Lattes CV, updated on {data}.',
-    'Construído com {pagelab}.': 'Built with {pagelab}.',
+    'Construído com {pagelattes}.': 'Built with {pagelattes}.',
     'Orientação: {nome}': 'Advisor: {nome}',
     'Coorientação: {nome}': 'Co-advisor: {nome}',
     // conteúdo de exemplo da prévia

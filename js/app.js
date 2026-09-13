@@ -480,7 +480,7 @@
     const el = document.getElementById('idiomas');
     if (!el) return;
     document.documentElement.lang = I18n.lang(I18n.idioma());
-    document.title = 'PageLab · ' + _('Monte seu site pessoal');
+    document.title = 'PageLattes · ' + _('Monte seu site pessoal');
     el.innerHTML = I18n.IDIOMAS.map(i =>
       `<button type="button" data-idioma="${i.id}" lang="${i.lang}" title="${esc(i.nome)}" aria-pressed="${I18n.idioma() === i.id}">${i.id.toUpperCase()}</button>`).join('');
   }

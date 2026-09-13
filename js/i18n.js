@@ -18,7 +18,7 @@
     { id: 'pt', nome: 'Português', lang: 'pt-BR' },
     { id: 'en', nome: 'English', lang: 'en' },
   ];
-  const CHAVE = 'pagelab:idioma';
+  const CHAVE = 'pagelattes:idioma';
 
   const traducoes = { en: {} };
   const faltando = new Set();

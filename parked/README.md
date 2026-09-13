@@ -1,9 +1,9 @@
 # Estacionado: site gerado em inglês
 
-Aqui fica o que foi tirado do PageLab quando o **site gerado em inglês** foi estacionado,
+Aqui fica o que foi tirado do PageLattes quando o **site gerado em inglês** foi estacionado,
 em 2026-09-12. Nada nesta pasta é carregado pelo construtor.
 
-O que continua funcionando no PageLab: a **interface** do construtor em português e inglês
+O que continua funcionando no PageLattes: a **interface** do construtor em português e inglês
 (`js/i18n.js` e o seletor PT/EN no cabeçalho). O que saiu é a capacidade de **gerar um site**
 em inglês ou nos dois idiomas.
 

@@ -1,0 +1,8 @@
+{
+  "name": "pagelattes-prints",
+  "private": true,
+  "description": "Gera os prints do README a partir do construtor rodando localmente",
+  "dependencies": {
+    "puppeteer-core": "^24.0.0"
+  }
+}

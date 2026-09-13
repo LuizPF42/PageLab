@@ -28,7 +28,7 @@
   const BIBLIOTECA = 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2';
   const MODELO = 'Xenova/opus-mt-ROMANCE-en';
   const TAMANHO_MB = 108; // encoder + decoder quantizados em 8 bits
-  const CHAVE = 'pagelab:tradutor'; // marca que o modelo já foi baixado uma vez neste navegador
+  const CHAVE = 'pagelattes:tradutor'; // marca que o modelo já foi baixado uma vez neste navegador
 
   // ---------- motor: um Web Worker com a biblioteca e o modelo ----------
 

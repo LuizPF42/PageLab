@@ -439,7 +439,7 @@ ${opcoes.dadosConstrutor ? `<script type="application/json" id="dados-do-constru
   function rodape(d) {
     const partes = [
       d.atualizadoEm ? _('Informações do Currículo Lattes, atualizado em {data}.', { data: esc(d.atualizadoEm) }) : '',
-      _('Construído com {pagelab}.', { pagelab: '<a href="https://github.com/LuizPF42/PageLab">PageLab</a>' }),
+      _('Construído com {pagelattes}.', { pagelattes: '<a href="https://github.com/LuizPF42/PageLattes">PageLattes</a>' }),
     ].filter(Boolean);
     return `<footer class="rodape">${partes.join(' ')}</footer>`;
   }
@@ -802,7 +802,8 @@ details[open]>summary{display:none}
 /* estrutura "centralizada" */
 .estrutura-central .pagina{max-width:920px}
 .estrutura-central .perfil{flex-direction:column;text-align:center}
-.estrutura-central .links,.estrutura-central .abas{justify-content:center}
+.estrutura-central .links{justify-content:center}
+.estrutura-central .abas a:first-child{margin-left:auto}.estrutura-central .abas a:last-child{margin-right:auto}
 .estrutura-central.foto-retangular .foto{width:var(--foto-largura,24rem)}
 
 /* estrutura "menu no topo" */
