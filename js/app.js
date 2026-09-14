@@ -213,6 +213,29 @@
     'Nenhum destaque ainda. Marque com ★ até {max} produções nas listas abaixo.': 'No highlights yet. Mark up to {max} works with ★ in the lists below.',
     'Algo que não está no Lattes? Um software, um site, um projeto, um prêmio.': 'Something that is not in Lattes? A piece of software, a website, a project, an award.',
     '+ Adicionar destaque livre': '+ Add a custom highlight',
+    // site em inglês: sem tradução automática, a pessoa escreve os equivalentes
+    'Em inglês': 'In English',
+    'Ex.: Professor at University X': 'E.g.: Professor at University X',
+    'A versão em inglês da apresentação. Se ficar vazia, o site mostra o texto em português.': 'The English version of the presentation. If left empty, the site shows the Portuguese text.',
+    'Ex.: Law and Development, Regulation, Empirical methods': 'E.g.: Law and Development, Regulation, Empirical methods',
+    'Tipo em inglês': 'Type in English',
+    'Software, project, award…': 'Software, project, award…',
+    'Título em inglês': 'Title in English',
+    'Onde, em inglês': 'Where, in English',
+    'Sobre, em inglês': 'About, in English',
+    'The same sentence in English (optional).': 'The same sentence in English (optional).',
+    'Ver em inglês': 'View in English',
+    'Ver em português': 'View in Portuguese',
+    'Sem tradução automática.': 'No automatic translation.',
+    'O PageLattes não traduz textos. Em inglês saem os rótulos do site (abas, títulos de seção, tipos de produção), os graus, os países e os nomes de instituição que ele conhece. O que veio do Lattes e o que você escreveu ficam em português, a não ser que você escreva a versão em inglês na etapa Conteúdo, campo a campo. O que ficar vazio aparece em português.':
+      'PageLattes does not translate text. The site labels (tabs, section titles, publication types), degrees, countries and the institution names it knows come out in English. What came from Lattes and what you wrote stay in Portuguese, unless you write the English version in the Content step, field by field. Whatever is left empty appears in Portuguese.',
+    'Versão em inglês do site: não há tradução automática. Os campos “Em inglês” desta tela são opcionais, e o que ficar vazio aparece em português. Nas listas abaixo, o lápis (✎) de cada item abre também os campos em inglês.':
+      'English version of the site: there is no automatic translation. The “In English” fields on this screen are optional, and whatever is left empty appears in Portuguese. In the lists below, the pencil (✎) of each item also opens the English fields.',
+    'Em inglês (opcional: vazio, fica em português)': 'In English (optional: if empty, Portuguese is shown)',
+    'Texto do item em inglês': 'Item text in English',
+    'Detalhe em inglês (instituição, papel…)': 'Detail in English (institution, role…)',
+    'Descrição em inglês': 'Description in English',
+    'Se ficar vazio, o site mostra: {texto}': 'If left empty, the site shows: {texto}',
     'Orientação: {nome}': 'Advisor: {nome}',
     'Coorientação: {nome}': 'Co-advisor: {nome}',
     'Bolsista: {nome}': 'Fellowship: {nome}',
@@ -320,7 +343,9 @@
 
   const app = document.getElementById('app');
   // temaPrevia: a prévia mostra o site no claro ou no escuro (só faz diferença no modo automático).
-  const ui = { erro: '', editando: null, expandidas: new Set(), largura: 1280, temaPrevia: 'claro', bioAtivo: 'bio' };
+  // idiomaPrevia: idem para o idioma, quando o site sai em português e inglês. bioAtivo: qual editor
+  // de apresentação (pt ou en) recebeu o foco por último, para os links e o menu de contexto.
+  const ui = { erro: '', editando: null, expandidas: new Set(), largura: 1280, temaPrevia: 'claro', idiomaPrevia: 'pt', bioAtivo: 'bio' };
   let estado = carregar() || novoEstado();
 
   // ---------- estado ----------
@@ -331,7 +356,8 @@
       aparencia: Tema.normalizar({}),
       fonte: null,
       semLattes: false,
-      perfil: { nome: '', subtitulo: '', bio: '', bioOriginal: '', foto: '', fotoProporcaoNatural: 0, links: {}, interesses: [], interessesEditados: false },
+      // Os campos *En são a versão em inglês escrita pela pessoa, usados quando o site sai em inglês.
+      perfil: { nome: '', subtitulo: '', subtituloEn: '', bio: '', bioEn: '', bioOriginal: '', foto: '', fotoProporcaoNatural: 0, links: {}, interesses: [], interessesEn: [], interessesEditados: false },
       secoes: [],
       avisos: [],
       publicacao: { usuario: '' },
@@ -395,6 +421,8 @@
             return Object.assign({}, it, {
               titulo: antes.titulo, link: antes.link || it.link, manter: antes.manter, destaque: antes.destaque,
               dTitulo: antes.dTitulo, dVeiculo: antes.dVeiculo, dTexto: antes.dTexto, ordem: antes.ordem,
+              // o que a pessoa escreveu em inglês também fica
+              tituloEn: antes.tituloEn, detalheEn: antes.detalheEn, descricaoEn: antes.descricaoEn, dTextoEn: antes.dTextoEn,
             });
           }
           if (ocultos.has(it.id)) return Object.assign({}, it, { manter: false, destaque: false });
@@ -498,6 +526,12 @@
 
   function temConteudo() {
     return !!(estado.fonte || estado.semLattes || estado.perfil.bio);
+  }
+
+  // O site vai ter versão em inglês (só inglês, ou português e inglês): a etapa Conteúdo ganha os
+  // campos "Em inglês". Não há tradução automática; o que ficar vazio sai em português.
+  function siteEmIngles() {
+    return estado.aparencia.idioma === 'en' || estado.aparencia.idioma === 'ambos';
   }
 
   // Bolinhas de cor de destaque: usadas na tela de aparência e nos ajustes rápidos da revisão.
@@ -618,6 +652,19 @@
             </div>
           </fieldset>
 
+          <fieldset class="grupo">
+            <legend>${_('Idioma do site')}</legend>
+            <div class="opcoes-layout opcoes-escuro">
+              ${Tema.IDIOMAS.map(i => `
+              <label class="opcao-layout">
+                <input type="radio" name="idioma" value="${i.id}" data-aparencia="idioma" class="invisivel"${ap.idioma === i.id ? ' checked' : ''}>
+                <strong>${esc(i.nome)}</strong>
+                <span>${esc(_(i.descricao))}</span>
+              </label>`).join('')}
+            </div>
+            <p class="dica" id="aviso-idioma"${ap.idioma === 'pt' ? ' hidden' : ''}><strong>${_('Sem tradução automática.')}</strong>
+              ${_('O PageLattes não traduz textos. Em inglês saem os rótulos do site (abas, títulos de seção, tipos de produção), os graus, os países e os nomes de instituição que ele conhece. O que veio do Lattes e o que você escreveu ficam em português, a não ser que você escreva a versão em inglês na etapa Conteúdo, campo a campo. O que ficar vazio aparece em português.')}</p>
+          </fieldset>
         </section>
 
         <div class="previa">
@@ -714,18 +761,24 @@
     if (estiloFoto) estiloFoto.textContent = Site.cssFoto({ foto: estado.perfil.foto, fotoProporcao: estado.perfil.fotoProporcaoNatural }, estado.aparencia);
     doc.documentElement.dataset.tema = ui.temaPrevia;
     // O script do botão PT/EN não roda na prévia (iframe sem scripts): o construtor faz o papel dele.
+    doc.documentElement.dataset.idioma = ui.idiomaPrevia;
+    doc.querySelectorAll('.idioma-site button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.idioma === ui.idiomaPrevia)));
     posicionarAlcaFoto();
   }
 
-  // Conteúdo do site para a prévia e para o arquivo final.
+  // Conteúdo do site para a prévia e para o arquivo final: um idioma, ou os dois quando o site sai em ambos.
   function conteudoSite() {
-    return temConteudo() ? Site.dados(estado) : Site.exemplo(estado.perfil);
+    const ap = estado.aparencia;
+    const um = id => (temConteudo() ? Site.dados(estado, id) : Site.exemplo(estado.perfil, id));
+    return ap.idioma === 'ambos' ? { pt: um('pt'), en: um('en') } : um(ap.idioma);
   }
 
-  // Botão que alterna a prévia entre claro e escuro (só aparece no modo automático).
+  // Botões que alternam a prévia: claro/escuro (só no modo automático) e PT/EN (só no site em ambos).
   function botaoTema() {
     const escuro = ui.temaPrevia === 'escuro';
-    return `<button type="button" class="botao-tema" data-acao="tema-previa" aria-pressed="${escuro}"${estado.aparencia.escuro === 'automatico' ? '' : ' hidden'}>${escuro ? _('☀ Ver no claro') : _('☾ Ver no escuro')}</button>`;
+    const en = ui.idiomaPrevia === 'en';
+    return `<button type="button" class="botao-tema" data-acao="tema-previa" aria-pressed="${escuro}"${estado.aparencia.escuro === 'automatico' ? '' : ' hidden'}>${escuro ? _('☀ Ver no claro') : _('☾ Ver no escuro')}</button>` +
+      `<button type="button" class="botao-tema" data-acao="idioma-previa" aria-pressed="${en}"${estado.aparencia.idioma === 'ambos' ? '' : ' hidden'}>${en ? _('Ver em português') : _('Ver em inglês')}</button>`;
   }
 
   function atualizarBotaoTema() {
@@ -735,6 +788,12 @@
       b.setAttribute('aria-pressed', String(escuro));
       b.textContent = escuro ? _('☀ Ver no claro') : _('☾ Ver no escuro');
     });
+    app.querySelectorAll('[data-acao="idioma-previa"]').forEach(b => {
+      const en = ui.idiomaPrevia === 'en';
+      b.hidden = estado.aparencia.idioma !== 'ambos';
+      b.setAttribute('aria-pressed', String(en));
+      b.textContent = en ? _('Ver em português') : _('Ver em inglês');
+    });
   }
 
   function atualizarAparencia() {
@@ -743,6 +802,8 @@
     app.querySelectorAll('[data-so-retangular]').forEach(el => { el.hidden = estado.aparencia.foto !== 'retangular'; });
     const aviso = document.getElementById('aviso-contraste');
     if (aviso) aviso.hidden = !acentoAjustado();
+    const avisoIdioma = document.getElementById('aviso-idioma');
+    if (avisoIdioma) avisoIdioma.hidden = estado.aparencia.idioma === 'pt';
     const personalizada = !Tema.ACENTOS.some(a => a.cor === estado.aparencia.acento);
     const outra = app.querySelector('.opcao-cor.outra');
     if (outra) {
@@ -832,6 +893,9 @@
           </label>
           <label class="ajuste">${_('Modo escuro')}
             <select data-aparencia="escuro">${Tema.ESCURO.map(e => `<option value="${e.id}"${ap.escuro === e.id ? ' selected' : ''}>${esc(_(e.nome))}</option>`).join('')}</select>
+          </label>
+          <label class="ajuste">${_('Idioma')}
+            <select data-aparencia="idioma">${Tema.IDIOMAS.map(i => `<option value="${i.id}"${ap.idioma === i.id ? ' selected' : ''}>${esc(i.nome)}</option>`).join('')}</select>
           </label>
         </div>
       </div>
@@ -1134,8 +1198,8 @@
       aparencia: estado.aparencia,
       fonte: estado.fonte,
       perfil: {
-        nome: p.nome, subtitulo: p.subtitulo, bio: p.bio, links: p.links,
-        interesses: p.interesses, interessesEditados: p.interessesEditados,
+        nome: p.nome, subtitulo: p.subtitulo, subtituloEn: p.subtituloEn, bio: p.bio, bioEn: p.bioEn, links: p.links,
+        interesses: p.interesses, interessesEn: p.interessesEn, interessesEditados: p.interessesEditados,
       },
       publicacao: { usuario: usuarioAtual() },
       secoes: estado.secoes
@@ -1221,9 +1285,12 @@
       perfil: Object.assign(base.perfil, {
         nome: String(p.nome || ''),
         subtitulo: String(p.subtitulo || ''),
+        subtituloEn: String(p.subtituloEn || ''),
         bio: String(p.bio || ''),
+        bioEn: String(p.bioEn || ''),
         links: Object.assign({}, p.links),
         interesses: lista(p.interesses),
+        interessesEn: lista(p.interessesEn),
         interessesEditados: !!p.interessesEditados,
         foto: /^data:image\/(png|jpe?g|webp|gif);base64,/.test(src) ? src : '',
       }),
@@ -1287,11 +1354,14 @@
   function telaConteudo() {
     const p = estado.perfil;
     const f = estado.fonte;
+    const ingles = siteEmIngles(); // campos em inglês ao lado dos em português
     const primeiraProducao = estado.secoes.findIndex(s => s.tipo === 'producao');
     return `
       ${f ? `<p class="origem">${f.atualizadoEm ? _('Dados do Lattes atualizado em {data}.', { data: esc(f.atualizadoEm) }) : _('Dados do Lattes.')}
         <button type="button" class="link" data-acao="trocar-lattes">${_('Usar outro arquivo')}</button></p>` : ''}
-      ${estado.avisos.length ? `<div class="aviso">${estado.avisos.map(a => `<p>${esc(_(a))}</p>`).join('')}</div>` : ''}
+      ${estado.avisos.length || ingles ? `<div class="aviso">
+        ${ingles ? `<p><strong>${_('Sem tradução automática.')}</strong> ${_('Versão em inglês do site: não há tradução automática. Os campos “Em inglês” desta tela são opcionais, e o que ficar vazio aparece em português. Nas listas abaixo, o lápis (✎) de cada item abre também os campos em inglês.')}</p>` : ''}
+        ${estado.avisos.map(a => `<p>${esc(_(a))}</p>`).join('')}</div>` : ''}
 
       <section class="cartao perfil">
         ${htmlFoto()}
@@ -1301,6 +1371,10 @@
           <label for="subtitulo">${_('Linha abaixo do nome')}</label>
           <input id="subtitulo" data-perfil="subtitulo" value="${esc(p.subtitulo)}"
             placeholder="${esc(Site.subtituloPadrao(estado) || _('Ex.: Professora na Universidade X'))}">
+          ${ingles ? `
+          <label for="subtitulo-en" class="rotulo-en">${_('Em inglês')}</label>
+          <input id="subtitulo-en" data-perfil="subtituloEn" value="${esc(p.subtituloEn || '')}" lang="en"
+            placeholder="${esc(Site.subtituloPadrao(estado, 'en') || _('Ex.: Professor at University X'))}">` : ''}
         </div>
       </section>
 
@@ -1317,6 +1391,14 @@
             <button type="button" class="link" data-acao="restaurar-bio" id="restaurar-bio"${podeRestaurarBio() ? '' : ' hidden'}>${_('Voltar ao texto do Lattes')}</button>
           </span>
         </div>
+        ${ingles ? `
+        <h3 id="rotulo-bio-en" class="rotulo-en">${_('Em inglês')}</h3>
+        <p class="dica">${_('A versão em inglês da apresentação. Se ficar vazia, o site mostra o texto em português.')}</p>
+        <div id="bio-en" class="editor-bio" contenteditable="true" role="textbox" aria-multiline="true"
+          aria-labelledby="rotulo-bio-en" spellcheck="true" lang="en">${htmlEditorBio(p.bioEn)}</div>
+        <div class="rodape-campo">
+          <span id="contador-en">${_('{n} caracteres', { n: Site.textoPuro(p.bioEn || '').length })}</span>
+        </div>` : ''}
       </section>
 
       <section class="cartao">
@@ -1324,6 +1406,10 @@
         <p class="dica">${_('Três a seis temas, separados por vírgula. Aparecem no início do site, ao lado da sua formação.')}${f ? ' ' + _('Vieram das áreas de atuação do seu Lattes.') : ''}</p>
         <input data-perfil="interesses" aria-labelledby="rotulo-interesses" value="${esc((p.interesses || []).join(', '))}"
           placeholder="${esc(_('Ex.: Direito e Desenvolvimento, Regulação, Métodos empíricos'))}">
+        ${ingles ? `
+        <label class="rotulo-en campo-en">${_('Em inglês')}
+          <input data-perfil="interessesEn" value="${esc((p.interessesEn || []).join(', '))}" lang="en"
+            placeholder="${esc(_('Ex.: Law and Development, Regulation, Empirical methods'))}"></label>` : ''}
       </section>
 
       <section class="cartao">
@@ -1415,6 +1501,13 @@
         <label>${_('Link')} <input type="url" data-destaque-campo="link" value="${esc(it.link || '')}" placeholder="${esc(_('https:// (opcional)'))}"></label>
         <label class="campo-largo">${livre ? _('Sobre') : _('Sobre o trabalho')}
           <textarea data-destaque-campo="dTexto" rows="2" placeholder="${esc(_('Em uma ou duas frases: do que trata e o que mostra.'))}">${esc(c.texto)}</textarea></label>
+        ${siteEmIngles() ? `
+        ${livre ? `
+        <label class="campo-largo rotulo-en">${_('Título em inglês')} <input data-destaque-campo="dTituloEn" value="${esc(it.dTituloEn || '')}" lang="en" placeholder="${esc(c.titulo)}"></label>
+        <label class="rotulo-en">${_('Tipo em inglês')} <input data-destaque-campo="categoriaEn" value="${esc(it.categoriaEn || '')}" lang="en" placeholder="${esc(_('Software, project, award…'))}"></label>
+        <label class="rotulo-en">${_('Onde, em inglês')} <input data-destaque-campo="dVeiculoEn" value="${esc(it.dVeiculoEn || '')}" lang="en" placeholder="${esc(c.veiculo)}"></label>` : ''}
+        <label class="campo-largo rotulo-en">${_('Sobre, em inglês')}
+          <textarea data-destaque-campo="dTextoEn" rows="2" lang="en" placeholder="${esc(_('The same sentence in English (optional).'))}">${esc(it.dTextoEn || '')}</textarea></label>` : ''}
       </li>`;
   }
 
@@ -1466,6 +1559,7 @@
           <span>${_('Descrição')} <em>${_('(pode encurtar ou apagar; o site mostra o texto inteiro)')}</em></span>
           <textarea data-editor-descricao="${chave}" rows="5">${esc(it.descricao || '')}</textarea>
         </label>` : ''}
+        ${siteEmIngles() && s.tipo !== 'producao' ? editorItemEn(s, it, chave) : ''}
         <label class="editor-link">
           <span>${_('Link')} <em>${_('(opcional: página do artigo, PDF, vídeo…)')}</em></span>
           <input type="url" data-editor-link="${chave}" value="${esc(it.link || '')}" placeholder="https://">
@@ -1478,6 +1572,7 @@
       <div class="coluna-texto">
         <label for="${id}" class="texto">
           <span class="titulo">${esc(it.titulo)}</span>
+          ${siteEmIngles() && (it.tituloEn || it.detalheEn) ? `<span class="en-item" lang="en">${esc([it.tituloEn, it.detalheEn].filter(Boolean).join(' · '))}</span>` : ''}
           ${it.detalhe ? `<span class="detalhe">${esc(it.detalhe)}</span>` : ''}
           ${it.obs ? `<span class="obs">${esc(resumir(it.obs, 160))}</span>` : ''}
           ${it.descricao ? `<span class="obs">${esc(resumir(it.descricao, 220))}</span>` : ''}
@@ -1501,6 +1596,23 @@
           ${editando ? '' : `<button type="button" class="icone" data-acao="editar" data-item="${chave}" title="${esc(_('Editar texto e link'))}" aria-label="${esc(_('Editar texto e link'))}">✎</button>`}
         </span>
       </li>`;
+  }
+
+  // Campos em inglês de um item do Lattes, dentro do lápis (✎). Só fora das produções, que são
+  // referências bibliográficas e ficam como estão. Mostra o que as regras de ingles.js fariam sem
+  // eles ("PhD in Law", "University of São Paulo"), para a pessoa decidir se vale escrever.
+  function editorItemEn(s, it, chave) {
+    const auto = Site.itemNoIdioma(s, Object.assign({}, it, { tituloEn: '', detalheEn: '', descricaoEn: '' }), true);
+    const regra = [auto.titulo !== it.titulo ? auto.titulo : '', it.detalhe && auto.detalhe !== it.detalhe ? auto.detalhe : ''].filter(Boolean).join(' · ');
+    const temDescricao = 'descricao' in it || /^(Projetos|OutrosProjetos|LinhaPesquisa)/.test(s.id || '');
+    return `
+        <div class="editor-en">
+          <span>${_('Em inglês (opcional: vazio, fica em português)')}</span>
+          <textarea data-editor-campo="tituloEn" data-item="${chave}" rows="2" lang="en" aria-label="${esc(_('Texto do item em inglês'))}" placeholder="${esc(_('Texto do item em inglês'))}">${esc(it.tituloEn || '')}</textarea>
+          ${it.detalhe && !it.integrantes ? `<input data-editor-campo="detalheEn" data-item="${chave}" value="${esc(it.detalheEn || '')}" lang="en" aria-label="${esc(_('Detalhe em inglês (instituição, papel…)'))}" placeholder="${esc(_('Detalhe em inglês (instituição, papel…)'))}">` : ''}
+          ${temDescricao ? `<textarea data-editor-campo="descricaoEn" data-item="${chave}" rows="4" lang="en" aria-label="${esc(_('Descrição em inglês'))}" placeholder="${esc(_('Descrição em inglês'))}">${esc(it.descricaoEn || '')}</textarea>` : ''}
+          ${regra ? `<p class="dica">${_('Se ficar vazio, o site mostra: {texto}', { texto: `<em lang="en">${esc(regra)}</em>` })}</p>` : ''}
+        </div>`;
   }
 
   function contagemSecao(s) {
@@ -1640,6 +1752,12 @@
 
       case 'tema-previa':
         ui.temaPrevia = ui.temaPrevia === 'escuro' ? 'claro' : 'escuro';
+        atualizarCores();
+        atualizarBotaoTema();
+        break;
+
+      case 'idioma-previa':
+        ui.idiomaPrevia = ui.idiomaPrevia === 'en' ? 'pt' : 'en';
         atualizarCores();
         atualizarBotaoTema();
         break;
@@ -1822,6 +1940,10 @@
     if (campoLink) it.link = campoLink.value.trim();
     const campoDescricao = app.querySelector(`[data-editor-descricao="${si}:${ii}"]`);
     if (campoDescricao) it.descricao = campoDescricao.value.replace(/\s+/g, ' ').trim();
+    // Os campos em inglês (tituloEn, detalheEn, descricaoEn), quando o site sai em inglês.
+    app.querySelectorAll(`[data-editor-campo][data-item="${si}:${ii}"]`).forEach(c => {
+      it[c.dataset.editorCampo] = c.value.replace(/\s+/g, ' ').trim();
+    });
     ui.editando = null;
     salvar();
     trocarItem(si, ii);
@@ -1839,10 +1961,11 @@
       mudarLargura(ui.largura + passo);
       return;
     }
-    const campo = e.target.closest('[data-editor], [data-editor-link], [data-editor-descricao]');
+    const campo = e.target.closest('[data-editor], [data-editor-link], [data-editor-descricao], [data-editor-campo]');
     if (!campo) return;
-    const [si, ii] = (campo.dataset.editor || campo.dataset.editorLink || campo.dataset.editorDescricao).split(':').map(Number);
-    if (e.key === 'Enter' && !e.shiftKey && !campo.dataset.editorDescricao) { e.preventDefault(); salvarEdicao(si, ii); }
+    const [si, ii] = (campo.dataset.editor || campo.dataset.editorLink || campo.dataset.editorDescricao || campo.dataset.item).split(':').map(Number);
+    const descricao = campo.dataset.editorDescricao || campo.dataset.editorCampo === 'descricaoEn'; // texto longo: Enter quebra linha
+    if (e.key === 'Enter' && !e.shiftKey && !descricao) { e.preventDefault(); salvarEdicao(si, ii); }
     if (e.key === 'Escape') { ui.editando = null; trocarItem(si, ii); }
   });
 
@@ -1871,9 +1994,10 @@
       ap.fonteTitulo = c.titulo;
       ap.fonteTexto = c.texto;
     } else ap[campo] = t.value;
+    if (campo === 'idioma' && t.value !== 'ambos') ui.idiomaPrevia = 'pt';
     salvar();
-    // Organização, estrutura e foto mudam o HTML; cor e fonte só mudam variáveis CSS.
-    if (campo === 'layout' || campo === 'estrutura' || campo === 'foto' || campo === 'referencias') montarPrevia();
+    // Organização, estrutura, foto e idioma mudam o HTML; cor e fonte só mudam variáveis CSS.
+    if (campo === 'layout' || campo === 'estrutura' || campo === 'foto' || campo === 'referencias' || campo === 'idioma') montarPrevia();
     atualizarAparencia();
   }
 
@@ -1940,14 +2064,14 @@
     if (t.dataset.destaqueCampo) {
       const [si, ii] = t.closest('[data-destaque]').dataset.destaque.split(':').map(Number);
       const campo = t.dataset.destaqueCampo;
-      estado.secoes[si].itens[ii][campo] = campo === 'link' || campo === 'periodo' || campo === 'categoria' ? t.value.trim() : t.value;
+      estado.secoes[si].itens[ii][campo] = /^(link|periodo|categoria|categoriaEn)$/.test(campo) ? t.value.trim() : t.value;
       salvar();
       if (campo === 'link') trocarItem(si, ii); // o link também aparece na lista
       return;
     }
-    if (t.dataset.perfil === 'interesses') {
-      estado.perfil.interesses = t.value.split(/\s*,\s*/).map(s => s.trim()).filter(Boolean);
-      estado.perfil.interessesEditados = true;
+    if (t.dataset.perfil === 'interesses' || t.dataset.perfil === 'interessesEn') {
+      estado.perfil[t.dataset.perfil] = t.value.split(/\s*,\s*/).map(s => s.trim()).filter(Boolean);
+      if (t.dataset.perfil === 'interesses') estado.perfil.interessesEditados = true;
       salvar();
       return;
     }
@@ -2021,12 +2145,18 @@
     return partes.join('').replace(/\u00a0/g, ' ') /* espaço rígido que o editor às vezes insere */.replace(/\n{3,}/g, '\n\n').trim();
   }
 
+  // Guarda o que está nos dois editores (o em inglês só existe quando o site sai em inglês).
   function atualizarBio() {
     const pt = document.getElementById('bio');
     if (!pt) return;
     estado.perfil.bio = serializarBio(pt);
     document.getElementById('contador').textContent = _('{n} caracteres', { n: Site.textoPuro(estado.perfil.bio).length });
     document.getElementById('restaurar-bio').hidden = !podeRestaurarBio();
+    const en = document.getElementById('bio-en');
+    if (en) {
+      estado.perfil.bioEn = serializarBio(en);
+      document.getElementById('contador-en').textContent = _('{n} caracteres', { n: Site.textoPuro(estado.perfil.bioEn).length });
+    }
     salvar();
   }
 

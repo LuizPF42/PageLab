@@ -396,6 +396,21 @@ details.cartao > .cartao.dentro { margin: 0; border: 0; border-top: 1px solid va
 .campo-nome label + input + label { margin-top: .5rem; }
 #nome { font-size: 1.3rem; font-weight: 600; }
 
+/* Campos em inglês (site em inglês ou nos dois idiomas): o mesmo campo, com um rótulo discreto "Em inglês".
+   Nada aqui é traduzido automaticamente: a pessoa escreve, e o que ficar vazio sai em português. */
+.rotulo-en { font-size: .85rem; font-weight: 600; color: var(--suave); }
+h3.rotulo-en { margin: 1.25rem 0 0; }
+h3.rotulo-en + .dica { margin-top: .15rem; }
+.campo-en { display: flex; flex-direction: column; gap: .3rem; margin-top: .6rem; }
+.editor-destaque label.rotulo-en { color: var(--suave); }
+/* No editor de cada item, o bloco em inglês fica separado por uma borda tracejada. */
+.editor-en { display: flex; flex-direction: column; gap: .4rem; padding: .6rem .75rem; border: 1px dashed var(--borda); border-radius: var(--raio-campo); }
+.editor-en > span:first-child { font-size: .85rem; font-weight: 600; color: var(--suave); }
+.editor-en .dica { margin: 0; font-size: .82rem; }
+/* Na lista, o título em inglês que a pessoa escreveu aparece embaixo do português. */
+.en-item { font-size: .85rem; color: var(--suave); }
+.en-item::before { content: "EN"; margin-right: .4rem; padding: 0 .3rem; border: 1px solid var(--borda); border-radius: 4px; font-size: .7rem; font-weight: 700; letter-spacing: .04em; vertical-align: .05em; }
+
 .editor-bio {
   min-height: 12rem; padding: .6rem .75rem;
   border: 1px solid var(--borda); border-radius: var(--raio-campo); background: #fff;

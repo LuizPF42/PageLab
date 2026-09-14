@@ -43,7 +43,7 @@ Abra [luizpf42.github.io/PageLattes](https://luizpf42.github.io/PageLattes/) e s
 
 ### 1. Aparência
 
-Escolha o fundo, a cor de destaque, a fonte, a estrutura da página e o formato da foto. A prévia ao lado muda na hora, e tudo pode ser trocado depois.
+Escolha o fundo, a cor de destaque, a fonte, a estrutura da página, o formato da foto e o idioma do site (português, inglês ou os dois). A prévia ao lado muda na hora, e tudo pode ser trocado depois.
 
 ![Etapa Aparência: opções de fundo, cor, estrutura e foto à esquerda; prévia do site à direita](prints/aparencia.png)
 
@@ -115,15 +115,18 @@ e abra `http://localhost:8765`.
 | `js/site.js` | Gera o HTML do site final. As escolhas vão embutidas num `<script type="application/json">`, que é o que a etapa Atualizar relê. |
 | `js/tema.js` | Fundos, cores (com ajuste automático de contraste), fontes e estruturas. |
 | `js/i18n.js` | O idioma da interface. |
+| `js/ingles.js` | As regras do site em inglês: grau da formação, país e nome de instituição. Só vocabulário fechado; não há tradução automática. |
 | `fonts/` | As fontes, com as licenças ao lado. O site final embute só o par escolhido. |
 | `prints/` | Os prints deste README e o script que os gera. |
-| `parked/` | O que foi estacionado, com o motivo (veja abaixo). |
+| `parked/` | O tradutor por IA que foi estacionado, com o motivo (veja abaixo). |
 
 ### Idiomas
 
-O construtor está em português e em inglês (botões PT / EN no cabeçalho). Os textos são escritos em português no código; as traduções ficam em blocos `I18n.registrar` no início de cada módulo, e `js/i18n.js` explica o mecanismo. **O site gerado sai em português.**
+O construtor está em português e em inglês (botões PT / EN no cabeçalho). Os textos são escritos em português no código; as traduções ficam em blocos `I18n.registrar` no início de cada módulo, e `js/i18n.js` explica o mecanismo.
 
-> **Site em inglês: estacionado.** O construtor já gerou site em inglês e nos dois idiomas, com tradução por IA rodando dentro do navegador. Isso foi retirado em 2026-09-12 e está guardado em [`parked/`](parked/), com o código, o motivo e os números medidos em 214 currículos reais. Em resumo: rótulo e estrutura traduzem bem por regras, mas o conteúdo do Lattes não, e meia tradução é pior que nenhuma. Quem quiser retomar começa pelo [`parked/README.md`](parked/README.md).
+O **site gerado** pode sair em português, em inglês ou nos dois, com um botão PT/EN para o visitante; a escolha é feita na etapa Aparência. **Não há tradução automática.** Em inglês, sai traduzido só o que tem vocabulário fechado: os rótulos do site (abas, títulos de seção, tipos de produção), o grau da formação ("Doutorado em" vira "PhD in"), os países e os nomes de instituição que `js/ingles.js` conhece por regra. Tudo o mais fica em português, a não ser o que a pessoa escrever em inglês na etapa Conteúdo: a apresentação, a linha abaixo do nome, os interesses, o texto de cada destaque e, item a item, o texto, o detalhe e a descrição de cada registro fora das produções. O que ficar vazio aparece em português. As produções (referências bibliográficas) e as orientações não mudam de idioma: são registros, no idioma em que foram publicados.
+
+> **Tradução por IA: estacionada.** O construtor chegou a traduzir a apresentação e os destaques com um modelo rodando dentro do navegador. Isso foi retirado em 2026-09-12 e está guardado em [`parked/`](parked/), com o código, o motivo e os números medidos em 214 currículos reais: o conteúdo do Lattes não traduz bem nem por regras nem pela metade, e a versão escrita pela própria pessoa é a única honesta. O histórico, e o que voltou depois, estão em [`parked/README.md`](parked/README.md).
 
 ### Refazer os prints
 

@@ -42,6 +42,13 @@
     'Em abas': 'In tabs',
     'Início, Trajetória, Pesquisa, Produção e Orientações, conforme o que você tiver.': 'Home, Background, Research, Publications and Advising, depending on what you have.',
     'Página única': 'Single page', 'Tudo em sequência, rolando a página.': 'Everything in sequence, scrolling down the page.',
+    // idioma do site (os nomes das línguas não mudam de idioma para idioma)
+    'Português': 'Português', 'English': 'English',
+    'Rótulos e textos fixos do site em português.': 'Labels and fixed texts of the site in Portuguese.',
+    'Rótulos e textos fixos em inglês. O conteúdo fica em português, a não ser o que você escrever em inglês na etapa Conteúdo.':
+      'Labels and fixed texts in English. The content stays in Portuguese, except what you write in English in the Content step.',
+    'Português e inglês': 'Portuguese and English',
+    'O visitante escolhe, com um botão PT/EN. Começa no idioma do navegador dele.': 'Visitors choose with a PT/EN button. It starts in the language of their browser.',
     // fontes: nomes próprios, iguais em qualquer idioma (registrados só para não constarem como faltando)
     'Inter': 'Inter', 'Source Serif': 'Source Serif', 'Playfair Display': 'Playfair Display', 'Nunito': 'Nunito',
     'IBM Plex Sans': 'IBM Plex Sans', 'IBM Plex Mono': 'IBM Plex Mono', 'Inconsolata': 'Inconsolata',
@@ -135,7 +142,17 @@
   ];
   const LATIN = 'U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD';
 
-  const PADRAO = { fundo: 'branco', acento: '#0f766e', fonteTitulo: 'inter', fonteTexto: 'inter', layout: 'abas', estrutura: 'lateral', foto: 'redonda', referencias: 'simples', alinhamento: 'justificado', escuro: 'automatico' };
+  const PADRAO = { fundo: 'branco', acento: '#0f766e', fonteTitulo: 'inter', fonteTexto: 'inter', layout: 'abas', estrutura: 'lateral', foto: 'redonda', referencias: 'simples', alinhamento: 'justificado', escuro: 'automatico', idioma: 'pt' };
+
+  // Idioma dos rótulos e textos fixos do site gerado (abas, "Destaques", rodapé...). Não há tradução
+  // automática: o conteúdo vindo do Lattes ou escrito pela pessoa fica como está, a não ser o que ela
+  // mesma escrever em inglês na etapa Conteúdo (ver Site.dados). Os nomes das línguas não se traduzem.
+  const IDIOMAS = [
+    { id: 'pt', nome: 'Português', descricao: 'Rótulos e textos fixos do site em português.' },
+    { id: 'en', nome: 'English', descricao: 'Rótulos e textos fixos em inglês. O conteúdo fica em português, a não ser o que você escrever em inglês na etapa Conteúdo.' },
+    // "ambos": o site sai nas duas línguas, com um botão PT/EN para o visitante.
+    { id: 'ambos', nome: 'Português e inglês', descricao: 'O visitante escolhe, com um botão PT/EN. Começa no idioma do navegador dele.' },
+  ];
 
   // Modo escuro do site gerado. "automatico" segue a preferência do sistema do visitante.
   const ESCURO = [
@@ -190,6 +207,7 @@
       referencias: valido(REFERENCIAS, ap.referencias) ? ap.referencias : PADRAO.referencias,
       alinhamento: valido(ALINHAMENTOS, ap.alinhamento) ? ap.alinhamento : PADRAO.alinhamento,
       escuro: valido(ESCURO, ap.escuro) ? ap.escuro : PADRAO.escuro,
+      idioma: valido(IDIOMAS, ap.idioma) ? ap.idioma : PADRAO.idioma,
       fotoLargura: numero(ap.fotoLargura, FOTO_LARGURA),     // null: tamanho padrão da estrutura
       fotoProporcao: numero(ap.fotoProporcao, FOTO_PROPORCAO), // null: 3:2
       // Enquadramento: ponto da imagem que fica no centro do recorte, em % (null: 50% 30%, rosto no alto).
@@ -387,7 +405,7 @@
   }
 
   return {
-    FUNDOS, ACENTOS, FAMILIAS, COMBINACOES, ESTRUTURAS, FOTOS, FOTO_LARGURA, FOTO_ZOOM, FOTO_PROPORCOES, LAYOUTS, REFERENCIAS, ALINHAMENTOS, ESCURO, PADRAO,
+    FUNDOS, ACENTOS, FAMILIAS, COMBINACOES, ESTRUTURAS, FOTOS, FOTO_LARGURA, FOTO_ZOOM, FOTO_PROPORCOES, LAYOUTS, REFERENCIAS, ALINHAMENTOS, ESCURO, IDIOMAS, PADRAO,
     normalizar, combinacaoAtual, familia, nome, descricao, variaveis, css, pilha,
     cssFontes, cssFontesEmbutidas, carregarFontes, corValida, contraste,
   };
