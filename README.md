@@ -89,6 +89,24 @@ O site é um arquivo só, e esse arquivo guarda as suas escolhas: cores, textos,
 
 ![Etapa 0, Atualizar: traga o index.html publicado e continue de onde parou](prints/atualizar.png)
 
+## Currículo em inglês
+
+O site pode sair em português, em inglês ou nos dois, com um botão PT/EN para quem visita. A escolha fica na etapa Aparência e pode ser mudada depois, na Revisão.
+
+![Etapa Aparência: a opção Idioma do site, com o aviso de que não há tradução automática, e a prévia já em inglês, com o botão PT/EN](prints/idioma.png)
+
+O PageLattes **não traduz automaticamente**. Tradutor nenhum acerta nomes de curso, de instituição e de projeto com a segurança que um currículo pede, e um site meio traduzido é pior que um site em português. Então ele faz só o que dá para fazer com certeza, e deixa o resto com você:
+
+- **O que é fixo sai em inglês por regra**: os títulos das seções e das abas, os tipos de produção, o grau da formação ("Doutorado em Física" vira "PhD in Physics"), os países e os nomes de instituição que ele conhece ("Universidade de São Paulo" vira "University of São Paulo"). Quando não conhece todas as palavras, deixa em português, inteiro.
+- **O que é seu, você escreve.** Na etapa Conteúdo aparecem campos "Em inglês" ao lado da apresentação, da linha abaixo do nome, dos interesses e da frase de cada destaque. Em cada item do currículo, o lápis abre também os campos em inglês e mostra o que sairia sem eles.
+- **O que ficar vazio aparece em português.** As produções e as orientações não mudam de idioma: são registros, e ficam como foram publicados.
+
+![Etapa Conteúdo com os campos "Em inglês" ao lado dos campos em português](prints/conteudo-ingles.png)
+
+![O lápis de um item da formação: o texto em português, os campos em inglês e a dica do que o site mostraria sem eles](prints/item-ingles.png)
+
+![O mesmo site em inglês, com o botão PT/EN no canto](prints/site-ingles.png)
+
 ## Seus dados ficam com você
 
 O construtor roda inteiro no seu navegador: o currículo, a foto e os textos não são enviados a servidor nenhum. O site mostra só o que já está público no seu Lattes, e só o que você escolheu mostrar.
