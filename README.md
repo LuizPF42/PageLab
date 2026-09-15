@@ -163,3 +163,5 @@ As fontes em `fonts/` são distribuídas sob a SIL Open Font License; os textos 
 ## Autoria
 
 Idealizado por [Luiz Cláudio Pimenta Filho](https://github.com/LuizPF42) e escrito com o [Claude Code](https://claude.com/claude-code), da Anthropic.
+
+Um exemplo de site gerado pelo PageLattes: [luizpf42.github.io](https://luizpf42.github.io).
